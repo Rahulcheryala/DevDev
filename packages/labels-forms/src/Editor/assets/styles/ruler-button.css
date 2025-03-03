@@ -1,0 +1,24 @@
+.rulerIcon {
+    transition: right 0.5s ease-in-out;
+}
+
+.rulerIcon.selected {
+    right: 450px;
+}
+
+.rulerIcon:not(.selected) {
+    right: 130px;
+}
+
+.addDocument {
+    transition: right 0.5s ease-in-out;
+}
+
+.addDocument.selected {
+    right: 490px;
+}
+
+.addDocument:not(.selected) {
+    right: 180px;
+}
+

@@ -1,0 +1,52 @@
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+
+body {
+  margin: 0;
+  font-family: 'SuisseIntl' !important;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.scena-editor {
+  font-family: 'SuisseIntl' !important;
+}
+
+.ant-dropdown-active.ant-dropdown-open {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+:where(.css-dev-only-do-not-override-1rawc5p)[class^="ant-dropdown"], :where(.css-dev-only-do-not-override-1rawc5p)[class*=" ant-dropdown"]{
+  font-family: 'SuisseIntl';
+}
+.ant-input-number .ant-input-number-input {
+  color: #19110B;
+  font-family: 'SuisseIntl';
+}
+/* :where(.css-dev-only-do-not-override-zblztx).ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector */
+.ant-custom-select.ant-select-outlined .ant-select-selector {
+  border-color: #E9E9EE;
+  border-radius: 10px;
+  color: #19110B;
+  font-family: 'SuisseIntl';
+}
+
+.ant-input-number-affix-wrapper .ant-input-number-input-wrap {
+  height: 100%;
+  display: flex;
+}
+.ant-select-dropdown .ant-select-item.ant-select-item-option {
+  font-family: 'SuisseIntl';
+  font-weight: 400;
+  color: #19110B;
+}
+.ant-select-dropdown .ant-select-item.ant-select-item-option.ant-select-item-option-selected, .ant-select-dropdown .ant-select-item.ant-select-item-option.ant-select-item-option-active, .ant-select-dropdown .ant-select-item.ant-select-item-option.ant-select-item-option-selected:hover, .ant-select-dropdown .ant-select-item.ant-select-item-option.ant-select-item-option-active:hover, .ant-select-dropdown .ant-select-item.ant-select-item-option:hover {
+  background-color: rgba(54, 73, 255, 0.12);
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "build": {
+      "outputs": [
+        "dist/**",
+        "build/**",
+        "api/**",
+        "public/build/**",
+        ".next/**",
+        "!.next/cache/**"
+      ],
+      "dependsOn": ["^build"]
+    },
+    "db:seed-triggers": {
+      "outputs": [],
+      "cache": false
+    },
+    "zeak#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["api/index.js", "api/build/**", "public/build/**"]
+    },
+    "test": {
+      "outputs": ["coverage/**"],
+      "dependsOn": []
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    },
+    "deploy": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "db:start": {
+      "outputs": []
+    },
+    "db:kill": {
+      "outputs": []
+    },
+    "db:types": {
+      "outputs": [],
+      "cache": true
+    },
+    "db:init": {
+      "outputs": []
+    },
+    "db:migrate": {
+      "outputs": [],
+      "cache": false
+    },
+    "db:push": {
+      "outputs": []
+    },
+    "db:pull": {
+      "outputs": []
+    },
+    "db:seed": {
+      "outputs": [],
+      "cache": false
+    },
+    "db:migrate:force": {
+      "outputs": []
+    },
+    "setup": {
+      "cache": false,
+      "outputs": []
+    },
+    "test:preview": {
+      "cache": false,
+      "outputs": []
+    },
+    "prisma:generate": {
+      "cache": false,
+      "outputs": []
+    }
+  }
+}

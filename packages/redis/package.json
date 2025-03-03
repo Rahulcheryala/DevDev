@@ -1,0 +1,36 @@
+{
+  "name": "@zeak/redis",
+  "dependencies": {
+    "ioredis": "^5.2.4"
+  },
+  "devDependencies": {
+    "@zeak/logger": "*",
+    "@zeak/tsconfig": "*",
+    "@types/node": "^20.12.5",
+    "dotenv": "16.3.1",
+    "eslint": "^8.23.1",
+    "eslint-config-zeak": "*",
+    "rimraf": "^5.0.5",
+    "tsup": "^6.5.0",
+    "tsx": "^3.12.1",
+    "typescript": "^5.2.2"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "private": true,
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf .turbo node_modules dist",
+    "db:kill": "docker-compose down",
+    "db:start": "docker-compose up -d",
+    "dev": "tsup --watch",
+    "lint": "TIMING=1 eslint \"src/**/*.ts*\""
+  },
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "version": "*"
+}

@@ -1,0 +1,27 @@
+.container {
+    width: 500px; /* Fixed width */
+    height: 500px; /* Fixed height */
+    border: 1px solid #ccc;
+    overflow: hidden; /* To prevent overflow */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .controls {
+    margin-bottom: 10px;
+  }
+  
+  .grid {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    background-color: lightyellow;
+  }
+  
+  .grid-item {
+    width: 100px; /* Fixed size for grid items */
+    height: 100px;
+    background-color: lightblue;
+    border: 1px solid #999;
+  }
+  

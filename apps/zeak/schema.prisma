@@ -1,0 +1,287 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters", "views", "multiSchema", "relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SUPABASE_DIRECT_POSTGRES_URL")
+}
+
+model departments {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId          String    @db.Uuid
+  name               String
+  departmentCode     String
+  description        String?
+  metadata           Json?
+  logo               String?
+  status             String    @default("Active")
+  createdAt          DateTime  @default(now()) @db.Timestamptz()
+  createdBy          String    @db.Uuid
+  updatedAt          DateTime? @db.Timestamptz()
+  lastUpdatedBy      String?   @db.Uuid
+  deletedAt          DateTime? @db.Timestamptz()
+  deletedBy          String?   @db.Uuid
+  version            Int       @default(1)
+  isArchived         Boolean   @default(false)
+  syncToken          String?   @db.Uuid
+  effectiveStartDate DateTime?
+  effectiveEndDate   DateTime?
+  supervisor         String?   @db.Uuid
+
+  supervisorUser  employeeMaster?    @relation(fields: [supervisor], references: [id])
+  departmentUsers empOrgAssignment[]
+}
+
+model employeeMaster {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  firstName        Bytes
+  lastName         Bytes
+  middleName       Bytes?
+  email            Bytes?
+  phoneNumber      Bytes?
+  dateOfBirth      Bytes?
+  gender           Bytes?
+  nationality      Bytes?
+  maritalStatus    Bytes?
+  employmentStatus Bytes
+  hireDate         Bytes
+  terminationDate  Bytes?
+  employeeTypeId   String    @db.Uuid
+  companyId        String    @db.Uuid
+  primaryCompanyId String?   @db.Uuid
+  createdAt        DateTime  @default(now()) @db.Timestamptz()
+  createdBy        String    @db.Uuid
+  updatedAt        DateTime? @db.Timestamptz()
+  lastUpdatedBy    String?   @db.Uuid
+  deletedAt        DateTime? @db.Timestamptz()
+  deletedBy        String?   @db.Uuid
+  syncData         Json?
+
+  // Relations
+  teamUsers             teamUsers[] // Teams relation through teamUsers
+  ledTeams              teams[] // Teams where this employee is the leader
+  departmentsSupervised departments[]
+  departments           empOrgAssignment[] @relation("EmployeeAssignment")
+
+  @@index([companyId])
+  @@index([employeeTypeId])
+}
+
+enum VerificationStatus {
+  Verified
+  Unverified
+  Pending
+}
+
+model addressMaster {
+  addressId        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  contextId        Int
+  address1         String?
+  address2         String?
+  city             String?
+  state            String?
+  postalCode       String?
+  country          String?
+  county           String?
+  isRestricted     Boolean   @default(false)
+  latitude         Decimal?  @db.Decimal(10, 8)
+  longitude        Decimal?  @db.Decimal(11, 8)
+  googlePlaceId    String?
+  formattedAddress String?
+  isActive         Boolean   @default(true)
+  validFrom        DateTime? @db.Timestamptz()
+  validTo          DateTime? @db.Timestamptz()
+  companyId        String    @db.Uuid
+  createdAt        DateTime  @default(now()) @db.Timestamptz()
+  createdBy        String    @db.Uuid
+  lastUpdatedAt    DateTime? @db.Timestamptz()
+  lastUpdatedBy    String?   @db.Uuid
+  deletedAt        DateTime? @db.Timestamptz()
+  deletedBy        String?   @db.Uuid
+}
+
+model contactMaster {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  firstName       Bytes
+  firstNameSearch String?
+  lastName        Bytes
+  lastNameSearch  String?
+  email           Bytes?
+  emailSearch     String?
+  phone           Bytes?
+  phoneSearch     String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz()
+  createdBy       String    @db.Uuid
+  updatedAt       DateTime? @db.Timestamptz()
+  lastUpdatedBy   String?   @db.Uuid
+  deletedAt       DateTime? @db.Timestamptz()
+  deletedBy       String?   @db.Uuid
+  syncData        Json?
+}
+
+model teams {
+  id            String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  companyId     String    @db.Uuid
+  imageUrl      String?
+  name          String
+  description   String?
+  status        String?
+  teamCode      String
+  parentTeamId  String?   @db.Uuid
+  teamLeaderId  String?   @db.Uuid
+  userCount     Int?      @default(0)
+  visibility    String?
+  metadata      Json?
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  createdBy     String    @db.Uuid
+  updatedAt     DateTime? @db.Timestamptz
+  lastUpdatedBy String?   @db.Uuid
+  endDate       DateTime?
+  startDate     DateTime?
+  deletedAt     DateTime? @db.Timestamptz
+  deletedBy     String?   @db.Uuid
+  version       Int       @default(1)
+  isArchived    Boolean   @default(false)
+  syncToken     String?   @db.Uuid
+
+  // Relations
+  teamUsers  teamUsers[]
+  childTeams teams[]         @relation("TeamHierarchy")
+  parentTeam teams?          @relation("TeamHierarchy", fields: [parentTeamId], references: [id])
+  teamLeader employeeMaster? @relation(fields: [teamLeaderId], references: [id])
+
+  // User relations for audit fields
+  // createdByUser     user  @relation("TeamCreatedBy", fields: [createdBy], references: [id])
+  // lastUpdatedByUser user? @relation("TeamLastUpdatedBy", fields: [lastUpdatedBy], references: [id])
+  // deletedByUser     user? @relation("TeamDeletedBy", fields: [deletedBy], references: [id])
+
+  @@index([companyId])
+  @@index([isArchived])
+  @@index([parentTeamId])
+  @@index([status])
+  @@index([teamLeaderId])
+  @@index([visibility])
+}
+
+model teamUsers {
+  id             String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  teamId         String    @db.Uuid
+  userId         String    @db.Uuid
+  role           String
+  isActive       Boolean   @default(true)
+  addedAt        DateTime  @default(now()) @db.Timestamptz
+  addedBy        String    @db.Uuid
+  removedAt      DateTime? @db.Timestamptz
+  removedBy      String?   @db.Uuid
+  lastActivityAt DateTime? @db.Timestamptz
+  notes          String?   @db.Text
+  syncToken      String?   @db.Uuid
+
+  team teams           @relation(fields: [teamId], references: [id])
+  user employeeMaster? @relation(fields: [userId], references: [id])
+
+  @@unique([teamId, userId])
+  @@index([isActive])
+  @@index([role])
+  @@index([teamId])
+  @@index([userId])
+  @@map("teamUsers")
+}
+
+model MasterList {
+  id            String   @id @default(uuid()) @map("id")
+  name          String   @map("name")
+  code          String?  @map("code")
+  description   String?  @map("description")
+  isActive      Boolean  @map("isActive")
+  createdAt     DateTime @default(now()) @map("createdAt")
+  createdBy     String   @map("createdBy")
+  inactivatedAt DateTime? @map("inactivatedAt")
+  inactivatedBy String?  @map("inactivatedBy")
+  purpose       String?  @map("purpose")
+  metadata      Json?    @map("metadata")
+  syncToken     String?  @map("syncToken")
+  updatedAt     DateTime? @map("updatedAt")
+  lastUpdatedBy String?  @map("lastUpdatedBy")
+  deletedAt     DateTime? @map("deletedAt")
+  deletedBy     String?  @map("deletedBy")
+
+  @@map("masterList")
+}
+
+
+model MasterListValue {
+  id            String   @id @default(uuid())
+  masterListId  String
+  value         String
+  displayName   String?
+  description   String?
+  sequence      Int?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  createdBy     String   @db.Uuid
+  updatedAt     DateTime?
+  lastUpdatedBy String?  @db.Uuid
+  syncToken     String?  @db.Uuid
+  deletedAt     DateTime?
+  deletedBy     String?  @db.Uuid
+
+  @@map("masterListValue")
+}
+
+
+model user {
+  id           String    @id @db.Uuid
+  email        String    @unique
+  firstName    String
+  lastName     String
+  fullName     String    @db.Text // Note: This is computed in DB but needs to be kept in sync
+  about        String    @default("")
+  phno         String    @default("")
+  address1     String    @default("")
+  address2     String    @default("")
+  city         String    @default("")
+  state        String    @default("")
+  zipCode      String    @default("")
+  country      String    @default("")
+  avatarUrl    String?
+  active       Boolean   @default(true)
+  twoFAEnabled Boolean   @default(false) @map("2FAEnabled")
+  birthday     DateTime? @db.Date
+  permissions  Json      @default("{}")
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+  updatedAt    DateTime? @db.Timestamptz
+
+  @@index([fullName])
+}
+
+model empOrgAssignment {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  employeeId    String    @db.Uuid
+  companyId     String    @db.Uuid
+  departmentId  String?   @db.Uuid
+  positionId    String?   @db.Uuid
+  locationId    String?   @db.Uuid
+  managerId     String?   @db.Uuid
+  startDate     DateTime? @db.Date
+  endDate       DateTime? @db.Date
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  createdBy     String    @db.Uuid
+  updatedAt     DateTime? @db.Timestamptz
+  lastUpdatedBy String?   @db.Uuid
+  deletedAt     DateTime? @db.Timestamptz
+  deletedBy     String?   @db.Uuid
+  syncData      Json?
+
+  // Relations
+  employee   employeeMaster @relation("EmployeeAssignment", fields: [employeeId], references: [id])
+  department departments?   @relation(fields: [departmentId], references: [id])
+}

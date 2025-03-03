@@ -1,0 +1,132 @@
+trigger:
+- public/dev-v1
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '2872349d-01e4-4e63-a158-4604626a481a'
+  imageRepository: 'zeak'
+  containerRegistry: 'zeakiodev.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+  vmImageName: 'ubuntu-latest'
+  projectPath: '/home/ubuntu/ZEAK'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - publish: '$(Build.SourcesDirectory)/packages/database/supabase/functions'
+      artifact: edge-functions
+      displayName: 'Publish Functions Artifact'
+    - publish: '$(Build.SourcesDirectory)/packages/database/supabase/migrations'
+      artifact: migrations
+      displayName: 'Publish Migrations Artifact'
+    - publish: '$(Build.SourcesDirectory)/Docker/docker-compose.yml'
+      artifact: docker-compose
+      displayName: 'Publish Docker Compose Artifact'
+    - publish: '$(Build.SourcesDirectory)/Docker/scripts'
+      artifact: scripts
+      displayName: 'Publish scripts Artifact'
+
+- stage: Deploy
+  displayName: Deploying through SSH-Connection
+  jobs:
+  - deployment: DeployVM
+    displayName: Deploy to VM
+    pool:
+      vmImage: $(vmImageName)
+    environment: 'zeak-dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          # - task: SSH@0
+          #   inputs:
+          #     sshEndpoint: 'zeak-dev-041224'
+          #     runOptions: 'commands'
+          #     commands: 'rm -rf /home/ubuntu/ZEAK/Docker/volumes/functions/*'
+          #     readyTimeout: '200000'
+          #   displayName: 'Removing old Edge-Functions Scripts'
+          # - task: SSH@0
+          #   inputs:
+          #     sshEndpoint: 'zeak-dev-041224'
+          #     runOptions: 'commands'
+          #     commands: 'rm -rf /home/ubuntu/ZEAK/Docker/seed/*'
+          #     readyTimeout: '200000'
+          #   displayName: 'Removing old Seed Scripts'
+          # - download: current
+          #   artifact: edge-functions
+          #   displayName: 'Download Functions Artifact'
+          # - download: current
+          #   artifact: migrations
+          #   displayName: 'Download Migrations Artifact'
+          - download: current
+            artifact: scripts
+            displayName: 'Download Scripts Artifact'
+          - download: current
+            artifact: docker-compose
+            displayName: 'Download Docker Compose Artifact'
+          # - script: |
+          #     ls -al
+          #     ls -al $(Pipeline.Workspace)
+          #     ls -al $(Pipeline.Workspace)/edge-functions
+          #     ls -al $(Pipeline.Workspace)/migrations
+          #     ls -al $(Pipeline.Workspace)/docker-compose
+          #     ls -al $(Pipeline.Workspace)/scripts
+          #   displayName: 'Display Files'
+          # - task: CopyFilesOverSSH@0
+          #   inputs:
+          #     sshEndpoint: 'zeak-dev-041224'
+          #     sourceFolder: '$(Pipeline.Workspace)/edge-functions'
+          #     contents: '**'
+          #     targetFolder: '/home/ubuntu/ZEAK/Docker/volumes/functions'
+          #     readyTimeout: '20000'
+          #   displayName: 'Uploading Edge-Functions'
+          # - task: CopyFilesOverSSH@0
+          #   inputs:
+          #     sshEndpoint: 'zeak-dev-041224'
+          #     sourceFolder: '$(Pipeline.Workspace)/migrations'
+          #     contents: '**'
+          #     targetFolder: '/home/ubuntu/ZEAK/Docker/seed'
+          #     readyTimeout: '20000'
+          #   displayName: 'Uploading Seed Scripts'
+          - task: CopyFilesOverSSH@0
+            inputs:
+              sshEndpoint: 'zeak-dev-041224'
+              sourceFolder: '$(Pipeline.Workspace)/docker-compose'
+              contents: '**'
+              targetFolder: '/home/ubuntu/ZEAK/Docker'
+              readyTimeout: '20000'
+            displayName: 'Uploading Docker Compose Script'
+          - task: CopyFilesOverSSH@0
+            inputs:
+              sshEndpoint: 'zeak-dev-041224'
+              sourceFolder: '$(Pipeline.Workspace)/scripts'
+              contents: '**'
+              targetFolder: '/home/ubuntu/ZEAK/Docker/scripts'
+              readyTimeout: '20000'
+            displayName: 'Uploading Deployment Scripts'
+          - task: SSH@0
+            inputs:
+              sshEndpoint: 'zeak-dev-041224'
+              runOptions: 'commands'
+              commands: 'sh /home/ubuntu/ZEAK/Docker/scripts/deploy.sh $(tag) zeakiodev'
+              readyTimeout: '200000'
+            displayName: 'Running Deployment Scripts'

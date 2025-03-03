@@ -1,0 +1,16 @@
+{
+  "name": "@zeak/camel",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:maven": "mvn exec:java -Dexec.mainClass='com.example.MainApp'",
+    "start:docker": "docker-compose up -d",
+    "dev:camel": "run-p start:maven",
+    "dev:kafka": "run-p start:docker",
+    "dev": "npm run dev:camel & turbo run dev --filter=./packages/camel",
+    "build": "npm run dev:kafka & turbo run dev --filter=./packages/camel"
+  },
+  "author": "",
+  "license": "ISC"
+}

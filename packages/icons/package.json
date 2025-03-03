@@ -1,0 +1,27 @@
+{
+  "name": "@zeak/icons",
+  "version": "*",
+  "private": true,
+  "main": "./src/index.tsx",
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "scripts": {
+    "build:css": "tailwindcss -m -i ./src/index.css -o ./src/Editor/styles/editor.css",
+    "declaration": "rm -rf declaration && tsc -p ./tsconfig.declaration.json",
+    "pack": "npm run declaration && npm pack",
+    "lint": "eslint . --fix",
+    "clean": "rm -rf .turbo node_modules"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "3.3.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  }
+}

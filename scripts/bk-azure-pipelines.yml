@@ -1,0 +1,35 @@
+trigger:
+- x-project/develop-v2
+
+resources:
+- repo: self
+
+variables:
+  dockerRegistryServiceConnection: 'db54daf5-586d-4115-813b-278b4a1d09fe'
+  imageRepository: 'weberp'
+  containerRegistry: 'xcelprodev.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+  vmImageName: 'ubuntu-latest'
+  projectPath: '/home/azureuser/weberp'
+
+stages:
+- stage: Deploy
+  displayName: Deploying through SSH-Connection
+  jobs:
+  - deployment: DeployVM
+    displayName: Deploy to VM
+    pool:
+      vmImage: $(vmImageName)
+    environment: 'WebERP-Dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: SSH@0
+            inputs:
+              sshEndpoint: 'WebERP-Dev-Server'
+              runOptions: 'commands'
+              commands: |
+                sh /home/adminuser/web_erp/cicd.sh
+              readyTimeout: '200000'
