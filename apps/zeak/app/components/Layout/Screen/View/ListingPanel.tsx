@@ -36,6 +36,7 @@ interface ListingPanelProps {
     records: Array<IRecord>;
     button: ReactNode;
     backUrl: string;
+    backButton?: ReactNode;
     onItemClicked: (record: any) => void;
     onCreateHandler: () => void;
 }
@@ -57,11 +58,11 @@ interface ListingPanelProps {
  * />
  * ```
  */
-const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, button, backUrl, onItemClicked, onCreateHandler }: ListingPanelProps): JSX.Element => {
+const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, button, backUrl, backButton, onItemClicked, onCreateHandler }: ListingPanelProps): JSX.Element => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [activeStatus, setActiveStatus] = useState('All');
-    const status = type === 'integration' ? ['All', 'System', 'User Defined'] : ['All', 'Active', 'Inactive', 'Archived'];
+    const status = type === 'integration' || type === 'connection' ? ['All', 'System', 'User Defined'] : ['All', 'Active', 'Inactive', 'Archived'];
     const [sortBy, setSortBy] = useState<string>('name-asc');
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -145,14 +146,16 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
     >
         <div className="top-section bg-white rounded-[12px]">
             <div className='py-4 px-[18px]'>
-                <div
+                {type === 'connection' ? backButton : (
+                    <div
                     title={`Back to ${caption}s`}
                     className='flex gap-2 py-3 cursor-pointer'
                     onClick={handleBack}
-                >
-                    <ChevronLeft className='text-secondary' />
-                    <span className='text-secondary'>Back</span>
-                </div>
+                    >
+                        <ChevronLeft className='text-secondary' />
+                        <span className='text-secondary'>Back</span>
+                    </div>
+                )}
             </div>
             <div className="search-section px-4 flex flex-col gap-6 py-4 pt-3">
                 <div className="relative">
@@ -229,7 +232,7 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
                                     ${selectedId === record.id ? 'bg-accent-primary hover:opacity-100 rounded-[12px]' : 'bg-white hover:opacity-80'}`}
                             >
                                 <div className='flex items-center gap-4'>
-                                    <Image src={record.logo || ''} alt={record.name} className='h-10 w-10 min-h-10 min-w-10 object-cover rounded-full' />
+                                    <Image src={record.logo || '/images/dynamics365.png'} alt={record.name} className='h-10 w-10 min-h-10 min-w-10 p-2 object-cover rounded-zeak bg-[#00000010]' />
                                     <div className='flex-1'>
                                         <p className='flex justify-between items-center'>
                                             <span
@@ -245,7 +248,7 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
                                                 </span>
                                             )}
                                         </p>
-                                        {type === 'integration' ?(
+                                        {type === 'integration' || type === 'connection' ? (
                                             <p
                                                 title="Integration Category"
                                                 className={`text-[12px] uppercase ${selectedId === record.id ? 'text-white opacity-60' : 'text-secondary-tertiary group-hover:text-white group-hover:opacity-60'}`}>
@@ -261,31 +264,35 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
                                     </div>
                                 </div>
                                 <div className='mt-[14px]'>
-                                    <p className='flex gap-2'>
-                                        <span className={`text-sm ${selectedId === record.id ? 'text-white opacity-60' : 'text-secondary-tertiary group-hover:text-white group-hover:opacity-60'}`}>
-                                            Last updated
-                                        </span>
-                                        <span
-                                            title="Last Updated By"
-                                            className={`text-sm font-semibold truncate max-w-[120px] block ${selectedId === record.id ? 'text-white opacity-60' : 'text-secondary group-hover:text-white group-hover:opacity-60'}`}>
-                                            {record.lastUpdatedBy || '-'}
-                                        </span>
-                                        <span className={`text-sm ${selectedId === record.id ? 'text-white' : 'text-accent-primary group-hover:text-white'}`}>|</span>
+                                    <p className='grid grid-cols-[65%_35%]'>
+                                        <div className='flex gap-x-2 flex-nowrap truncate'>
+                                            <span className={`text-sm ${selectedId === record.id ? 'text-white opacity-60' : 'text-tertiary group-hover:text-white group-hover:opacity-60'}`}>
+                                                Last updated
+                                            </span>
+                                            <span
+                                                title="Last Updated By"
+                                                className={`text-sm truncate max-w-[120px] block ${selectedId === record.id ? 'text-white opacity-60' : 'text-secondary group-hover:text-white group-hover:opacity-60'}`}>
+                                                {record.lastUpdatedBy || '-'}
+                                            </span>
+                                        </div>
+                                        <div className='flex flex-nowrap truncate'>
+                                        <span className={`text-sm mx-2 ${selectedId === record.id ? 'text-white' : 'text-accent-primary group-hover:text-white'}`}>|</span>
                                         <span
                                             title="Last Updated On"
-                                            className={`text-sm ${selectedId === record.id ? 'text-white opacity-60' : 'text-secondary-tertiary group-hover:text-white group-hover:opacity-60'}`}>
+                                            className={`text-sm ${selectedId === record.id ? 'text-white opacity-60' : 'text-tertiary group-hover:text-white group-hover:opacity-60'}`}>
                                             {record.updatedAt ? new Date(record.updatedAt!).toLocaleDateString('en-GB', {
                                                 day: '2-digit',
                                                 month: 'short',
                                                 year: 'numeric'
                                             }) : '-'}
                                         </span>
+                                        </div>
                                     </p>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center bg-white mt-[2px] text-secondary-tertiary">
+                        <div className="h-full flex flex-col items-center justify-center bg-white mt-[2px] text-tertiary">
                             <p>No {type} found</p>
                             <p className="text-sm mt-2">Try adjusting your search or filters</p>
                         </div>

@@ -3,7 +3,7 @@ import React from "react";
 import { FaRegUserCircle } from "react-icons/fa";
 
 type TypePillProps = {
-  type: string | any;
+  type: string;
   className?: string;
 };
 
@@ -11,7 +11,7 @@ const TypePill: React.FC<TypePillProps> = ({ type, className }: TypePillProps) =
   return (
     <>
       {type === "System" ? (
-        <div className={`w-fit flex items-center gap-2 rounded-md ${className}`}>
+        <div className={`w-fit flex items-center gap-2 rounded-md uppercase ${className}`}>
           <Image
             src="/zeak-z-logo.png"
             alt="Zeak Logo"
@@ -20,7 +20,7 @@ const TypePill: React.FC<TypePillProps> = ({ type, className }: TypePillProps) =
           {type}
         </div>
       ) : (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 uppercase">
           <FaRegUserCircle />
           {type}
         </div>

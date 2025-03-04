@@ -62,6 +62,7 @@ export type IntegrationState = {
   isFormDirty: boolean;
   connectionsList: any[];
   selectedConnection: any;
+  viewType: "list" | "grid";
 };
 
 // Define action types
@@ -80,7 +81,8 @@ export type IntegrationAction =
   | { type: "RESET_FORM" }
   | { type: "SET_FLOW"; payload: IntegrationFlow }
   | { type: "UPDATE_ERROR"; payload: { [key: string]: string | null } }
-  | { type: "CLEAR_ERRORS" };
+  | { type: "CLEAR_ERRORS" }
+  | { type: "SET_VIEW_TYPE"; payload: "list" | "grid" };
 
 // Initial state
 const initialState: IntegrationState = {
@@ -92,8 +94,9 @@ const initialState: IntegrationState = {
   error: null,
   errors: {},
   isFormDirty: false,
-  connectionsList: [],
+  connectionsList: integrations.flatMap(integration => integration.connections),
   selectedConnection: null,
+  viewType: "grid",
 };
 
 // Reducer function
@@ -106,6 +109,8 @@ function integrationReducer(
       return { ...state, isLoading: action.payload };
     case "SET_ERROR":
       return { ...state, error: action.payload };
+    case "SET_VIEW_TYPE":
+      return { ...state, viewType: action.payload };
     case "SET_RECORDS":
       return { ...state, records: action.payload };
     // case "ADD_RECORDS":
@@ -114,7 +119,7 @@ function integrationReducer(
       return { 
         ...state, 
         selectedIntegration: action.payload,
-        connectionsList: action.payload?.connections || [],
+        connectionsList: action.payload?.connections!,
         selectedConnection: null 
       };
     case "SET_SELECTED_CONNECTION":

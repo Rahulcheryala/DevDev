@@ -21,7 +21,7 @@ export default function ConnectionHeader() {
 
   const breadcrumbs = [
     {
-      label: "Organization",
+      label: "Settings",
       to: "/",
     },
     {

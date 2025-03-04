@@ -24,7 +24,7 @@ export default function IntegrationHeader() {
 
   const breadcrumbs = [
     {
-      label: "Organization",
+      label: "Settings",
       to: "/",
     },
     {

@@ -37,16 +37,16 @@ function InitiateConnectionScreen() {
 
   return (
     <div
-      className="w-full h-full rounded-[12px] bg-white flex-1 flex flex-col"
+      className="w-full h-full rounded-[12px] bg-white flex-1 flex flex-col cursor-pointer"
       onClick={onCreateHandler}
     >
       <div className="h-[64px] w-full bg-[#66D4CF1A] rounded-t-zeak"></div>
       <div className="h-[64px] w-full bg-[#66D4CF2A]"></div>
-      <div className="flex flex-col flex-1 items-start gap-2 bg-[#66D4CF3A] overflow-y-hidden p-6 cursor-pointer">
-        <h1 className="text-[36px] font-medium">Click to create</h1>
-        <div className="h-[56px] w-[56px] rounded-full bg-white flex justify-center items-center">
+      <div className="min-h-[250px] flex flex-col flex-1 items-start gap-2 bg-[#66D4CF3A] p-8">
+        <div className="p-3 rounded-full bg-white">
           <TbPlus className="w-[32px] h-[32px] font-weight" />
         </div>
+        <h1 className="text-2xl font-medium">Click to create</h1>
       </div>
     </div>
   );

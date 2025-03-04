@@ -2,8 +2,9 @@ import { IntegrationTab, integrationTabs } from "../../models/constants";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@zeak/react";
 import { IntegrationProvider } from "../../context";
 import IntegrationList from "./IntegrationList";
-import ConnectionDataTable from "../ViewFlow/ConnectionDataTable";
+import ConnectionDataTable from "../ViewFlow/integration/ConnectionDataTable";
 import IntegrationCharts from "./IntegrationCharts";
+import { ConnectionProvider } from "../../context/connection";
 
 export default function IntegrationPageTabs() {
   return (
@@ -37,7 +38,9 @@ export default function IntegrationPageTabs() {
       <TabsContent value={IntegrationTab.INTEGRATIONS} className="h-full mt-2">
         <IntegrationCharts />
         <IntegrationProvider>
-          <IntegrationList />
+          <ConnectionProvider>
+            <IntegrationList />
+          </ConnectionProvider>
         </IntegrationProvider>
       </TabsContent>
 
@@ -48,7 +51,9 @@ export default function IntegrationPageTabs() {
       >
         <IntegrationCharts />
         <IntegrationProvider>
-          <ConnectionDataTable component="listing" />
+          <ConnectionProvider>
+            <ConnectionDataTable component="listing" />
+          </ConnectionProvider>
         </IntegrationProvider>
       </TabsContent>
 

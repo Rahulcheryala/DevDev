@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@remix-run/react";
 import { RxSlash } from "react-icons/rx";
 import { BuildingIcon } from "@zeak/icons"
-import { ChevronDown, ChevronLeft, XIcon } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, XIcon } from "lucide-react";
 import { BiEditAlt } from "react-icons/bi";
 import { Popover, PopoverContent, PopoverTrigger } from "@zeak/react";
 import Image from "../../../Image";
@@ -74,11 +74,11 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
           <div className="flex items-center gap-8 text-sm">
             <p className="flex items-center gap-2 ">
               <span className="text-secondary-tertiary">CATEGORY</span>
-              <span className="text-secondary">{selectedItem.integrationCategory}</span>
+              <span className="text-secondary uppercase">{selectedItem.integrationCategory}</span>
             </p>
             <p className="flex items-center gap-2">
               <LuPlug2 className="text-secondary-tertiary" size={18} />
-              <span className="text-secondary">{selectedItem.connectionType}</span>
+              <span className="text-secondary uppercase">{selectedItem.connectionType}</span>
             </p>
             <p className="flex items-center gap-2">
               <TypePill type={selectedItem.type!} />
@@ -91,12 +91,12 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
             <p className="flex items-center gap-2 ">
               <span className="text-secondary-tertiary">INTEGRATION</span>
               <img src="/zeak.svg" alt="Zeak Logo" className="w-10 h-w-10 -mx-2" />
-              <span className="text-secondary font-medium">{selectedItem.integrationName}</span>
+              <span className="text-secondary font-medium uppercase">{selectedItem.integrationName}</span>
             </p>
             <p className="flex items-center gap-2 ">
               <span className="text-secondary-tertiary">APPLICATION</span>
-              <Image src={selectedItem.logo || ''} alt={selectedItem.name} className='min-h-[20px] min-w-[20px] h-[20px] w-[20px] rounded-full text-xs' />
-              <span className="text-secondary font-medium">{selectedItem.application}</span>
+              <Image src={selectedItem.logo || '/images/dynamics365.png'} alt={selectedItem.name} className='min-h-[20px] min-w-[20px] h-[20px] w-[20px] rounded-full text-xs' />
+              <span className="text-secondary font-medium uppercase">{selectedItem.application}</span>
             </p>
           </div>
         )
@@ -196,22 +196,23 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
             </button>
           </div>
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between items-end">
           <div className="flex gap-6 items-center">
             {component !== "connection" && (
               <Image src={selectedItem.logo || ''} alt={selectedItem.name} className='min-h-[72px] min-w-[72px] h-[72px] w-[72px] rounded-full' />
             )}
             <div className="flex flex-col gap-4">
               <div className="flex gap-4 items-center">
-                <p className="text-text-dark text-4xl max-w-[400px] truncate">{selectedItem.name}</p>
+                <p className="text-text-dark text-4xl max-w-[450px] truncate">{selectedItem.name}</p>
                 <ChevronDown className="text-text-tertiary" />
                 <div className="px-3 py-1 rounded-[12px] bg-white"><StatusPill status={selectedItem.status} /></div>
               </div>
               <SubHeader />
             </div>
           </div>
-          {/* <div className="flex items-center pr-3">
+          <div className="flex items-center">
             <button
+              // TODO(vamsi): Add previous and next buttons functionality
               title="Previous"
               className="px-1 py-1 rounded-l-md bg-white border-r-2 border-stroke-shade"
             ><ChevronLeft className="text-secondary text-xl" /></button>
@@ -220,7 +221,7 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
               title="Next"
               className="px-1 py-1 rounded-r-md bg-white  border-l-2 border-stroke-shade"
             ><ChevronRight className="text-secondary text-xl" /></button>
-          </div> */}
+          </div>
         </div>
       </div>
     </motion.div>

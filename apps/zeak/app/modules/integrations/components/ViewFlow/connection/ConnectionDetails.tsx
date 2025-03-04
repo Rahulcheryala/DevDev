@@ -1,53 +1,15 @@
 import { useIntegrationContext } from "../../../context";
 import { motion } from "framer-motion";
 import { DetailsSection, StatusPill } from "../../../../../components/Layout/Screen";
-import ConnectionDataTable from "../ConnectionDataTable";
-import { ConnectionProvider } from "../../../context/connection";
 import TypePill from "~/components/Layout/Screen/View/TypePill";
-import ConnectionsPill from "~/modules/integrations/components/misc/connectionsPill";
-import { useState } from "react";
-import { LucideTriangleAlert } from "lucide-react";
-import { TbLink } from "react-icons/tb";
-import { LuUnlink } from "react-icons/lu";
-
-
-const ConnectionStatus = ({ status }: { status: string }) => {
-  return (
-    <div className="flex items-center gap-3 text-sm">
-      {status === "ONLINE" && (
-        <>
-          <TbLink size={20} className="text-green-500 cursor-pointer" />
-          <span className="text-green-500">ONLINE</span>
-        </>
-      )}
-      {status === "OFFLINE" && (
-        <>
-          <LuUnlink size={20} className="text-gray-500 cursor-pointer" />
-          <span className="text-gray-500">OFFLINE</span>
-        </>
-      )}
-      {status === "ERROR" && (
-        <>
-          <LucideTriangleAlert
-            size={20}
-            className="text-red-500 cursor-pointer"
-          />
-          <span className="text-red-500">ERROR</span>
-        </>
-      )}
-    </div>
-  );
-};
 
 function ConnectionDetails() {
-  const [openedSection, setOpenedSection] = useState('Connection Details');
   const {
     state: { selectedConnection, selectedIntegration, currentFlow },
   } = useIntegrationContext();
 
-  console.log(selectedIntegration, selectedConnection);
+  // console.log(selectedIntegration, selectedConnection);
 
-  //* TODO VAMSI general section updates
   type ConfigKeys = "Connection Details" | "Credentials" | "Advanced";
 
   const CONNECTION_DETAILS_SECTIONS: Record<ConfigKeys, any> = {
@@ -70,7 +32,7 @@ function ConnectionDetails() {
         title: "Integration Type",
         value: (
           <TypePill
-            type={selectedIntegration?.type}
+            type={selectedIntegration?.type!}
           />
         ),
       },
@@ -83,58 +45,18 @@ function ConnectionDetails() {
         title: "Purpose",
         value: selectedIntegration?.purpose,
       },
-      // {
-      //   title: "Connections Status",
-      //   value: (
-      //     <ConnectionsPill
-      //       connections={selectedConnection.connections}
-      //     />
-      //   ),
-      // },
       {
         title: "Connection status",
-        value: <ConnectionStatus status={selectedConnection.connectionStatus} />,
+        value: <StatusPill status={selectedConnection.connectionStatus} />,
       },
       {
         title: "Integration Category",
         value: selectedIntegration?.integrationCategory,
       }
-      
-      // {
-      //   title: "Authentication Type",
-      //   value: selectedConnection.authenticationType,
-      // },
-      // {
-      //   title: "Status",
-      //   value: <StatusPill status={selectedConnection.status} />,
-      // },
-      // {
-      //   title: "Type",
-      //   value: (
-      //     <TypePill
-      //       type={selectedConnection.type}
-      //       className="bg-green-100 px-3 py-1 "
-      //     />
-      //   ),
-      // },
-      // {
-      //   title: "Connections",
-      //   value: (
-      //     <ConnectionsPill
-      //       connections={selectedConnection.connections}
-      //     />
-      //   ),
-      // },
-      // {
-      //   title: "Application",
-      //   value: selectedConnection.integrationName,
-      // },
-      ],
-    "Credentials":[],
-    "Advanced":[]
-}
-
-//**END VAMSI general section updated
+    ],
+    "Credentials": [],
+    "Advanced": []
+  }
 
   if (!selectedConnection) return null;
 
@@ -144,71 +66,17 @@ function ConnectionDetails() {
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
     >
-      <div className="flex flex-col gap-4">
-      { Object.keys(CONNECTION_DETAILS_SECTIONS).map((item) => (
-            <DetailsSection
-              key={item}
-              title={item}
-              items={CONNECTION_DETAILS_SECTIONS[item as keyof typeof CONNECTION_DETAILS_SECTIONS]}
-              className="bg-[#F7F9FE]"
+      <div className="flex flex-col gap-4 mb-10">
+        {Object.keys(CONNECTION_DETAILS_SECTIONS).map((item) => (
+          <DetailsSection
+            key={item}
+            title={item}
+            items={CONNECTION_DETAILS_SECTIONS[item as keyof typeof CONNECTION_DETAILS_SECTIONS]}
+            className="bg-[#F7F9FE]"
             //   selectedIntegration={selectedIntegration}
-              currentFlow={currentFlow}
-            />
+            currentFlow={currentFlow}
+          />
         ))}
-        {/* <DetailsSection
-          title="Connection Details"
-          className="bg-[#F7F9FE]"
-        //   selectedIntegration={selectedIntegration}
-          currentFlow={currentFlow}
-          items = {[
-            {
-              title: "Connection Name",
-              value: selectedConnection.connectionName,
-            },
-            { title: "Connection ID", value: selectedConnection.id },
-            { title: "Purpose", value: selectedConnection.purpose },
-            {
-              title: "Environment Type",
-              value: selectedConnection.environmentType,
-            },
-            {
-              title: "Environment URL",
-              value: selectedConnection.environmentURL,
-            },
-            // {
-            //   title: "Authentication Type",
-            //   value: selectedConnection.authenticationType,
-            // },
-            // {
-            //   title: "Status",
-            //   value: <StatusPill status={selectedConnection.status} />,
-            // },
-            // {
-            //   title: "Type",
-            //   value: (
-            //     <TypePill
-            //       type={selectedConnection.type}
-            //       className="bg-green-100 px-3 py-1 "
-            //     />
-            //   ),
-            // },
-            // {
-            //   title: "Connections",
-            //   value: (
-            //     <ConnectionsPill
-            //       connections={selectedConnection.connections}
-            //     />
-            //   ),
-            // },
-            // {
-            //   title: "Application",
-            //   value: selectedConnection.integrationName,
-            // },
-          ]}
-        /> */}
-        {/* <ConnectionProvider>
-          <ConnectionDataTable component="view" />
-        </ConnectionProvider> */}
       </div>
     </motion.div>
   );

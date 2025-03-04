@@ -18,7 +18,8 @@ import { MorePopover } from "./MorePopover";
 import { ExportOptions } from "./ExportOptions";
 import { useIntegrationContext } from "~/modules/integrations/context";
 import { useConnectionContext } from "~/modules/integrations/context/connection";
-// import { useIntegrationContext } from "../../modules/integrations/context";
+import { FaListUl } from "react-icons/fa";
+import { IoGridOutline } from "react-icons/io5";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -42,7 +43,7 @@ export default function DataTableToolbar<TData>({
   type
 }: DataTableToolbarProps<TData>) {
   const { setShowColumnSearch , showColumnSearch, setIsAddNewRow, setIsAddNewColumn } = useDatatableStore();
-  const { dispatch } = useIntegrationContext();
+  const { dispatch, state: {viewType} } = useIntegrationContext();
   const { dispatch: connectionDispatch } = useConnectionContext();
 
   const handleNewIntegration = () => {
@@ -53,6 +54,28 @@ export default function DataTableToolbar<TData>({
     connectionDispatch({ type: "SET_FLOW", payload: "create" });
   };
 
+  const ViewTypeSelector = () => {
+    return (
+      <Popover>
+        <PopoverTrigger className="flex items-center gap-3">
+          {viewType === "list" ? (<>
+          <FaListUl className="w-5 h-5" /> List
+          </>) : (<>
+          <IoGridOutline className="w-5 h-5" /> Grid
+          </>)}
+        </PopoverTrigger>
+        <PopoverContent className="w-fit p-2">
+          <button disabled={viewType === "list"} onClick={() => dispatch({ type: "SET_VIEW_TYPE", payload: "list" })} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
+            <FaListUl className="w-5 h-5" /> List
+          </button>
+          <button disabled={viewType === "grid"} onClick={() => dispatch({ type: "SET_VIEW_TYPE", payload: "grid" })} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
+            <IoGridOutline className="w-5 h-5" /> Grid
+          </button>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
   return (
     <div className="rounded-lg shadow-lg  bg-white space-y-4">
       {/* Top section */}
@@ -61,9 +84,15 @@ export default function DataTableToolbar<TData>({
           <DataTableView />
         </div>
         <div className="flex items-center gap-4 justify-center ">
-              <div className="flex items-center gap-3 border-r pr-[28px] ">
-              <TaskIcon className="w-5 h-5" />
-            Tasks
+          <div className="flex items-center gap-3 border-r pr-[28px] ">
+            {type === "integration" ? (
+              <ViewTypeSelector />
+            ) :(
+              <>
+                <TaskIcon className="w-5 h-5" />
+                Tasks
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3 border-r pr-[28px]">
             <RiDeleteBin6Line className="w-5 h-5" />

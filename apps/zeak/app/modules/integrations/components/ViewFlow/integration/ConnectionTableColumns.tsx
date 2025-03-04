@@ -54,10 +54,13 @@ const ConnectionNameLink = ({
   return (
     <div
       onClick={() =>
+      {
         dispatch({
           type: "SET_SELECTED_CONNECTION",
           payload: connectionId,
-        })
+        });
+        console.log(connectionId)
+      }
       }
     >
       <NameColumn name={connectionName} columnSize={columnSize} />

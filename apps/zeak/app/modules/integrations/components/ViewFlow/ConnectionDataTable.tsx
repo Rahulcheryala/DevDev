@@ -20,7 +20,7 @@ export default function ConnectionDataTable({ component }: ConnectionDataTablePr
       <DataTable
         type={component}
         columns={ConnectionTableColumns}
-        data={connections!}
+        data={[]}
       >
         <InitiateConnectionScreen />
       </DataTable>
