@@ -3,10 +3,19 @@ import React from "react";
 import IntegrationForm from "~/modules/integrations/components/CreateFlow/IntegrationForm";
 import { IntegrationFlow } from "~/modules/integrations/context";
 import { Integration } from "~/modules/integrations/models/constants";
+import { ChevronDown, ChevronUp, PenLine} from 'lucide-react';
+import { TbLink } from "react-icons/tb";
+
+
+const keyClasses: Record<string, string> = {
+  'Environment Type': "bg-yellow-500 w-fit px-4 py-1 rounded-full text-white",
+  'Environment URL': "text-blue-500",
+  'Connection status': "text-green-500",
+};
 
 type DetailsSectionProps = {
   title: string;
-  items: { title: string; value: string | number | boolean | null | React.ReactNode }[];
+  items: { title: string; value: string | number | boolean | null | React.ReactNode, icon: string | null }[];
   selectedIntegration?: Integration;
   className?: string;
   currentFlow?: IntegrationFlow;
@@ -39,24 +48,35 @@ const DetailsSection: React.FC<DetailsSectionProps> = ({
             />
           </div>
         ) : (
-          <div className="grid grid-cols-[1fr_1fr] gap-x-10 gap-y-6">
-            {items
-              .filter((item) => item.value)
-              .map((item) => (
-                <div key={item.title}>
-                  <p className="text-sm text-secondary-tertiary font-medium">
-                    {item.title}
-                  </p>
-                  <div className="text-[16px] text-text-dark mt-1 font-medium">
-                    {item.value}
+          <div className="flex justify-between w-full">
+            <div className="grid grid-cols-[1fr_1fr] gap-x-10 gap-y-6">
+              {items
+                .filter((item) => item.value)
+                .map((item) => (
+                  <div key={item.title}>
+                    <p className="text-sm text-secondary-tertiary font-medium">
+                      {item.title}
+                    </p>
+                    <div className={`${keyClasses[item.title]?keyClasses[item.title]:'text-text-dark'} text-[16px] mt-1`}>
+                      {item.icon?<img src={item.icon?item.icon:''} alt={item.title} className="w-4 h-w-4 mr-2 inline"/>:''}
+                      {item.title === 'Connection status'?<TbLink size={16} className="text-green-500 inline mr-1" />:''}
+                      <span >{item.value}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+            </div>
+            <div className="flex align-middle">
+            <PenLine className="h-5 w-5 mr-1.5 text-text-tertiary" />
+            {true?<ChevronDown className="w-5 h-5" />
+            :<ChevronUp className="w-5 h-5 " />}
+            </div>
           </div>
         )}
       </div>
+      
     </section>
   );
 };
 
 export default DetailsSection;
+

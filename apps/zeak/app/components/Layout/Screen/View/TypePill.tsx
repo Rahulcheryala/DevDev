@@ -3,7 +3,7 @@ import React from "react";
 import { FaRegUserCircle } from "react-icons/fa";
 
 type TypePillProps = {
-  type: string;
+  type: string | any;
   className?: string;
 };
 
