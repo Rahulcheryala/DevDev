@@ -4,7 +4,6 @@ import IntegrationForm from "~/modules/integrations/components/CreateFlow/Integr
 import { IntegrationFlow } from "~/modules/integrations/context";
 import { Integration } from "~/modules/integrations/models/constants";
 import { ChevronDown, ChevronUp, PenLine} from 'lucide-react';
-import { TbLink } from "react-icons/tb";
 
 
 const keyClasses: Record<string, string> = {
@@ -59,7 +58,6 @@ const DetailsSection: React.FC<DetailsSectionProps> = ({
                     </p>
                     <div className={`${keyClasses[item.title]?keyClasses[item.title]:'text-text-dark'} text-[16px] mt-1`}>
                       {item.icon?<img src={item.icon?item.icon:''} alt={item.title} className="w-4 h-w-4 mr-2 inline"/>:''}
-                      {item.title === 'Connection status'?<TbLink size={16} className="text-green-500 inline mr-1" />:''}
                       <span >{item.value}</span>
                     </div>
                   </div>

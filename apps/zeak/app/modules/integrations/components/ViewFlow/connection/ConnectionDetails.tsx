@@ -6,6 +6,38 @@ import { ConnectionProvider } from "../../../context/connection";
 import TypePill from "~/components/Layout/Screen/View/TypePill";
 import ConnectionsPill from "~/modules/integrations/components/misc/connectionsPill";
 import { useState } from "react";
+import { LucideTriangleAlert } from "lucide-react";
+import { TbLink } from "react-icons/tb";
+import { LuUnlink } from "react-icons/lu";
+
+
+const ConnectionStatus = ({ status }: { status: string }) => {
+  return (
+    <div className="flex items-center gap-3 text-sm">
+      {status === "ONLINE" && (
+        <>
+          <TbLink size={20} className="text-green-500 cursor-pointer" />
+          <span className="text-green-500">ONLINE</span>
+        </>
+      )}
+      {status === "OFFLINE" && (
+        <>
+          <LuUnlink size={20} className="text-gray-500 cursor-pointer" />
+          <span className="text-gray-500">OFFLINE</span>
+        </>
+      )}
+      {status === "ERROR" && (
+        <>
+          <LucideTriangleAlert
+            size={20}
+            className="text-red-500 cursor-pointer"
+          />
+          <span className="text-red-500">ERROR</span>
+        </>
+      )}
+    </div>
+  );
+};
 
 function ConnectionDetails() {
   const [openedSection, setOpenedSection] = useState('Connection Details');
@@ -61,7 +93,7 @@ function ConnectionDetails() {
       // },
       {
         title: "Connection status",
-        value: selectedConnection?.connectionStatus,
+        value: <ConnectionStatus status={selectedConnection.connectionStatus} />,
       },
       {
         title: "Integration Category",
