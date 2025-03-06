@@ -5,6 +5,7 @@ import ConnectionDataTable from "./ConnectionDataTable";
 import { ConnectionProvider } from "../../context/connection";
 import TypePill from "~/components/Layout/Screen/View/TypePill";
 import ConnectionsPill from "~/modules/integrations/components/misc/connectionsPill";
+import { IntegrationResourceTypes } from "~/modules/integrations/models/constants";
 
 function IntegrationDetails() {
   const {
@@ -25,6 +26,7 @@ function IntegrationDetails() {
           className="bg-[#F7F9FE]"
           selectedIntegration={selectedIntegration}
           currentFlow={currentFlow}
+          resourceType={IntegrationResourceTypes.INTEGRATION}
           items = {[
             {
               title: "Integration Name",

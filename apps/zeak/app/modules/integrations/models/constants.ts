@@ -404,3 +404,8 @@ export interface Integration {
   }[];
   actions: string;
 }
+
+export enum IntegrationResourceTypes {
+  INTEGRATION = "Integration",
+  CONNECTION = "Connection"
+}
