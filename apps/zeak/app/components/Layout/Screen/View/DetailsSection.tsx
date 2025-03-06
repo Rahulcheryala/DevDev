@@ -51,7 +51,7 @@ const DetailsSection: React.FC<DetailsSectionProps> = ({
                 selectedIntegration={selectedIntegration}
               />
             )}
-            {resourceType&&resourceType === IntegrationResourceTypes.CONNECTION &&(
+            {resourceType&&resourceType === IntegrationResourceTypes.CONNECTION && title === 'Connection Details' &&(
               <ConnectionForm 
                 currentFlow={currentFlow}
                 selectedIntegration={selectedIntegration}

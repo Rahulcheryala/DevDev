@@ -98,7 +98,7 @@ function ConnectionDetails() {
     >
       <div className="flex flex-col gap-4 mb-10">
         {Object.keys(CONNECTION_DETAILS_SECTIONS).map((item) => (
-          <div className="relative" key={item}>
+        <div className="relative" key={item}>
           <div className="absolute top-6 right-2 flex items-center gap-2 z-[999]">
            <PenLine onClick={editConnectionHandler} className="h-5 w-5 mr-1.5 text-text-tertiary cursor-pointer" />
             <ChevronDown className="w-6 h-6 text-text-tertiary cursor-pointer" />
@@ -113,8 +113,8 @@ function ConnectionDetails() {
             resourceType={IntegrationResourceTypes.CONNECTION}
             selectedIntegration={selectedIntegration}
             selectedConnection={selectedConnection}
-          />      
-          </div>
+          />  
+        </div>
         ))}
         
       </div>
