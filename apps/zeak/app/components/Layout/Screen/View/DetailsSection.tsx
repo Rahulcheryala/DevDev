@@ -1,14 +1,12 @@
 import { cn } from "@zeak/react";
 import React from "react";
 import IntegrationForm from "~/modules/integrations/components/CreateFlow/IntegrationForm";
+import ConnectionForm from "~/modules/integrations/components/CreateFlow/ConnectionForm";
 import { IntegrationFlow } from "~/modules/integrations/context";
-import { Integration } from "~/modules/integrations/models/constants";
-import { ChevronDown, ChevronUp, PenLine } from "lucide-react";
+import { Integration,  IntegrationResourceTypes } from "~/modules/integrations/models/constants";
 
 const keyClasses: Record<string, string> = {
-  "Environment Type": "bg-[#FC0] w-fit px-4 py-1 rounded-zeak text-white",
   "Environment URL": "text-blue-500 font-medium tracking-wider",
-  "Connection status": "text-green-500",
 };
 
 type DetailsSectionProps = {
@@ -19,16 +17,20 @@ type DetailsSectionProps = {
     icon?: string | null;
   }[];
   selectedIntegration?: Integration;
+  selectedConnection?: Integration['connections'];
   className?: string;
   currentFlow?: IntegrationFlow;
+  resourceType?:string;
 };
 
 const DetailsSection: React.FC<DetailsSectionProps> = ({
   title,
   items,
   selectedIntegration,
+  selectedConnection,
   className,
   currentFlow,
+  resourceType
 }: DetailsSectionProps): JSX.Element => {
   return (
     <section className="flex">
@@ -43,10 +45,19 @@ const DetailsSection: React.FC<DetailsSectionProps> = ({
       <div className="flex-1 px-10 py-6 pr-6 rounded-[12px] bg-white rounded-l-none">
         {currentFlow === "edit" ? (
           <div className="flex flex-col gap-2">
-            <IntegrationForm
-              currentFlow={currentFlow}
-              selectedIntegration={selectedIntegration}
-            />
+            {resourceType&&resourceType === IntegrationResourceTypes.INTEGRATION &&(
+              <IntegrationForm
+                currentFlow={currentFlow}
+                selectedIntegration={selectedIntegration}
+              />
+            )}
+            {resourceType&&resourceType === IntegrationResourceTypes.CONNECTION && title === 'Connection Details' &&(
+              <ConnectionForm 
+                currentFlow={currentFlow}
+                selectedIntegration={selectedIntegration}
+                selectedConnection={selectedConnection}
+              />
+            )}
           </div>
         ) : (
           <div className="relative">
@@ -74,10 +85,6 @@ const DetailsSection: React.FC<DetailsSectionProps> = ({
                     </div>
                   </div>
                 ))}
-            </div>
-            <div className="absolute top-0 right-0 flex items-center gap-2">
-              <PenLine className="h-5 w-5 mr-1.5 text-text-tertiary" />
-              <ChevronDown className="w-6 h-6 text-text-tertiary" />
             </div>
           </div>
         )}

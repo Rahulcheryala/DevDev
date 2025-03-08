@@ -404,3 +404,13 @@ export type IntegrationComponents = "listing" | "individual" | null;
 //   }[];
 //   actions: string;
 // }
+
+export enum IntegrationResourceTypes {
+  INTEGRATION = "Integration",
+  CONNECTION = "Connection"
+}
+
+export enum ConnectionStatusTypes {
+  OFFLINE='OFFLINE',
+  ONLINE='ONLINE'
+}
