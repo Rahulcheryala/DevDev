@@ -2,7 +2,9 @@
 node_modules
 .turbo
 *.log
-*.sh
+docker-compose-cicd.sh
+re-deploy.sh
+ci-cd.sh
 .next
 .idea
 dist
