@@ -71,6 +71,9 @@ export const path = {
       teamCreate: `${api}/teams/create`,
       teamEdit: `${api}/teams/update`,
       teamMembersMap: `${api}/teams/members/update`,
+
+      integrationsList: `${api}/integrations/list`,
+      connectionsList: `${api}/connections/list`,
     },
     file: {
       previewImage: (bucket: string, path: string) =>

@@ -6,7 +6,7 @@ import { DataTableCheckbox } from "../../../../components/DataTable";
 import RowDragHandleCell from "../../../../components/DataTable/RowDragHanle";
 import { NameColumn, StatusPill } from "../../../../components/Layout/Screen";
 import IntegrationActionOptions from "../misc/IntegrationActionOptions";
-import moment from "moment";
+import moment from "moment-timezone";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { FiPlus } from "react-icons/fi";
 import { useConnectionContext } from "../../context/connection";
@@ -75,8 +75,8 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
     enableColumnFilter: false,
   },
   {
-    id: "name",
-    accessorKey: "name",
+    id: "integrationName",
+    accessorKey: "integrationName",
     header: ({ header }) => (
       <div className="text-ellipsis text-center overflow-hidden text-[14px] font-semibold leading-[18px]">
         Integration Name
@@ -84,8 +84,9 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
     ),
     cell: ({ row, column }) => (
       <NameColumn
-        link={`${row.original.id}`}
+        src={row.original.logo}
         name={row.original.integrationName}
+        link={`${row.original.id}`}
         columnSize={column.getSize()}
       />
     ),
@@ -147,7 +148,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
     enableSorting: true,
   },
   {
-    id: "lastUpdated",
+    id: "updatedAt",
     accessorKey: "updatedAt",
     header: ({ header }) => (
       <div className="text-ellipsis text-center overflow-hidden text-[14px] font-semibold leading-[18px]">
@@ -160,9 +161,9 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
         <div className="flex flex-col text-left">
-          <span>{moment(row.original.updatedAt).format("DD MMM, YYYY")}</span>
+          <span>{moment(row.original.createdAt).format("DD MMM, YYYY")}</span>
           <span className="text-[11px] text-muted-foreground">
-            {moment(row.original.updatedAt).format("hh:mm A")}
+            {moment(row.original.createdAt).format("hh:mm A")} | {moment(row.original.createdAt).tz('America/Chicago').format('z')}
           </span>
         </div>
       </div>
@@ -188,7 +189,9 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         style={{ maxWidth: column.getSize() }}
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
-        <ConnectionsPill connections={row.original.connections} />
+        connection details  
+        {/* TODO(vamsi): Add connection details with backend functionality */}
+        {/* <ConnectionsPill connections={row.original.connections} /> */}
       </div>
     ),
     meta: {
@@ -210,13 +213,15 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
     cell: ({ row, column }) => (
       <div style={{ maxWidth: column.getSize() }} className="px-5 relative">
         <div className="w-11/12 text-ellipsis text-nowrap overflow-hidden text-left">
-          {row.original.companies
+          {row.original.companyIds
             .map((company: any) => company.companyName)
             .join(", ") || "N/A"}
         </div>
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-500 font-semibold text-xs">
-          +{row.original.companies.length}
-        </div>
+        {row.original.companyIds && row.original.companyIds.length > 0 && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-500 font-semibold text-xs">
+            +{row.original.companyIds.length}
+          </div>
+        )}
       </div>
     ),
     meta: {
@@ -240,7 +245,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         style={{ maxWidth: column.getSize() }}
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-center"
       >
-        {row.original.actions === "Add Connection" && <AddConnectionButton />}
+        <AddConnectionButton />
       </div>
     ),
     meta: {

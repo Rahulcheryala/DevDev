@@ -95,7 +95,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
   };
 
   return (
-    <div className="flex justify-start items-start self-stretch flex-wrap gap-4">
+    <div className="flex justify-start items-start self-stretch flex-wrap gap-4 transition-all duration-300">
       {records.map(record => renderCard(record))}
     </div>
   );

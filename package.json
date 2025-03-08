@@ -53,6 +53,8 @@
     "db:start:redis": "npm run db:start -w @zeak/redis",
     "db:stop": "npm run db:stop -w @zeak/database",
     "db:types": "npm run db:types -w @zeak/database",
+    "db:test-connection": "cd packages/database && npm run test:db-connection",
+    "db:seed-integrations": "cd packages/database && npm run seed:integrations",
     "prisma:generate": "turbo run prisma:generate --filter=./apps/zeak",
     "deploy": "turbo run deploy",
     "dev": "turbo run dev --filter=./apps/zeak --filter=./packages/",

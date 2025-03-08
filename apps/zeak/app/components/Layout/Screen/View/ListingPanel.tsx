@@ -6,6 +6,7 @@ import Image from '../../../Image'
 import { motion } from 'framer-motion'
 import { Popover, PopoverContent, PopoverTrigger } from '@zeak/react'
 import { capitalize } from '../../../../utils/string'
+import StatusPill from './StatusPill'
 
 
 export type IRecord = {
@@ -65,6 +66,8 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
     const status = type === 'integration' || type === 'connection' ? ['All', 'System', 'User Defined'] : ['All', 'Active', 'Inactive', 'Archived'];
     const [sortBy, setSortBy] = useState<string>('name-asc');
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+    console.log(records)
 
     const sortOptions = [
         { id: 'name-asc', label: 'Name A-Z' },
@@ -232,7 +235,7 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
                                     ${selectedId === record.id ? 'bg-accent-primary hover:opacity-100 rounded-[12px]' : 'bg-white hover:opacity-80'}`}
                             >
                                 <div className='flex items-center gap-4'>
-                                    <Image src={record.logo || '/images/dynamics365.png'} alt={record.name} className='h-10 w-10 min-h-10 min-w-10 p-2 object-cover rounded-zeak bg-[#00000010]' />
+                                    <Image src={record.logo || '/images/dynamics365.png'} alt={record.name} className={`h-10 w-10 min-h-10 min-w-10 p-2 object-cover ${type === 'integration' ? 'rounded-full' : 'rounded-zeak'} ${selectedId === record.id ? 'bg-white' : 'bg-[#00000010]'}`} />
                                     <div className='flex-1'>
                                         <p className='flex justify-between items-center'>
                                             <span
@@ -240,12 +243,15 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
                                                 className={`text-[14px] font-medium ${selectedId === record.id ? 'text-white' : 'text-secondary group-hover:text-white'}`}>
                                                 {record.name}
                                             </span>
-                                            {type !== 'integration' && (
+                                            {type !== 'integration' && type !== 'connection' && (
                                                 <span
                                                     title={`${caption} Code`}
                                                     className={`text-[14px] uppercase ${selectedId === record.id ? 'text-white' : 'text-secondary-tertiary group-hover:text-white'}`}>
                                                     {record.code}
                                                 </span>
+                                            )}
+                                            {type === 'connection' && (
+                                                <div className="px-1 py-0.5 rounded-sm text-xs"><StatusPill status={record.connectionType!} /></div>
                                             )}
                                         </p>
                                         {type === 'integration' || type === 'connection' ? (
@@ -264,9 +270,9 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
                                     </div>
                                 </div>
                                 <div className='mt-[14px]'>
-                                    <p className='grid grid-cols-[65%_35%]'>
-                                        <div className='flex gap-x-2 flex-nowrap truncate'>
-                                            <span className={`text-sm ${selectedId === record.id ? 'text-white opacity-60' : 'text-tertiary group-hover:text-white group-hover:opacity-60'}`}>
+                                    <p className='grid grid-cols-[60%_40%] justify-between'>
+                                        <div className='flex gap-x-2 flex-nowrap'>
+                                            <span className={`text-sm whitespace-nowrap ${selectedId === record.id ? 'text-white opacity-60' : 'text-tertiary group-hover:text-white group-hover:opacity-60'}`}>
                                                 Last updated
                                             </span>
                                             <span
@@ -275,11 +281,11 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
                                                 {record.lastUpdatedBy || '-'}
                                             </span>
                                         </div>
-                                        <div className='flex flex-nowrap truncate'>
+                                        <div className='flex flex-nowrap justify-end'>
                                         <span className={`text-sm mx-2 ${selectedId === record.id ? 'text-white' : 'text-accent-primary group-hover:text-white'}`}>|</span>
                                         <span
                                             title="Last Updated On"
-                                            className={`text-sm ${selectedId === record.id ? 'text-white opacity-60' : 'text-tertiary group-hover:text-white group-hover:opacity-60'}`}>
+                                            className={`text-sm truncate ${selectedId === record.id ? 'text-white opacity-60' : 'text-tertiary group-hover:text-white group-hover:opacity-60'}`}>
                                             {record.updatedAt ? new Date(record.updatedAt!).toLocaleDateString('en-GB', {
                                                 day: '2-digit',
                                                 month: 'short',

@@ -1,6 +1,9 @@
 import { useIntegrationContext } from "../../../context";
 import { motion } from "framer-motion";
-import { DetailsSection, StatusPill } from "../../../../../components/Layout/Screen";
+import {
+  DetailsSection,
+  StatusPill,
+} from "../../../../../components/Layout/Screen";
 import ConnectionDataTable from "./ConnectionDataTable";
 import { ConnectionProvider } from "../../../context/connection";
 import TypePill from "~/components/Layout/Screen/View/TypePill";
@@ -25,7 +28,7 @@ function IntegrationDetails() {
           className="bg-[#F7F9FE]"
           selectedIntegration={selectedIntegration}
           currentFlow={currentFlow}
-          items = {[
+          items={[
             {
               title: "Integration Name",
               value: selectedIntegration.integrationName,
@@ -61,6 +64,7 @@ function IntegrationDetails() {
               title: "Connections",
               value: (
                 <ConnectionsPill
+                  type="details"
                   connections={selectedIntegration.connections}
                 />
               ),
@@ -68,6 +72,7 @@ function IntegrationDetails() {
             {
               title: "Application",
               value: selectedIntegration.integrationName,
+              icon: selectedIntegration.logo || '/images/dynamics365.png'
             },
           ]}
         />

@@ -1,27 +1,36 @@
+import {
+    ExecutionFrequency,
+    ConnectionStatus,
+    LastTestResult,
+    EnvironmentType
+} from "@prisma/client";
+
 export interface IConnectionModel {
     id: string;
+    integrationId: string;
     connectionName: string;
-    status: string;
-    integrationType: string;
-    integrationName: string;
-    environmentType: string;
-    environmentURL: string;
-    companies: string[];
-    integrationSettings: {
-        connectionType: string;
-        authentication: string;
-        integrationCategory: string;
+    connectionCode: string;
+    connectionDescription?: string;
+    companyIds: string[];
+    isOnline: boolean;
+    connectionDetails: {
+        environmentType: EnvironmentType;
+        environmentURL: string;
+        maxRetries: number;
+        timeout: number;
+        retryDelay: number;
     };
-
-    executionFrequency: string;
-    maxRetries: number;
-    retryDelay: number;
-    timeout: number;
-
-    createdAt: string;
+    executionFrequency: ExecutionFrequency;
+    connectionStatus: ConnectionStatus;
+    isTested: boolean;
+    lastTestedAt?: Date;
+    lastTestedBy?: string;
+    lastTestResult?: LastTestResult;
+    createdAt: Date;
     createdBy: string;
-    updatedAt: string;
-    updatedBy: string;
-    deletedAt: string;
-    deletedBy: string;  
+    updatedAt?: Date;
+    lastUpdatedBy?: string;
+    deletedAt?: Date;
+    deletedBy?: string;
+    syncToken: string;
 }

@@ -39,7 +39,9 @@
     "deploy": "supabase link --project-ref $SUPABASE_PROJECT_ID && supabase db push",
     "dev": "tsup --watch",
     "lint": "TIMING=1 eslint \"src/**/*.ts*\"",
-    "setup": "tsx src/seed.ts"
+    "setup": "tsx src/seed.ts",
+    "seed:integrations": "chmod +x ./scripts/run-integration-seed.sh && ./scripts/run-integration-seed.sh",
+    "test:db-connection": "chmod +x ./scripts/test-db-connection.sh && ./scripts/test-db-connection.sh"
   },
   "sideEffects": false,
   "types": "./dist/index.d.ts",

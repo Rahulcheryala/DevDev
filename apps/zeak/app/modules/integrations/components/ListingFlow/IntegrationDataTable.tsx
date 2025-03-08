@@ -1,12 +1,11 @@
 import { DataTable } from "../../../../components/DataTable";
 import { useIntegrationContext } from "../../context";
-// import { IIntegrationModel } from "../../models/integration.model";
+import { IIntegrationModel } from "../../models/integration.model";
 import { IntegrationTableColumns } from "./IntegrationTableColumns";
 import { TbPlus } from "react-icons/tb";
-import { Integration } from "../../models/constants";
 
 type IntegrationDataTableProps = {
-  records: Integration[];
+  records: IIntegrationModel[];
 };
 
 export default function IntegrationDataTable({

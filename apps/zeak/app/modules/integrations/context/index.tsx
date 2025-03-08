@@ -17,9 +17,10 @@ import { IIntegrationModel } from "../models/integration.model";
 import { ConfirmationModal } from "../../../components/Layout/Screen";
 import IntegrationAddFlow from "../components/CreateFlow";
 import { ConnectionProvider } from "./connection";
+import { fetchConnectionsList, fetchIntegrationsList } from "../utils/api.utils";
+import { IConnectionModel } from "../models/connection.model";
 
 // temporary data
-import { integrations, Integration } from "../models/constants";
 
 // Define flow types for integrations
 export type IntegrationFlow =
@@ -31,37 +32,18 @@ export type IntegrationFlow =
   | "delete"
   | null;
 
-const integrationObject: IIntegrationModel = {
-  id: "550e8400-e29b-41d4-a716-446655440000", // UUID
-  integrationName: "Salesforce Integration",
-  purpose: "CRM data synchronization",
-  application: "salesforce",
-  connectionType: "OData", // UUID for connection type
-  integrationCategory: "ERP", // UUID for category
-  authenticationType: "OAuth 2.0", // UUID for auth type
-  status: "Active", // UUID for status
-  connectionLimit: 100,
-  createdAt: "2024-03-19T10:30:00Z", // ISO timestamp
-  createdBy: "user123-4567-89ab-cdef-123456789abc", // UUID for user
-  updatedAt: "2024-03-19T11:45:00Z", // ISO timestamp
-  lastUpdatedBy: "user123-4567-89ab-cdef-123456789abc", // UUID for user
-  deletedAt: null,
-  deletedBy: null,
-  syncToken: "sync123-4567-89ab-cdef-123456789abc", // UUID for sync token
-};
-
 // Define the state interface
 export type IntegrationState = {
-  records: Integration[];
-  selectedIntegration: Integration | null;
+  records: IIntegrationModel[];
+  selectedIntegration: IIntegrationModel | null;
   integrationForm: IntegrationForm;
   currentFlow: IntegrationFlow;
   isLoading: boolean;
   error: Error | null;
   errors: { [key: string]: string | null };
   isFormDirty: boolean;
-  connectionsList: any[];
-  selectedConnection: any;
+  connectionsList: IConnectionModel[] | null;
+  selectedConnection: IConnectionModel | null;
   viewType: "list" | "grid";
 };
 
@@ -69,10 +51,11 @@ export type IntegrationState = {
 export type IntegrationAction =
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_ERROR"; payload: Error | null }
-  | { type: "SET_RECORDS"; payload: Integration[] }
+  | { type: "SET_RECORDS"; payload: IIntegrationModel[] }
   // | { type: "ADD_RECORDS"; payload: IIntegrationModel[] }
-  | { type: "SET_SELECTED_INTEGRATION"; payload: Integration | null }
-  | { type: "SET_SELECTED_CONNECTION"; payload: any }
+  | { type: "SET_SELECTED_INTEGRATION"; payload: IIntegrationModel | null }
+  | { type: "SET_CONNECTIONS_LIST"; payload: IConnectionModel[] | null}
+  | { type: "SET_SELECTED_CONNECTION"; payload: IConnectionModel | null }
   | {
       type: "UPDATE_FORM";
       payload: Partial<IntegrationForm>;
@@ -86,7 +69,7 @@ export type IntegrationAction =
 
 // Initial state
 const initialState: IntegrationState = {
-  records: integrations,
+  records: [],
   selectedIntegration: null,
   integrationForm: initialIntegrationForm,
   currentFlow: null,
@@ -94,9 +77,9 @@ const initialState: IntegrationState = {
   error: null,
   errors: {},
   isFormDirty: false,
-  connectionsList: integrations.flatMap(integration => integration.connections),
+  connectionsList: [],
   selectedConnection: null,
-  viewType: "grid",
+  viewType: "list",
 };
 
 // Reducer function
@@ -119,15 +102,17 @@ function integrationReducer(
       return { 
         ...state, 
         selectedIntegration: action.payload,
-        connectionsList: action.payload?.connections!,
         selectedConnection: null 
+      };
+    case "SET_CONNECTIONS_LIST":
+      return { 
+        ...state, 
+        connectionsList: action.payload
       };
     case "SET_SELECTED_CONNECTION":
       return { 
         ...state, 
-        selectedConnection: state.connectionsList.find(
-          connection => connection.id === action.payload
-        )
+        selectedConnection: action.payload
       };
     case "UPDATE_FORM":
       return {
@@ -184,32 +169,35 @@ export const IntegrationProvider = ({ children }: { children: ReactNode }) => {
   const { currentFlow } = state;
 
   // Fetch initial data
-  // const fetchData = useCallback(async () => {
-  //   try {
-  //     dispatch({ type: "SET_LOADING", payload: true });
-  //     dispatch({ type: "SET_ERROR", payload: null });
+  const fetchData = useCallback(async () => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_ERROR", payload: null });
 
-  //     // TODO: Replace with actual API calls
-  //     const [integrations] = await Promise.all([
-  //       // fetchIntegrationList()
-  //       Promise.resolve([]),
-  //     ]);
+      // TODO: Replace with actual API calls
+      const [integrations, connectionsList] = await Promise.all([
+        fetchIntegrationsList(),
+        fetchConnectionsList(),
+      ]);
 
-  //     dispatch({ type: "SET_RECORDS", payload: integrations });
-  //   } catch (error) {
-  //     dispatch({
-  //       type: "SET_ERROR",
-  //       payload:
-  //         error instanceof Error ? error : new Error("An error occurred"),
-  //     });
-  //   } finally {
-  //     dispatch({ type: "SET_LOADING", payload: false });
-  //   }
-  // }, []);
+      // console.log(connectionsList);
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, [fetchData]);
+      dispatch({ type: "SET_RECORDS", payload: integrations.data });
+      dispatch({ type: "SET_CONNECTIONS_LIST", payload: connectionsList.data });
+    } catch (error) {
+      dispatch({
+        type: "SET_ERROR",
+        payload:
+          error instanceof Error ? error : new Error("An error occurred"),
+      });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // Handle different flows
   useEffect(() => {

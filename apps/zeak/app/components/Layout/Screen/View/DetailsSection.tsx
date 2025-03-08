@@ -16,7 +16,7 @@ type DetailsSectionProps = {
   items: {
     title: string;
     value: string | number | boolean | null | React.ReactNode;
-    icon: string | null;
+    icon?: string | null;
   }[];
   selectedIntegration?: Integration;
   className?: string;

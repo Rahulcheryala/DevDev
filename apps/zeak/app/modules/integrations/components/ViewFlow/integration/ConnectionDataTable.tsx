@@ -13,7 +13,7 @@ export default function ConnectionDataTable({ component }: ConnectionDataTablePr
     state: { selectedIntegration, connectionsList },
   } = useIntegrationContext();
 
-  const connections = component === "listing" ? connectionsList : selectedIntegration?.connections;
+  const connections = component === "listing" ? connectionsList : connectionsList!.filter((connection) => connection.integrationId === selectedIntegration?.id);
 
   return (
     <div className="bg-[#F0F4FD] flex flex-col h-full">

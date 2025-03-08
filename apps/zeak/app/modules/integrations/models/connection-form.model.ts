@@ -1,41 +1,33 @@
+import { ConnectionStatus, EnvironmentType, ExecutionFrequency } from "@prisma/client";
+
 export type ConnectionForm = {
     connectionName: string;
-    status: 'draft' | 'active' | 'inactive';
-    integrationType: string;
-    integrationName: string;
-    environmentType: string;
-    environmentURL: string;
-    companies: string[];
-    integrationSettings: {
-        connectionMode: 'online' | 'offline';
-        connectionType: string;
-        authentication: string;
-        integrationCategory: string;
-    };
-
-    executionFrequency: 'on-demand' | 'scheduled';
-    maxRetries: number;
-    retryDelay: number;
-    timeout: number;
+    connectionCode: string;
+    connectionDescription?: string;
+    connectionDetails: {
+        environmentType: EnvironmentType | '',
+        environmentURL: string,
+        maxRetries: number | null,
+        retryDelay: number | null,
+        timeout: number | null,
+    }
+    companies: string[],
+    connectionStatus: ConnectionStatus | '';
+    executionFrequency: ExecutionFrequency | '';
 };
 
 export const initialConnectionFormData: ConnectionForm = {
     connectionName: '',
-    status: 'draft',
-    integrationType: '',
-    integrationName: '',
-    environmentType: '',
-    environmentURL: '',
-    companies: [],
-    integrationSettings: {
-        connectionMode: 'online',
-        connectionType: '',
-        authentication: '',
-        integrationCategory: '',
+    connectionCode: '',
+    connectionDescription: '',
+    connectionDetails: {
+        environmentType: '',
+        environmentURL: '',
+        maxRetries: null,
+        retryDelay: null,
+        timeout: null,
     },
-    
-    executionFrequency: 'on-demand',
-    maxRetries: 0,
-    retryDelay: 0,
-    timeout: 0,
+    companies: [],
+    connectionStatus: '', // TODO(vamsi): Add default value
+    executionFrequency: '', // TODO(vamsi): Add default value
 };

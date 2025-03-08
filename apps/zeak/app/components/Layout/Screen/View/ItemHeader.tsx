@@ -199,13 +199,15 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
         <div className="flex justify-between items-end">
           <div className="flex gap-6 items-center">
             {component !== "connection" && (
-              <Image src={selectedItem.logo || ''} alt={selectedItem.name} className='min-h-[72px] min-w-[72px] h-[72px] w-[72px] rounded-full' />
+              <Image src={selectedItem.logo || '/images/dynamics365.png'} alt={selectedItem.name} className='min-h-[72px] min-w-[72px] h-[72px] w-[72px] p-3.5 bg-white rounded-full' />
             )}
             <div className="flex flex-col gap-4">
               <div className="flex gap-4 items-center">
                 <p className="text-text-dark text-4xl max-w-[450px] truncate">{selectedItem.name}</p>
                 <ChevronDown className="text-text-tertiary" />
-                <div className="px-3 py-1 rounded-[12px] bg-white"><StatusPill status={selectedItem.status} /></div>
+                <div className="px-3 py-1 rounded-[12px] bg-white">
+                  <StatusPill status={selectedItem.status} />
+                </div>
               </div>
               <SubHeader />
             </div>

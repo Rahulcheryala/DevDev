@@ -9,6 +9,7 @@ export enum StatusColors {
   draft = "text-yellow-500",
   online = "text-green-500",
   offline = "text-gray-400",
+  error = "text-red-500",
 }
 
 /**
@@ -35,6 +36,7 @@ interface StatusPillProps {
     | "draft"
     | "online"
     | "offline"
+    | "error"
     | string;
   columnSize?: number;
   className?: string;

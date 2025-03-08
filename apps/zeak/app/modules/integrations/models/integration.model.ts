@@ -1,18 +1,38 @@
+import {
+  ApplicationName,
+  IntegrationType,
+  IntegrationCategory,
+  ConnectionType,
+  Status,
+  LastTestResult,
+  AuthType
+} from "@prisma/client";
+
 export interface IIntegrationModel {
-  id: string;  // UUID
+  id: string;
   integrationName: string;
-  purpose?: string;
-  application: string;
-  connectionType: string;  // UUID reference to masterListValue
-  integrationCategory: string;  // UUID reference to masterListValue
-  authenticationType: string;  // UUID reference to masterListValue
-  status: string;  // UUID reference to masterListValue
-  connectionLimit?: number;
-  createdAt: string;  // Timestamp
-  createdBy: string;  // UUID reference to users
-  updatedAt?: string | null;  // Timestamp
-  lastUpdatedBy?: string | null;  // UUID reference to users
-  deletedAt?: string | null;  // Timestamp
-  deletedBy?: string | null;  // UUID reference to users
-  syncToken?: string | null;  // UUID
-} 
+  applicationName: ApplicationName;
+  integrationCode: string;
+  logo?: string;
+  description?: string;
+  isFavorite: boolean;
+  integrationType: IntegrationType;
+  integrationCategory: IntegrationCategory;
+  connectionType: ConnectionType;
+  authType: AuthType;
+  connectionLimit: number;
+  status: Status;
+  companyIds: string[];
+  tags?: any;
+  isTested: boolean;
+  lastTestedAt?: Date;
+  lastTestedBy?: string;
+  lastTestResult?: LastTestResult;
+  createdAt: Date;
+  createdBy: string;
+  updatedAt?: Date;
+  lastUpdatedBy?: string;
+  deletedAt?: Date;
+  deletedBy?: string;
+  syncToken: string;
+}
