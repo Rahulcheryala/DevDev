@@ -17,6 +17,7 @@ export type ConnectionForm = {
     maxRetries: number;
     retryDelay: number;
     timeout: number;
+    enabled: boolean;
 };
 
 export const initialConnectionFormData: ConnectionForm = {
@@ -38,4 +39,5 @@ export const initialConnectionFormData: ConnectionForm = {
     maxRetries: 0,
     retryDelay: 0,
     timeout: 0,
+    enabled: false,
 };

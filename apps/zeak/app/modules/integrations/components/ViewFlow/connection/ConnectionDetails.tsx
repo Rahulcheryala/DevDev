@@ -2,10 +2,36 @@ import { useIntegrationContext } from "../../../context";
 import { motion } from "framer-motion";
 import { DetailsSection, StatusPill } from "../../../../../components/Layout/Screen";
 import TypePill from "~/components/Layout/Screen/View/TypePill";
+import { ChevronDown, ChevronUp, PenLine } from "lucide-react";
+import { IntegrationResourceTypes } from "~/modules/integrations/models/constants";
+
+const EnvironmentType = ({ type }: { type: string }) => {
+  return (
+    <div className="flex items-center gap-3 text-sm">
+      {type === "PROD" && (
+        <>
+          <span className="bg-yellow-500 w-fit px-4 py-1 rounded-full text-white">PROD</span>
+        </>
+      )}
+      {type === "DEV" && (
+        <>
+          <span className="bg-gray-600 w-fit px-4 py-1 rounded-full text-white">DEV</span>
+        </>
+      )}
+      {type === "UAT" && (
+        <>
+          <span className="bg-orange-500 w-fit px-4 py-1 rounded-full text-white">UAT</span>
+        </>
+      )}
+    </div>
+    )
+  };
+  
 
 function ConnectionDetails() {
   const {
     state: { selectedConnection, selectedIntegration, currentFlow },
+    dispatch,
   } = useIntegrationContext();
 
   // console.log(selectedIntegration, selectedConnection);
@@ -22,7 +48,7 @@ function ConnectionDetails() {
       { title: "Purpose", value: selectedConnection.purpose },
       {
         title: "Environment Type",
-        value: selectedConnection.environmentType,
+        value: <EnvironmentType type={selectedConnection.environmentType}/>
       },
       {
         title: "Environment URL",
@@ -58,6 +84,10 @@ function ConnectionDetails() {
     "Advanced": []
   }
 
+  const editConnectionHandler = () => {
+    dispatch({ type: "SET_FLOW", payload: "edit" });
+  };
+
   if (!selectedConnection) return null;
 
   return (
@@ -68,6 +98,11 @@ function ConnectionDetails() {
     >
       <div className="flex flex-col gap-4 mb-10">
         {Object.keys(CONNECTION_DETAILS_SECTIONS).map((item) => (
+        <div className="relative" key={item}>
+          <div className="absolute top-6 right-2 flex items-center gap-2 z-[999]">
+           <PenLine onClick={editConnectionHandler} className="h-5 w-5 mr-1.5 text-text-tertiary cursor-pointer" />
+            <ChevronDown className="w-6 h-6 text-text-tertiary cursor-pointer" />
+          </div>
           <DetailsSection
             key={item}
             title={item}
@@ -75,8 +110,13 @@ function ConnectionDetails() {
             className="bg-[#F7F9FE]"
             //   selectedIntegration={selectedIntegration}
             currentFlow={currentFlow}
-          />
+            resourceType={IntegrationResourceTypes.CONNECTION}
+            selectedIntegration={selectedIntegration}
+            selectedConnection={selectedConnection}
+          />  
+        </div>
         ))}
+        
       </div>
     </motion.div>
   );
