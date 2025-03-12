@@ -12,7 +12,7 @@ export interface IConnectionModel {
     connectionCode: string;
     connectionDescription?: string;
     companyIds: string[];
-    isOnline: boolean;
+    isOnline: boolean; // TODO(vamsi): change to isEnabled
     connectionDetails: {
         environmentType: EnvironmentType;
         environmentURL: string;
@@ -33,4 +33,11 @@ export interface IConnectionModel {
     deletedAt?: Date;
     deletedBy?: string;
     syncToken: string;
+    integration:{
+        integrationName: string;
+        applicationName: string;
+        integrationCategory: string;
+        authType: string;
+        logo: string;
+    }
 }

@@ -1,13 +1,13 @@
-import { useIntegrationContext } from "../../../context";
-import IntegrationActionOptions from "../../misc/IntegrationActionOptions";
+import { useUnifiedContext } from "../../../context";
 import { ItemHeader } from "../../../../../components/Layout/Screen";
 import { ISelectedItem } from "../../../../../components/Layout/Screen/View/ItemHeader";
+import IntegrationActionOptions from "../../misc/IntegrationActionOptions";
 
 export default function IntegrationHeader() {
   const {
     state: { selectedIntegration },
     dispatch,
-  } = useIntegrationContext();
+  } = useUnifiedContext();
 
   // Ensure selectedIntegration is not null before destructuring
   if (!selectedIntegration) return null;
@@ -19,7 +19,7 @@ export default function IntegrationHeader() {
     status,
     integrationCategory,
     connectionType,
-    type,
+    integrationType,
   } = selectedIntegration;
 
   const breadcrumbs = [
@@ -38,7 +38,7 @@ export default function IntegrationHeader() {
   };
 
   const editIntegrationHandler = () => {
-    dispatch({ type: "SET_FLOW", payload: "edit" });
+    dispatch({ type: "SET_INTEGRATION_FLOW", payload: "edit" });
   };
 
   return (
@@ -48,11 +48,9 @@ export default function IntegrationHeader() {
       backUrl="/x/access-settings/integrations/"
       onEdit={editIntegrationHandler}
       onClose={unsetIntegrationHandler}
-      type={selectedIntegration.type}
+      type={selectedIntegration.integrationType}
       actionPopover={
-        <IntegrationActionOptions
-          type={selectedIntegration.type}
-        />
+        <IntegrationActionOptions type={selectedIntegration.integrationType} />
       }
       selectedItem={
         {
@@ -60,9 +58,9 @@ export default function IntegrationHeader() {
           name: integrationName,
           status,
           code: id,
-          integrationCategory,
+          integrationCategory: integrationCategory.replace(/_/g, " "),
           connectionType,
-          type,
+          integrationType,
         } as ISelectedItem
       }
     />

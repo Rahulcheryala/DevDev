@@ -74,6 +74,8 @@ export const path = {
 
       integrationsList: `${api}/integrations/list`,
       connectionsList: `${api}/connections/list`,
+      integrationConnections: (integrationId: string) =>
+        generatePath(`${api}/integration/connections?integrationId=${integrationId}`),
     },
     file: {
       previewImage: (bucket: string, path: string) =>
@@ -210,6 +212,8 @@ export const path = {
     //   generatePath(`${x}/access-settings/integrations/connections/${id}`),
     // integrationsDelete: (id: string) =>
     //   generatePath(`${x}/access-settings/integrations/delete/${id}`),
+    connectionDetail: (integrationId: string, connectionId: string) => 
+      `/x/access-settings/integrations/${integrationId}/connections/${connectionId}`,
   },
 } as const;
 

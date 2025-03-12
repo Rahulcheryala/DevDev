@@ -1,6 +1,6 @@
 import { toast } from "@zeak/react";
 import { Fragment, useMemo, useState } from "react";
-import { useIntegrationContext } from "../../../context";
+import { useUnifiedContext } from "../../../context";
 import { CreationTabs } from "../../../../../components/Layout";
 import { ButtonProps } from "../../../../../components/Layout/Screen/Creation/SaveButton";
 import { createIntegrationFn } from "../../../utils/api.utils";
@@ -25,8 +25,8 @@ const ConnectionAddFlow = ({
   const [activeTab, setactiveTab] = useState<IntegrationAddFlowTabs>(
     IntegrationAddFlowTabs.STEP_1
   );
-  const { state, dispatch } = useIntegrationContext();
-  const { integrationForm, currentFlow } = state;
+  const { state, dispatch } = useUnifiedContext();
+  const { connectionForm } = state;
 
   const onCloseHandler = (bool?: boolean) => {
     setactiveTab(IntegrationAddFlowTabs.STEP_1);
@@ -35,7 +35,7 @@ const ConnectionAddFlow = ({
 
   const validateForm = async () => {
     try {
-      await integrationGeneralInfoSchema.parseAsync(integrationForm);
+      await integrationGeneralInfoSchema.parseAsync(connectionForm);
       return true;
     } catch (error) {
       if (error instanceof Error) {
@@ -52,27 +52,29 @@ const ConnectionAddFlow = ({
       saveData(true);
     } else if (action === "save_clear") {
       saveData(false);
-    } else if (action === "draft") {
-      saveData(true, { status: "draft" });
-    }
+    } 
+    // else if (action === "draft") {
+    //   saveData(true, { status: "draft" });
+    // }
   };
 
   const saveData = async (
     close: boolean = true,
-    updateBody?: Partial<typeof integrationForm>
+    updateBody?: Partial<typeof connectionForm>
   ) => {
     try {
       const isValid = await validateForm();
       if (!isValid) return;
 
-      const body = { ...integrationForm, ...updateBody };
-      await createIntegrationFn(body);
+      const body = { ...connectionForm, ...updateBody };
+      // TODO(vamsi): create connection api
+      // await createIntegrationFn(body);
 
       if (close) {
         onCloseHandler(true);
       } else {
-        dispatch({ type: "RESET_FORM" });
-        dispatch({ type: "CLEAR_ERRORS" });
+        dispatch({ type: "RESET_CONNECTION_FORM" });
+        dispatch({ type: "CLEAR_CONNECTION_ERRORS" });
       }
 
       return toast.success("Integration created successfully!");

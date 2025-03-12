@@ -1,47 +1,61 @@
 import { useEffect } from "react";
 import { useParams } from "@remix-run/react";
-import { useIntegrationContext } from "../../../context";
+import { useUnifiedContext } from "../../../context";
 import { ViewContainer } from "../../../../../components/Layout/Screen";
 import { ITab } from "../../../../../components/Layout/Screen/Creation/CreationTabs";
 import { IntegrationViewFlowTabs } from "../../../models/constants";
 import ConnectionDetails from "./ConnectionDetails";
 import ConnectionHeader from "./ConnectionHeader";
-import CompaniesDataTable from "../CompaniesDataTable";
+import CompaniesDataTable from "../integration/CompaniesDataTable";
 import ConnectionListingPanel from "./ConnectionListingPanel";
 
 const ConnectionView = () => {
-  // const { connectionId } = useParams();
+  const { connectionId } = useParams();
   const {
-    state: { selectedConnection },
-  } = useIntegrationContext();
+    state: {
+      records,
+      selectedConnection,
+      selectedIntegration,
+      connectionsList,
+    },
+    dispatch,
+  } = useUnifiedContext();
 
-  // First useEffect to ensure we have the integration and its connections
-  // useEffect(() => {
-  //   if (!selectedIntegration) {
-  //     console.log("No integration selected");
-  //     return;
-  //   }
-  //   console.log("Integration selected:", selectedIntegration);
-  // }, [selectedIntegration]);
+  // TODO: Remove this once the integration is set
+  // Reason: the integration is set to null when the connection is selected
+  if (!selectedIntegration) {
+    const integration = records?.find(
+      (record) => record.id === selectedConnection?.integrationId
+    );
+    if (integration) {
+      dispatch({
+        type: "SET_SELECTED_INTEGRATION",
+        payload: integration,
+      });
+    }
+  }
 
-  // // Second useEffect to handle connection selection
-  // useEffect(() => {
-  //   if (connectionId && connectionsList && connectionsList.length > 0 && !selectedConnection) {
-  //     console.log("Setting selected connection:", connectionId);
-  //     dispatch({
-  //       type: "SET_SELECTED_CONNECTION",
-  //       payload: connectionId,
-  //     });
-  //   }
-  // }, [connectionId, connectionsList, dispatch]); // Remove selectedConnection from dependencies
+  useEffect(() => {
+    if (connectionId && connectionsList && connectionsList.length > 0) {
+      const connection = connectionsList.find(
+        (connection) => connection.id === connectionId
+      );
+      if (connection) {
+        dispatch({
+          type: "SET_SELECTED_CONNECTION",
+          payload: connection,
+        });
+      }
+    }
+  }, [connectionId, connectionsList, dispatch]);
 
-  // if (!selectedIntegration) {
-  //   return <div>Loading integration...</div>;
-  // }
+  if (!selectedIntegration) {
+    return <div>Loading integration...</div>;
+  }
 
-  // if (!connectionsList || connectionsList.length === 0) {
-  //   return <div>Loading connections...</div>;
-  // }
+  if (!connectionsList || connectionsList.length === 0) {
+    return <div>Loading connections...</div>;
+  }
 
   const StepTabs = [
     {
@@ -78,6 +92,6 @@ const ConnectionView = () => {
       onTabChange={() => {}}
     />
   );
-}
+};
 
 export default ConnectionView;

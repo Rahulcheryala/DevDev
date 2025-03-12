@@ -1,4 +1,4 @@
-import { useIntegrationContext } from "../../context";
+import { useUnifiedContext } from "../../context";
 import { useState } from "react";
 import Image from "../../../../components/Image";
 import { PiSpinnerGap } from "react-icons/pi";
@@ -16,7 +16,7 @@ type TestStatus = {
 };
 
 export const TestConnect = () => {
-  const { state } = useIntegrationContext();
+  const { state } = useUnifiedContext();
   const [testStatuses, setTestStatuses] = useState<TestStatus[]>([
     {
       event: "Integration Test",
@@ -64,7 +64,7 @@ export const TestConnect = () => {
               <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center relative">
                 <Image
                   src={state.integrationForm.logo}
-                  alt={state.integrationForm.name}
+                  alt={state.integrationForm.integrationName}
                   className="w-full h-full rounded-full"
                 />
                 <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center">
@@ -73,7 +73,7 @@ export const TestConnect = () => {
               </div>
               <div className="text-center w-32">
                 <p className="font-medium text-wrap">
-                  {state.integrationForm.name}
+                  {state.integrationForm.integrationName}
                 </p>
                 <p className="text-xs text-textLink">YOUR PLATFORM</p>
               </div>

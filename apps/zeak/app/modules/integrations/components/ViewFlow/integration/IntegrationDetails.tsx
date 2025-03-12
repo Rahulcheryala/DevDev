@@ -1,18 +1,14 @@
-import { useIntegrationContext } from "../../../context";
 import { motion } from "framer-motion";
-import {
-  DetailsSection,
-  StatusPill,
-} from "../../../../../components/Layout/Screen";
-import ConnectionDataTable from "./ConnectionDataTable";
-import { ConnectionProvider } from "../../../context/connection";
+import { DetailsSection, StatusPill } from "../../../../../components/Layout/Screen";
 import TypePill from "~/components/Layout/Screen/View/TypePill";
 import ConnectionsPill from "~/modules/integrations/components/misc/connectionsPill";
+import { useUnifiedContext } from "../../../context";
+import ConnectionList from "./ConnectionList";
 
 function IntegrationDetails() {
   const {
-    state: { selectedIntegration, currentFlow },
-  } = useIntegrationContext();
+    state: { selectedIntegration, integrationFlow },
+  } = useUnifiedContext();
 
   if (!selectedIntegration) return null;
 
@@ -27,17 +23,17 @@ function IntegrationDetails() {
           title="Integration Details"
           className="bg-[#F7F9FE]"
           selectedIntegration={selectedIntegration}
-          currentFlow={currentFlow}
+          currentFlow={integrationFlow}
           items={[
             {
               title: "Integration Name",
               value: selectedIntegration.integrationName,
             },
-            { title: "Intgration ID", value: selectedIntegration.id },
-            { title: "Purpose", value: selectedIntegration.purpose },
+            { title: "Intgration Code", value: selectedIntegration.integrationCode },
+            { title: "Purpose", value: selectedIntegration.description },
             {
               title: "Integration Category",
-              value: selectedIntegration.integrationCategory,
+              value: selectedIntegration.integrationCategory?.replace(/_/g, " "),
             },
             {
               title: "Connection Type",
@@ -45,7 +41,7 @@ function IntegrationDetails() {
             },
             {
               title: "Authentication Type",
-              value: selectedIntegration.authenticationType,
+              value: selectedIntegration.authType?.replace(/_/g, " "),
             },
             {
               title: "Status",
@@ -55,8 +51,8 @@ function IntegrationDetails() {
               title: "Type",
               value: (
                 <TypePill
-                  type={selectedIntegration.type}
-                  className="bg-green-100 px-3 py-1 "
+                  type={selectedIntegration.integrationType}
+                  className="bg-green-100 px-3 py-1"
                 />
               ),
             },
@@ -65,20 +61,18 @@ function IntegrationDetails() {
               value: (
                 <ConnectionsPill
                   type="details"
-                  connections={selectedIntegration.connections}
+                  id={selectedIntegration.id}
                 />
               ),
             },
             {
               title: "Application",
               value: selectedIntegration.integrationName,
-              icon: selectedIntegration.logo || '/images/dynamics365.png'
+              icon: selectedIntegration.logo
             },
           ]}
         />
-        <ConnectionProvider>
-          <ConnectionDataTable component="view" />
-        </ConnectionProvider>
+        <ConnectionList integrationId={selectedIntegration.id} component="view" />
       </div>
     </motion.div>
   );

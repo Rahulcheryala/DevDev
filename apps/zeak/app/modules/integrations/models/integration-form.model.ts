@@ -12,11 +12,11 @@ export type IntegrationForm = {
     integrationType: IntegrationType | '';
     integrationName: string;
     integrationCode: string;
-    desciption?: string;
+    purpose?: string;
     applicationName: ApplicationName | '';
     integrationCategory: IntegrationCategory | '';
     connectionType: ConnectionType | '';
-    authType: AuthType | '';
+    authentication: AuthType | '';
     connectionLimit: number;
     companies: string[];
     executionFrequency: ExecutionFrequency | '';
@@ -31,11 +31,11 @@ export const initialIntegrationForm: IntegrationForm = {
     integrationType: 'User_Defined',
     integrationName: '',
     integrationCode: '',
-    desciption: '',
+    purpose: '',
     applicationName: '',
     integrationCategory: '',
     connectionType: '',
-    authType: '',
+    authentication: '',
     connectionLimit: 0,
     companies: [],
     executionFrequency: 'On_Demand',

@@ -12,15 +12,21 @@ import {
   initialIntegrationForm,
 } from "../models/integration-form.model";
 import { IIntegrationModel } from "../models/integration.model";
+import { IConnectionModel } from "../models/connection.model";
 // import { toast } from "@zeak/react";
-// import { useNavigate } from "@remix-run/react";
+import { useNavigate } from "@remix-run/react";
 import { ConfirmationModal } from "../../../components/Layout/Screen";
 import IntegrationAddFlow from "../components/CreateFlow";
-import { ConnectionProvider } from "./connection";
-import { fetchConnectionsList, fetchIntegrationsList } from "../utils/api.utils";
-import { IConnectionModel } from "../models/connection.model";
-
-// temporary data
+import ConnectionAddFlow from "../components/CreateFlow/Connection";
+import {
+  ConnectionForm,
+  initialConnectionFormData,
+} from "../models/connection-form.model";
+import {
+  fetchConnectionsList,
+  fetchIntegrationConnections,
+  fetchIntegrationsList,
+} from "../utils/api.utils";
 
 // Define flow types for integrations
 export type IntegrationFlow =
@@ -32,123 +38,228 @@ export type IntegrationFlow =
   | "delete"
   | null;
 
-// Define the state interface
-export type IntegrationState = {
+// Define flow types for connections
+export type ConnectionFlow =
+  | "create"
+  | "edit"
+  | "delete"
+  | "activation"
+  | "duplicate"
+  | null;
+
+// Unified state for both integrations and connections
+export type UnifiedState = {
+  // Integration state
+  viewType: "list" | "grid";
   records: IIntegrationModel[];
   selectedIntegration: IIntegrationModel | null;
   integrationForm: IntegrationForm;
-  currentFlow: IntegrationFlow;
-  isLoading: boolean;
-  error: Error | null;
-  errors: { [key: string]: string | null };
-  isFormDirty: boolean;
-  connectionsList: IConnectionModel[] | null;
+  integrationFlow: IntegrationFlow;
+  selectedIntegrationConnections: IConnectionModel[];
+  isIntegrationLoading: boolean;
+  integrationError: Error | null;
+  integrationErrors: { [key: string]: string | null };
+  isIntegrationFormDirty: boolean;
+
+  // Connection state
+  connectionsList: IConnectionModel[];
   selectedConnection: IConnectionModel | null;
-  viewType: "list" | "grid";
+  connectionForm: ConnectionForm;
+  connectionFlow: ConnectionFlow;
+  isConnectionLoading: boolean;
+  connectionError: Error | null;
+  connectionErrors: { [key: string]: string | null };
+  isConnectionFormDirty: boolean;
 };
 
-// Define action types
-export type IntegrationAction =
-  | { type: "SET_LOADING"; payload: boolean }
-  | { type: "SET_ERROR"; payload: Error | null }
-  | { type: "SET_RECORDS"; payload: IIntegrationModel[] }
-  // | { type: "ADD_RECORDS"; payload: IIntegrationModel[] }
-  | { type: "SET_SELECTED_INTEGRATION"; payload: IIntegrationModel | null }
-  | { type: "SET_CONNECTIONS_LIST"; payload: IConnectionModel[] | null}
-  | { type: "SET_SELECTED_CONNECTION"; payload: IConnectionModel | null }
-  | {
-      type: "UPDATE_FORM";
-      payload: Partial<IntegrationForm>;
-      setFormDirty?: boolean;
-    }
-  | { type: "RESET_FORM" }
-  | { type: "SET_FLOW"; payload: IntegrationFlow }
-  | { type: "UPDATE_ERROR"; payload: { [key: string]: string | null } }
-  | { type: "CLEAR_ERRORS" }
-  | { type: "SET_VIEW_TYPE"; payload: "list" | "grid" };
-
-// Initial state
-const initialState: IntegrationState = {
+// Initial state for the unified context
+const initialState: UnifiedState = {
+  // Integration state
+  viewType: "list",
   records: [],
   selectedIntegration: null,
   integrationForm: initialIntegrationForm,
-  currentFlow: null,
-  isLoading: true,
-  error: null,
-  errors: {},
-  isFormDirty: false,
+  integrationFlow: null,
+  selectedIntegrationConnections: [],
+  isIntegrationLoading: false,
+  integrationError: null,
+  integrationErrors: {},
+  isIntegrationFormDirty: false,
+
+  // Connection state
   connectionsList: [],
   selectedConnection: null,
-  viewType: "list",
+  connectionForm: initialConnectionFormData,
+  connectionFlow: null,
+  isConnectionLoading: false,
+  connectionError: null,
+  connectionErrors: {},
+  isConnectionFormDirty: false,
 };
 
-// Reducer function
-function integrationReducer(
-  state: IntegrationState,
-  action: IntegrationAction
-): IntegrationState {
+// Unified action type
+export type UnifiedAction =
+  // Integration actions
+  | { type: "SET_INTEGRATION_LOADING"; payload: boolean }
+  | { type: "SET_INTEGRATION_ERROR"; payload: Error | null }
+  | { type: "SET_INTEGRATIONS_LIST"; payload: IIntegrationModel[] }
+  | { type: "SET_SELECTED_INTEGRATION"; payload: IIntegrationModel | null }
+  | {
+      type: "SET_SELECTED_INTEGRATION_CONNECTIONS";
+      payload: IConnectionModel[];
+    }
+  | {
+      type: "UPDATE_INTEGRATION_FORM";
+      payload: Partial<IntegrationForm>;
+      setFormDirty?: boolean;
+    }
+  | { type: "RESET_INTEGRATION_FORM" }
+  | { type: "SET_INTEGRATION_FLOW"; payload: IntegrationFlow }
+  | {
+      type: "UPDATE_INTEGRATION_ERROR";
+      payload: { [key: string]: string | null };
+    }
+  | { type: "CLEAR_INTEGRATION_ERRORS" }
+  | { type: "SET_VIEW_TYPE"; payload: "list" | "grid" }
+
+  // Connection actions
+  | { type: "SET_CONNECTION_LOADING"; payload: boolean }
+  | { type: "SET_CONNECTION_ERROR"; payload: Error | null }
+  | { type: "SET_CONNECTIONS_LIST"; payload: IConnectionModel[] }
+  | { type: "SET_SELECTED_CONNECTION"; payload: IConnectionModel | null }
+  | {
+      type: "UPDATE_CONNECTION_FORM";
+      payload: Partial<ConnectionForm>;
+      setFormDirty?: boolean;
+    }
+  | { type: "RESET_CONNECTION_FORM" }
+  | { type: "SET_CONNECTION_FLOW"; payload: ConnectionFlow }
+  | {
+      type: "UPDATE_CONNECTION_ERROR";
+      payload: { [key: string]: string | null };
+    }
+  | { type: "CLEAR_CONNECTION_ERRORS" };
+
+// Unified reducer function
+function unifiedReducer(
+  state: UnifiedState,
+  action: UnifiedAction
+): UnifiedState {
   switch (action.type) {
-    case "SET_LOADING":
-      return { ...state, isLoading: action.payload };
-    case "SET_ERROR":
-      return { ...state, error: action.payload };
-    case "SET_VIEW_TYPE":
-      return { ...state, viewType: action.payload };
-    case "SET_RECORDS":
+    // Integration reducers
+    case "SET_INTEGRATION_LOADING":
+      return { ...state, isIntegrationLoading: action.payload };
+    case "SET_INTEGRATION_ERROR":
+      return { ...state, integrationError: action.payload };
+    case "SET_INTEGRATIONS_LIST":
       return { ...state, records: action.payload };
-    // case "ADD_RECORDS":
-    //   return { ...state, records: [...state.records, ...action.payload] };
     case "SET_SELECTED_INTEGRATION":
-      return { 
-        ...state, 
-        selectedIntegration: action.payload,
-        selectedConnection: null 
-      };
-    case "SET_CONNECTIONS_LIST":
-      return { 
-        ...state, 
-        connectionsList: action.payload
-      };
-    case "SET_SELECTED_CONNECTION":
-      return { 
-        ...state, 
-        selectedConnection: action.payload
-      };
-    case "UPDATE_FORM":
+      return { ...state, selectedIntegration: action.payload };
+    case "SET_SELECTED_INTEGRATION_CONNECTIONS":
+      return { ...state, selectedIntegrationConnections: action.payload };
+    case "UPDATE_INTEGRATION_FORM":
       return {
         ...state,
         integrationForm: { ...state.integrationForm, ...action.payload },
-        isFormDirty:
-          action.setFormDirty !== undefined ? action.setFormDirty : true,
+        isIntegrationFormDirty: action.setFormDirty !== false,
       };
-    case "RESET_FORM":
+    case "RESET_INTEGRATION_FORM":
       return {
         ...state,
         integrationForm: initialIntegrationForm,
-        isFormDirty: false,
+        integrationErrors: {},
+        isIntegrationFormDirty: false,
       };
-    case "SET_FLOW":
-      return { ...state, currentFlow: action.payload };
-    case "UPDATE_ERROR":
+    case "SET_INTEGRATION_FLOW":
+      return { ...state, integrationFlow: action.payload };
+    case "UPDATE_INTEGRATION_ERROR":
       return {
         ...state,
-        errors: { ...state.errors, ...action.payload },
+        integrationErrors: { ...state.integrationErrors, ...action.payload },
       };
-    case "CLEAR_ERRORS":
+    case "CLEAR_INTEGRATION_ERRORS":
+      return { ...state, integrationErrors: {} };
+    case "SET_VIEW_TYPE":
+      return { ...state, viewType: action.payload };
+
+    // Connection reducers
+    case "SET_CONNECTION_LOADING":
+      return { ...state, isConnectionLoading: action.payload };
+    case "SET_CONNECTION_ERROR":
+      return { ...state, connectionError: action.payload };
+    case "SET_CONNECTIONS_LIST":
+      return { ...state, connectionsList: action.payload };
+    case "SET_SELECTED_CONNECTION":
+      return { ...state, selectedConnection: action.payload };
+    case "UPDATE_CONNECTION_FORM":
       return {
         ...state,
-        errors: {},
+        connectionForm: { ...state.connectionForm, ...action.payload },
+        isConnectionFormDirty: action.setFormDirty !== false,
       };
+    case "RESET_CONNECTION_FORM":
+      return {
+        ...state,
+        connectionForm: initialConnectionFormData,
+        connectionErrors: {},
+        isConnectionFormDirty: false,
+      };
+    case "SET_CONNECTION_FLOW":
+      return { ...state, connectionFlow: action.payload };
+    case "UPDATE_CONNECTION_ERROR":
+      return {
+        ...state,
+        connectionErrors: { ...state.connectionErrors, ...action.payload },
+      };
+    case "CLEAR_CONNECTION_ERRORS":
+      return { ...state, connectionErrors: {} };
     default:
       return state;
   }
 }
 
-// Create context
-const IntegrationContext = createContext<
+// Create unified context
+const UnifiedContext = createContext<
   | {
-      state: IntegrationState;
-      dispatch: React.Dispatch<IntegrationAction>;
+      state: UnifiedState;
+      dispatch: React.Dispatch<UnifiedAction>;
+      openIntegrationDrawer: (type: IntegrationFlow) => void;
+      closeIntegrationDrawer: (ignoreCheck?: boolean) => void;
+      openConnectionDrawer: (type: ConnectionFlow) => void;
+      closeConnectionDrawer: (ignoreCheck?: boolean) => void;
+      isIntegrationDrawerOpen: boolean;
+      isConnectionDrawerOpen: boolean;
+      isDeleteIntegrationOpen: boolean;
+      integrationConfirmationOpen: {
+        message: string;
+        title: string;
+        flag: boolean;
+      };
+      connectionConfirmationOpen: {
+        message: string;
+        title: string;
+        flag: boolean;
+      };
+      setIntegrationConfirmationOpen: React.Dispatch<
+        React.SetStateAction<{
+          message: string;
+          title: string;
+          flag: boolean;
+        }>
+      >;
+      setConnectionConfirmationOpen: React.Dispatch<
+        React.SetStateAction<{
+          message: string;
+          title: string;
+          flag: boolean;
+        }>
+      >;
+      setIsDeleteIntegrationOpen: React.Dispatch<React.SetStateAction<boolean>>;
+      onIntegrationConfirmHandler: () => Promise<void>;
+      onIntegrationCancelHandler: () => void;
+      onConnectionConfirmHandler: () => Promise<void>;
+      onConnectionCancelHandler: () => void;
+      refreshData: () => void;
     }
   | undefined
 >(undefined);
@@ -159,116 +270,333 @@ const initialConfirmationValues = {
   flag: false,
 };
 
-// Provider component
-export const IntegrationProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(integrationReducer, initialState);
-  const [isCreateFlowOpen, setIsCreateFlowOpen] = useState(false);
-  const [confirmationOpen, setConfirmationOpen] = useState({
+// Global variable to track provider instances for debugging
+let providerInstances = 0;
+
+// Unified provider component
+export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
+  const [state, dispatch] = useReducer(unifiedReducer, initialState);
+
+  // Integration state
+  const [isIntegrationDrawerOpen, setIsIntegrationDrawerOpen] = useState(false);
+  const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useState(false);
+  const [integrationConfirmationOpen, setIntegrationConfirmationOpen] =
+    useState({
+      ...initialConfirmationValues,
+    });
+
+  // Connection state
+  const [isConnectionDrawerOpen, setIsConnectionDrawerOpen] = useState(false);
+  const [connectionConfirmationOpen, setConnectionConfirmationOpen] = useState({
     ...initialConfirmationValues,
   });
-  const { currentFlow } = state;
 
-  // Fetch initial data
-  const fetchData = useCallback(async () => {
-    try {
-      dispatch({ type: "SET_LOADING", payload: true });
-      dispatch({ type: "SET_ERROR", payload: null });
+  // Access needed state variables
+  const { records, integrationFlow, selectedIntegration, connectionFlow } =
+    state;
 
-      // TODO: Replace with actual API calls
-      const [integrations, connectionsList] = await Promise.all([
-        fetchIntegrationsList(),
-        fetchConnectionsList(),
-      ]);
+  const navigate = useNavigate();
 
-      // console.log(connectionsList);
+  // Data fetching status tracking
+  const [dataFetchStatus, setDataFetchStatus] = useState({
+    isFetched: false,
+    isFetching: false,
+    lastFetched: null as number | null,
+  });
 
-      dispatch({ type: "SET_RECORDS", payload: integrations.data });
-      dispatch({ type: "SET_CONNECTIONS_LIST", payload: connectionsList.data });
-    } catch (error) {
-      dispatch({
-        type: "SET_ERROR",
-        payload:
-          error instanceof Error ? error : new Error("An error occurred"),
-      });
-    } finally {
-      dispatch({ type: "SET_LOADING", payload: false });
-    }
-  }, []);
+  // Debug code to detect provider instances
+  // useEffect(() => {
+  //   providerInstances++;
+  //   console.log(
+  //     `[DEBUG] UnifiedProvider mounted. Total instances: ${providerInstances}`
+  //   );
 
+  //   return () => {
+  //     providerInstances--;
+  //     console.log(
+  //       `[DEBUG] UnifiedProvider unmounted. Total instances: ${providerInstances}`
+  //     );
+  //   };
+  // }, []);
+
+  // Optimized fetch function with caching
+  const fetchData = useCallback(
+    async (forceFetch = false) => {
+      // Skip fetching if data is already being fetched
+      if (dataFetchStatus.isFetching) return;
+
+      // Skip fetching if data is already fetched and not forced, and last fetch was less than 5 minutes ago
+      const now = Date.now();
+      const cacheValid =
+        dataFetchStatus.lastFetched &&
+        now - dataFetchStatus.lastFetched < 5 * 60 * 1000;
+
+      if (dataFetchStatus.isFetched && !forceFetch && cacheValid) {
+        // console.log("Using cached data");
+        return;
+      }
+
+      try {
+        // Set fetching state
+        setDataFetchStatus((prev) => ({ ...prev, isFetching: true }));
+        dispatch({ type: "SET_INTEGRATION_LOADING", payload: true });
+        dispatch({ type: "SET_CONNECTION_LOADING", payload: true });
+        dispatch({ type: "SET_INTEGRATION_ERROR", payload: null });
+        dispatch({ type: "SET_CONNECTION_ERROR", payload: null });
+
+        if (dataFetchStatus.isFetched) return;
+        const [integrations, connectionsList] = await Promise.all([
+          fetchIntegrationsList(),
+          fetchConnectionsList(),
+        ]);
+
+        // console.log("Fetching done in unified context");
+
+        dispatch({ type: "SET_INTEGRATIONS_LIST", payload: integrations.data });
+        dispatch({
+          type: "SET_CONNECTIONS_LIST",
+          payload: connectionsList.data,
+        });
+
+        // Update fetch status
+        setDataFetchStatus({
+          isFetched: true,
+          isFetching: false,
+          lastFetched: Date.now(),
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        dispatch({ type: "SET_INTEGRATION_ERROR", payload: error as Error });
+        dispatch({ type: "SET_CONNECTION_ERROR", payload: error as Error });
+        setDataFetchStatus((prev) => ({ ...prev, isFetching: false }));
+      } finally {
+        dispatch({ type: "SET_INTEGRATION_LOADING", payload: false });
+        dispatch({ type: "SET_CONNECTION_LOADING", payload: false });
+      }
+    },
+    [
+      dataFetchStatus.isFetched,
+      dataFetchStatus.isFetching,
+      dataFetchStatus.lastFetched,
+    ]
+  );
+
+  // Fetch data on initial mount only
   useEffect(() => {
     fetchData();
+  }, []);
+
+  // Add a function to manually refresh data when needed
+  const refreshData = useCallback(() => {
+    fetchData(true);
   }, [fetchData]);
+
+  // useEffect(() => {
+  //   console.log(state.integrationForm)
+  // }, [state.integrationForm])
+
+  // useEffect(() => {
+  //   console.log(state.selectedIntegration)
+  // }, [state.selectedIntegration])
+
+  // useEffect(()=>{
+  //   console.log("in useEffect")
+  //   if(state.selectedIntegration && state.connectionsList){
+  //     console.log("in if case")
+  //     dispatch({
+  //       type: "SET_SELECTED_INTEGRATION_CONNECTIONS",
+  //       payload: state.connectionsList?.filter(
+  //         (connection) => connection.integrationId === state.selectedIntegration?.id
+  //       ) || null,
+  //     });
+  //   }
+  //   else if(state.selectedIntegration && !state.connectionsList){
+  //     console.log("in else if case")
+  //     fetchIntegrationConnections(state.selectedIntegration?.id).then((connections)=>{
+  //       dispatch({
+  //         type: "SET_SELECTED_INTEGRATION_CONNECTIONS",
+  //         payload: connections,
+  //       });
+  //     });
+  //   }
+  // }, [state.selectedIntegration]);
 
   // Handle different flows
   useEffect(() => {
-    switch (currentFlow) {
+    switch (integrationFlow) {
       case "create":
-        setIsCreateFlowOpen(true);
+      case "edit":
+      case "duplicate":
+        setIsIntegrationDrawerOpen(true);
+        if (state.selectedIntegration) {
+          // Additional side effects for different flows
+          // ...
+        }
+        break;
+      case "activation":
+        // Handle activation flow
+        break;
+      case "delete":
+        setIsDeleteIntegrationOpen(true);
         break;
       default:
         break;
     }
-  }, [currentFlow]);
+  }, [integrationFlow, state.selectedIntegration]);
 
-  const closeCreateDrawer = (ignoreCheck?: boolean) => {
-    if (state.isFormDirty && !ignoreCheck) {
-      setConfirmationOpen({
-        flag: true,
-        title: "Cancel Edit?",
-        message:
-          "Do you want to leave without saving? You will lose all the progress.",
-      });
+  // Handle connection flow changes
+  useEffect(() => {
+    switch (connectionFlow) {
+      case "create":
+      case "edit":
+      case "duplicate":
+        setIsConnectionDrawerOpen(true);
+        break;
+      case "activation":
+        // Handle activation flow
+        break;
+      case "delete":
+        // Handle delete flow
+        break;
+      default:
+        break;
+    }
+  }, [connectionFlow]);
+
+  // Integration drawer handlers
+  const openIntegrationDrawer = (type: IntegrationFlow) => {
+    setIsIntegrationDrawerOpen(true);
+    dispatch({ type: "SET_INTEGRATION_FLOW", payload: type });
+  };
+
+  const closeIntegrationDrawer = (ignoreCheck?: boolean) => {
+    if (ignoreCheck || !state.isIntegrationFormDirty) {
+      setIsIntegrationDrawerOpen(false);
+      dispatch({ type: "RESET_INTEGRATION_FORM" });
+      dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
       return;
     }
-    setIsCreateFlowOpen(false);
-    dispatch({ type: "RESET_FORM" });
-    dispatch({ type: "SET_FLOW", payload: null });
-    dispatch({ type: "CLEAR_ERRORS" });
+
+    setIntegrationConfirmationOpen({
+      message: "You have unsaved changes. Are you sure you want to close?",
+      title: "Discard Changes?",
+      flag: true,
+    });
   };
 
-  const onConfirmHandler = async () => {
-    setConfirmationOpen({ ...initialConfirmationValues });
-    if (currentFlow === "create") {
-      closeCreateDrawer(true);
+  // Connection drawer handlers
+  const openConnectionDrawer = (type: ConnectionFlow) => {
+    setIsConnectionDrawerOpen(true);
+    dispatch({ type: "SET_CONNECTION_FLOW", payload: type });
+  };
+
+  const closeConnectionDrawer = (ignoreCheck?: boolean) => {
+    if (ignoreCheck || !state.isConnectionFormDirty) {
+      setIsConnectionDrawerOpen(false);
+      dispatch({ type: "RESET_CONNECTION_FORM" });
+      dispatch({ type: "SET_CONNECTION_FLOW", payload: null });
+      return;
     }
-    dispatch({ type: "SET_FLOW", payload: null });
+
+    setConnectionConfirmationOpen({
+      message: "You have unsaved changes. Are you sure you want to close?",
+      title: "Discard Changes?",
+      flag: true,
+    });
   };
 
-  const onCancelHandler = () => {
-    setConfirmationOpen({ ...initialConfirmationValues });
-    if (currentFlow === "create") return;
-    dispatch({ type: "SET_FLOW", payload: null });
+  // Integration confirmation handlers
+  const onIntegrationConfirmHandler = async () => {
+    setIntegrationConfirmationOpen({ ...initialConfirmationValues });
+    setIsIntegrationDrawerOpen(false);
+    dispatch({ type: "RESET_INTEGRATION_FORM" });
+    dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+  };
+
+  const onIntegrationCancelHandler = () => {
+    setIntegrationConfirmationOpen({ ...initialConfirmationValues });
+  };
+
+  // Connection confirmation handlers
+  const onConnectionConfirmHandler = async () => {
+    setConnectionConfirmationOpen({ ...initialConfirmationValues });
+    setIsConnectionDrawerOpen(false);
+    dispatch({ type: "RESET_CONNECTION_FORM" });
+    dispatch({ type: "SET_CONNECTION_FLOW", payload: null });
+  };
+
+  const onConnectionCancelHandler = () => {
+    setConnectionConfirmationOpen({ ...initialConfirmationValues });
   };
 
   return (
-    <IntegrationContext.Provider
-      value={{ state, dispatch }}
+    <UnifiedContext.Provider
+      value={{
+        state,
+        dispatch,
+        openIntegrationDrawer,
+        closeIntegrationDrawer,
+        openConnectionDrawer,
+        closeConnectionDrawer,
+        isIntegrationDrawerOpen,
+        isConnectionDrawerOpen,
+        isDeleteIntegrationOpen,
+        integrationConfirmationOpen,
+        connectionConfirmationOpen,
+        setIntegrationConfirmationOpen,
+        setConnectionConfirmationOpen,
+        setIsDeleteIntegrationOpen,
+        onIntegrationConfirmHandler,
+        onIntegrationCancelHandler,
+        onConnectionConfirmHandler,
+        onConnectionCancelHandler,
+        refreshData,
+      }}
     >
-      {children}
-      <ConnectionProvider>
-        <IntegrationAddFlow
-          isOpen={isCreateFlowOpen}
-          closeDrawer={closeCreateDrawer}
+      {/* Integration UI components */}
+      {integrationConfirmationOpen.flag && (
+        <ConfirmationModal
+          isOpen={integrationConfirmationOpen.flag}
+          message={integrationConfirmationOpen.message}
+          title={integrationConfirmationOpen.title}
+          onClose={onIntegrationCancelHandler}
+          onConfirm={onIntegrationConfirmHandler}
         />
-      </ConnectionProvider>
-      <ConfirmationModal
-        isOpen={confirmationOpen.flag}
-        message={confirmationOpen.message}
-        title={confirmationOpen.title}
-        onClose={onCancelHandler}
-        onConfirm={onConfirmHandler}
+      )}
+
+      {/* Connection UI components */}
+      {connectionConfirmationOpen.flag && (
+        <ConfirmationModal
+          isOpen={connectionConfirmationOpen.flag}
+          message={connectionConfirmationOpen.message}
+          title={connectionConfirmationOpen.title}
+          onClose={onConnectionCancelHandler}
+          onConfirm={onConnectionConfirmHandler}
+        />
+      )}
+
+      {children}
+
+      {/* Integration drawers */}
+      <IntegrationAddFlow
+        isOpen={isIntegrationDrawerOpen}
+        closeDrawer={closeIntegrationDrawer}
       />
-    </IntegrationContext.Provider>
+
+      {/* Connection drawers */}
+      <ConnectionAddFlow
+        isOpen={isConnectionDrawerOpen}
+        closeDrawer={closeConnectionDrawer}
+      />
+    </UnifiedContext.Provider>
   );
 };
 
-// Custom hook for using the context
-export const useIntegrationContext = () => {
-  const context = useContext(IntegrationContext);
-  if (!context) {
-    throw new Error(
-      "useIntegrationContext must be used within an IntegrationProvider"
-    );
+// Custom hook to use the unified context
+export const useUnifiedContext = () => {
+  const context = useContext(UnifiedContext);
+  if (context === undefined) {
+    throw new Error("useUnifiedContext must be used within a UnifiedProvider");
   }
   return context;
 };

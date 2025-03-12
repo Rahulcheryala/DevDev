@@ -1,11 +1,11 @@
 import { DataTable } from "../../../../../components/DataTable";
-import { useIntegrationContext } from "../../../context";
+import { useUnifiedContext } from "../../../context";
 import { CompanyTableColumns } from "./CompanyTableColumns";
 
 export default function CompaniesDataTable() {
   const {
     state: { selectedIntegration },
-  } = useIntegrationContext();
+  } = useUnifiedContext();
 
   const companies = selectedIntegration?.companies;
   // console.log(records);

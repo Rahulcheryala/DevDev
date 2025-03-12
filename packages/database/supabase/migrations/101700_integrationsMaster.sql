@@ -3,7 +3,7 @@ CREATE TYPE "golden"."applicationName" AS ENUM ('Microsoft Dynamics 365', 'Offic
 CREATE TYPE "golden"."integrationType" AS ENUM ('System', 'User Defined');
 CREATE TYPE "golden"."integrationCategory" AS ENUM ('ERP', 'CRM', 'Project Management', 'Productivity', 'Communication');
 CREATE TYPE "golden"."connectionType" AS ENUM ('API', 'SOAP', 'REST');
-CREATE TYPE "golden"."authType" AS ENUM ('Basic Auth', 'OAuth2', 'APIKey', 'PAT');
+CREATE TYPE "golden"."authType" AS ENUM ('Basic Auth', 'OAuth2', 'API Key', 'PAT');
 CREATE TYPE "golden"."status" AS ENUM ('Active', 'Inactive', 'Blocked', 'Draft', 'Deprecated', 'Error');
 CREATE TYPE "golden"."lastTestResult" AS ENUM ('Success', 'Failure', 'Pending');
 

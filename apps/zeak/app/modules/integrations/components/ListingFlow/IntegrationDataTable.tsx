@@ -1,6 +1,7 @@
 import { DataTable } from "../../../../components/DataTable";
-import { useIntegrationContext } from "../../context";
+import { useUnifiedContext } from "../../context";
 import { IIntegrationModel } from "../../models/integration.model";
+import IntegrationCard from "../misc/IntegrationCard";
 import { IntegrationTableColumns } from "./IntegrationTableColumns";
 import { TbPlus } from "react-icons/tb";
 
@@ -11,11 +12,24 @@ type IntegrationDataTableProps = {
 export default function IntegrationDataTable({
   records,
 }: IntegrationDataTableProps) {
+  const { state: {viewType}, dispatch, openIntegrationDrawer } = useUnifiedContext();
+  const toggleViewFunction = () => {
+    if (viewType === "list") {
+      dispatch({ type: "SET_VIEW_TYPE", payload: "grid" });
+    } else {
+      dispatch({ type: "SET_VIEW_TYPE", payload: "list" });
+    }
+  }
+
   return (
     <DataTable
       type="integration"
       columns={IntegrationTableColumns}
       data={records}
+      viewType={viewType}
+      toggleView={toggleViewFunction}
+      handleAddNewIntegration={() => openIntegrationDrawer("create")}
+      gridComponent={<IntegrationCard records={records} />}
     >
       <InitiateIntegrationScreen />
     </DataTable>
@@ -23,16 +37,12 @@ export default function IntegrationDataTable({
 }
 
 function InitiateIntegrationScreen() {
-  const { dispatch } = useIntegrationContext();
-
-  const onCreateHandler = () => {
-    dispatch({ type: "SET_FLOW", payload: "create" });
-  };
+  const { openIntegrationDrawer } = useUnifiedContext();
 
   return (
     <div
       className="w-full h-full rounded-[12px] bg-white flex-1 flex flex-col"
-      onClick={onCreateHandler}
+      onClick={() => openIntegrationDrawer("create")}
     >
       <div className="h-[64px] w-full bg-[#66D4CF1A] rounded-t-zeak"></div>
       <div className="h-[64px] w-full bg-[#66D4CF2A]"></div>

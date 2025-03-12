@@ -1,41 +1,44 @@
+import moment from "moment-timezone";
 import { ColumnDef } from "@tanstack/react-table";
 import { cn, Popover, PopoverContent, PopoverTrigger } from "@zeak/react";
-import { CiViewColumn } from "react-icons/ci";
-import { BsThreeDotsVertical } from "react-icons/bs";
 import { DataTableCheckbox } from "../../../../components/DataTable";
 import RowDragHandleCell from "../../../../components/DataTable/RowDragHanle";
 import { NameColumn } from "../../../../components/Layout/Screen";
-import moment from "moment";
 import ConnectionActionOptions from "../misc/ConnectionActionOptions";
 import { LucideTriangleAlert } from "lucide-react";
+import { CiViewColumn } from "react-icons/ci";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import { TbLink } from "react-icons/tb";
 import { LuUnlink } from "react-icons/lu";
-import { useIntegrationContext } from "../../context";
-import Image from "../../../../components/Image";
+import { useIntegrationData } from "../../hooks/useIntegrationData";
+import { ConnectionStatus } from "@prisma/client";
 
-const ConnectionStatus = ({ status }: { status: string }) => {
+const statusMap = {
+  [ConnectionStatus.Online]: {
+    icon: <TbLink size={20} className="text-green-500 cursor-pointer" />,
+    label: <span className="text-green-500">ONLINE</span>,
+  },
+  [ConnectionStatus.Offline]: {
+    icon: <LuUnlink size={20} className="text-gray-500 cursor-pointer" />,
+    label: <span className="text-gray-500">OFFLINE</span>,
+  },
+  [ConnectionStatus.Error]: {
+    icon: <LucideTriangleAlert size={20} className="text-red-500 cursor-pointer" />,
+    label: <span className="text-red-500">ERROR</span>,
+  },
+};
+
+const ConnectionStatusMapper = ({ status }: { status: string }) => {
+  const statusInfo = statusMap[status as keyof typeof statusMap]
   return (
     <div className="flex items-center gap-3 text-sm">
-      {status === "ONLINE" && (
+      {statusInfo ? (
         <>
-          <TbLink size={20} className="text-green-500 cursor-pointer" />
-          <span className="text-green-500">ONLINE</span>
+          {statusInfo.icon}
+          {statusInfo.label}
         </>
-      )}
-      {status === "OFFLINE" && (
-        <>
-          <LuUnlink size={20} className="text-gray-500 cursor-pointer" />
-          <span className="text-gray-500">OFFLINE</span>
-        </>
-      )}
-      {status === "ERROR" && (
-        <>
-          <LucideTriangleAlert
-            size={20}
-            className="text-red-500 cursor-pointer"
-          />
-          <span className="text-red-500">ERROR</span>
-        </>
+      ) : (
+        <span className="text-gray-500">UNKNOWN STATUS</span>
       )}
     </div>
   );
@@ -50,31 +53,24 @@ const ConnectionNameLink = ({
   connectionId: string;
   columnSize: number;
 }) => {
-  const { dispatch } = useIntegrationContext();
-
   return (
-    <div className="flex items-center gap-4 px-3 cursor-pointer" onClick={(e) => {
-      console.log("clicked");
-      // e.stopPropagation();
-      // dispatch({
-      //   type: "SET_SELECTED_CONNECTION",
-      //   payload: connectionId,
-      // })
-    }}>
-        <Image alt={connectionName} className='h-10 w-10 min-h-10 min-w-10 rounded-full' />
-        <div style={{ maxWidth: columnSize }} className="text-ellipsis text-nowrap overflow-hidden text-accent-primary">
-            {connectionName}
-        </div>
+    <div
+    // onClick={() =>
+    // {
+    //   dispatch({
+    //     type: "SET_SELECTED_CONNECTION",
+    //     payload: connectionId,
+    //   });
+    //   console.log(connectionId)
+    // }
+    // }
+    >
+      <NameColumn name={connectionName} columnSize={columnSize} />
     </div>
-    // <div
-      
-    // >
-    //   <NameColumn name={connectionName} columnSize={columnSize} />
-    // </div>
   );
 };
 
-export const ConnectionTableColumns: ColumnDef<any>[] = [
+export const ConnectionListTableColumns: ColumnDef<any>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -116,15 +112,19 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
     enableColumnFilter: false,
   },
   {
-    id: "name",
-    accessorKey: "name",
+    id: "connectionName",
+    accessorKey: "connectionName",
     header: ({ header }) => (
       <div className="text-ellipsis text-center overflow-hidden text-[14px] font-semibold leading-[18px]">
         Connection Name
       </div>
     ),
     cell: ({ row, column }) => (
-      <ConnectionNameLink connectionName={row.original.connectionName} connectionId={row.original.id} columnSize={column.getSize()}/>
+      <ConnectionNameLink
+        connectionName={row.original.connectionName}
+        connectionId={row.original.id}
+        columnSize={column.getSize()}
+      />
       // <NameColumn
       //   link={`connections/${row.original.id}`}
       //   name={row.original.connectionName}
@@ -135,7 +135,7 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
       filterVariant: "text",
       name: "Connection Name",
     },
-    size: 250,
+    size: 300,
     enableColumnFilter: true,
     enableSorting: true,
   },
@@ -148,8 +148,8 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="flex justify-start items-center px-4">
-        <ConnectionStatus status={row.original.connectionStatus} />
+      <div className="flex justify-start items-center px-6">
+        <ConnectionStatusMapper status={row.original.connectionStatus} />
       </div>
     ),
     meta: {
@@ -161,8 +161,64 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
     enableSorting: true,
   },
   {
-    id: "description",
-    accessorKey: "description",
+    id: "integrationName",
+    accessorKey: "integrationName",
+    header: ({ header }) => (
+      <div className="text-ellipsis text-center overflow-hidden text-[14px] font-semibold leading-[18px]">
+        Integration Name
+      </div>
+    ),
+    cell: ({ row, column }) => {
+      const { getIntegrationById } = useIntegrationData();
+      const integration = getIntegrationById(row.original.integrationId);
+      return (
+        <NameColumn
+          src={integration?.logo!}
+          name={integration?.integrationName!}
+          link={`${integration?.id}`}
+          columnSize={column.getSize()}
+        />
+      )
+    },
+    meta: {
+      filterVariant: "text",
+      name: "Integration Name",
+    },
+    size: 250,
+    enableColumnFilter: true,
+    enableSorting: true,
+  },
+  {
+    id: "applicationName",
+    accessorKey: "applicationName",
+    header: ({ header }) => (
+      <div className="text-ellipsis text-center overflow-hidden text-[14px] font-semibold leading-[18px]">
+        Application
+      </div>
+    ),
+    cell: ({ row, column }) => {
+      const { getIntegrationById } = useIntegrationData();
+      const integration = getIntegrationById(row.original.integrationId);
+      return (
+        <NameColumn
+          src={integration?.logo!}
+          name={integration?.applicationName.replace(/_/g," ")!}
+          // link={`${integration?.id}`}
+          columnSize={column.getSize()}
+        />
+      )
+    },
+    meta: {
+      filterVariant: "text",
+      name: "Application",
+    },
+    size: 250,
+    enableColumnFilter: true,
+    enableSorting: true,
+  },
+  {
+    id: "connectionDescription",
+    accessorKey: "connectionDescription",
     header: ({ header }) => (
       <div className="text-ellipsis text-center overflow-hidden text-[14px] font-semibold leading-[18px]">
         Description
@@ -173,14 +229,14 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
         style={{ maxWidth: column.getSize() }}
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
-        {row.original.description || "-"}
+        {row.original.connectionDescription}
       </div>
     ),
     meta: {
       filterVariant: "text",
       name: "Description",
     },
-    size: 250,
+    size: 300,
     enableColumnFilter: true,
     enableSorting: true,
   },
@@ -198,20 +254,21 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
         <div className="flex flex-col text-left">
-          <span>{row.original.errors}</span>
+          {/* TODO(vamsi): Add error count from the logs */}
+          <span>{row.original.errors || 0}</span>
         </div>
       </div>
     ),
     meta: {
-      filterVariant: "select",
+      filterVariant: "text",
       name: "Errors",
     },
-    size: 250,
+    size: 200,
     enableColumnFilter: true,
     enableSorting: true,
   },
   {
-    id: "lastUpdated",
+    id: "updatedAt",
     accessorKey: "updatedAt",
     header: ({ header }) => (
       <div className="text-ellipsis text-center overflow-hidden text-[14px] font-semibold leading-[18px]">
@@ -224,15 +281,18 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
         <div className="flex flex-col text-left">
-          <span>{moment(row.original.lastUpdated).format("DD MMM, YYYY")}</span>
+          <span>{moment(row.original.updatedAt || row.original.createdAt).format("DD MMM, YYYY")}</span>
           <span className="text-[11px] text-muted-foreground">
-            {moment(row.original.lastUpdated).format("hh:mm A")}
+          <span className="text-[11px] text-muted-foreground">
+            {moment(row.original.updatedAt || row.original.createdAt).format("hh:mm A")} |{" "}
+            {moment(row.original.updatedAt || row.original.createdAt).tz("America/Chicago").format("z")}
+          </span>
           </span>
         </div>
       </div>
     ),
     meta: {
-      filterVariant: "select",
+      filterVariant: "text",
       name: "Last Updated",
     },
     size: 250,
@@ -240,11 +300,11 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
     enableSorting: true,
   },
   {
-    id: "lastSynced",
-    accessorKey: "lastSynced",
+    id: "lastTestedAt",
+    accessorKey: "lastTestedAt",
     header: ({ header }) => (
       <div className="text-ellipsis text-center overflow-hidden text-[14px] font-semibold leading-[18px]">
-        Last Synced
+        Last Tested
       </div>
     ),
     cell: ({ row, column }) => (
@@ -253,16 +313,17 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
         <div className="flex flex-col text-left">
-          <span>{moment(row.original.lastSynced).format("DD MMM, YYYY")}</span>
+          <span>{moment(row.original.lastTestedAt || row.original.createdAt).format("DD MMM, YYYY")}</span>
           <span className="text-[11px] text-muted-foreground">
-            {moment(row.original.lastSynced).format("hh:mm A")}
+          {moment(row.original.lastTestedAt || row.original.createdAt).format("hh:mm A")} |{" "}
+          {moment(row.original.lastTestedAt || row.original.createdAt).tz("America/Chicago").format("z")}
           </span>
         </div>
       </div>
     ),
     meta: {
-      filterVariant: "select",
-      name: "Last Synced",
+      filterVariant: "text",
+      name: "Last Tested",
     },
     size: 250,
     enableColumnFilter: true,
@@ -278,14 +339,14 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex justify-start items-center px-4">
-        {row.original.enabled ? "Yes" : "No"}
+        {row.original.isOnline ? "Yes" : "No"}
       </div>
     ),
     meta: {
       filterVariant: "text",
       name: "Enabled",
     },
-    size: 250,
+    size: 200,
     enableColumnFilter: true,
     enableSorting: true,
   },
@@ -309,6 +370,7 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
             </button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-64 p-0">
+            {/* TODO(vamsi): Add the action options */}
             <ConnectionActionOptions
               connectionId={row.original.id}
               component="listing"

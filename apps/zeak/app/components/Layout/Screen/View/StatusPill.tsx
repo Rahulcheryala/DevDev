@@ -1,6 +1,7 @@
 import React from "react";
 // import { RiRecordCircleLine } from "react-icons/ri";
 import { BiLinkAlt } from "react-icons/bi";
+import { FaRegCircleDot } from "react-icons/fa6";
 
 export enum StatusColors {
   active = "text-green-500",
@@ -58,7 +59,7 @@ const StatusPill: React.FC<StatusPillProps> = ({
           ]
         }`}
       >
-        <BiLinkAlt />
+        <FaRegCircleDot />
         <span
           style={{ maxWidth: columnSize - 50 }}
           className={`text-ellipsis text-nowrap overflow-hidden uppercase ${textClassName}`}

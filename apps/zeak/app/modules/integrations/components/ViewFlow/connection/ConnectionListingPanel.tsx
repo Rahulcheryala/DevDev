@@ -1,58 +1,56 @@
-import { BiArrowBack, BiPlus } from "react-icons/bi";
-import { FaChevronLeft } from "react-icons/fa6";
-import { useIntegrationContext } from "../../../context";
-import { useState, useEffect, useMemo } from "react";
-import { IIntegrationModel } from "../../../models/integration.model";
-import { Link, useNavigate } from "@remix-run/react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "@remix-run/react";
+import { useUnifiedContext } from "../../../context";
 import { ListingPanel } from "../../../../../components/Layout/Screen";
 import { IRecord } from "../../../../../components/Layout/Screen/View/ListingPanel";
-import { Integration } from "../../../models/constants";
-import { useConnectionContext } from "~/modules/integrations/context/connection";
+import { IConnectionModel } from "~/modules/integrations/models/connection.model";
+import { FaChevronLeft } from "react-icons/fa6";
+import { BiPlus } from "react-icons/bi";
 
 function ConnectionListingPanel() {
   const {
-    state: { selectedIntegration, selectedConnection },
+    state: { selectedIntegration, selectedConnection, connectionsList },
     dispatch,
-  } = useIntegrationContext();
+    openConnectionDrawer,
+  } = useUnifiedContext();
+  const navigate = useNavigate();
+  const [selectedId, setSelectedId] = useState<string | null>(
+    selectedConnection?.id?.toString() || null
+  );
 
-  const { dispatch: connectionDispatch } = useConnectionContext();
+  useEffect(() => {
+    if (selectedConnection?.id) {
+      setSelectedId(selectedConnection.id);
+    }
+  }, [selectedConnection]);
 
   if (!selectedIntegration || !selectedConnection) return null;
 
-  const records = selectedIntegration.connections || [];
+  const connections = connectionsList?.filter(
+    (connection) => connection.integrationId === selectedIntegration.id
+  ) || [];
 
-  //   const navigate = useNavigate();
-  //   const [selectedId, setSelectedId] = useState<string | null>(
-  //     selectedIntegration?.id?.toString() || null
-  //   );
-
-  //   useEffect(() => {
-  //     if (selectedIntegration?.id) {
-  //       setSelectedId(selectedIntegration.id);
-  //     }
-  //   }, [selectedIntegration]);
-
-  const handleIntegrationSelect = (id: string) => {
-    // setSelectedId(record.id);
-    dispatch({ type: "SET_SELECTED_CONNECTION", payload: id });
-    // navigate(`/x/access-settings/integrations/${record.id}`);
+  const handleConnectionSelect = (connection: IConnectionModel) => {
+    setSelectedId(connection.id);
+    dispatch({ type: "SET_SELECTED_CONNECTION", payload: connection });
+    navigate(`/x/access-settings/connections/${connection.id}`);
   };
 
   const handleNewConnection = () => {
-    connectionDispatch({ type: "SET_FLOW", payload: "create" });
+    openConnectionDrawer("create");
   };
 
   const transformedRecords: IRecord[] = useMemo(() => {
-    return records.map((record) => ({
-      id: record.id,
-      name: record?.connectionName,
-      connectionType: record.connectionStatus,
+    return connections.map((connection) => ({
+      id: connection.id,
+      name: connection?.connectionName,
+      connectionType: connection.connectionStatus,
       logo: selectedIntegration.logo || "",
       integrationCategory: selectedIntegration.integrationName,
-      updatedAt: record.lastUpdated,
-      lastUpdatedBy: record.lastUpdatedBy,
+      updatedAt: connection.updatedAt ? connection.updatedAt.toString() : connection.createdAt.toString(),
+      lastUpdatedBy: connection.lastUpdatedBy ? connection.lastUpdatedBy : connection.createdBy,
     }));
-  }, [records]);
+  }, [connections, selectedIntegration]);
 
   const ButtonComponent = () => {
     return (
@@ -66,8 +64,10 @@ function ConnectionListingPanel() {
   const BackButtonComponent = () => {
     return (
       <button
+        title={`Back to ${selectedIntegration.integrationName} integration`}
         onClick={() => {
-          dispatch({ type: "SET_SELECTED_CONNECTION", payload: null });
+          // dispatch({ type: "SET_SELECTED_CONNECTION", payload: null });
+          navigate(`/x/access-settings/integrations/${selectedIntegration.id}`);
         }}
         className="flex items-center gap-2 py-3 cursor-pointer"
       >
@@ -82,12 +82,12 @@ function ConnectionListingPanel() {
   return (
     <ListingPanel
       type="connection"
-      selectedId={selectedConnection.id}
+      selectedId={selectedId!}
       records={transformedRecords}
       button={<ButtonComponent />}
+      backUrl={`/x/access-settings/integrations/${selectedIntegration.id}`}
       backButton={<BackButtonComponent />}
-      backUrl="/x/access-settings/integrations/"
-      onItemClicked={handleIntegrationSelect}
+      onItemClicked={handleConnectionSelect}
       onCreateHandler={handleNewConnection}
     />
   );

@@ -16,8 +16,6 @@ import { cn } from "@zeak/react";
 import { PlusIcon } from "lucide-react";
 import { MorePopover } from "./MorePopover";
 import { ExportOptions } from "./ExportOptions";
-import { useIntegrationContext } from "~/modules/integrations/context";
-import { useConnectionContext } from "~/modules/integrations/context/connection";
 import { FaListUl } from "react-icons/fa";
 import { IoGridOutline } from "react-icons/io5";
 
@@ -30,6 +28,10 @@ interface DataTableToolbarProps<TData> {
   isCompact: boolean;
   setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFilter[]>>;
   type?: string;
+  viewType?: string;
+  toggleView?: () => void;
+  handleAddNewIntegration?: () => void;
+  handleAddNewConnection?: () => void;
 }
 
 export default function DataTableToolbar<TData>({
@@ -40,19 +42,13 @@ export default function DataTableToolbar<TData>({
   currentPageData,
   isCompact,
   setColumnFilters,
-  type
+  type,
+  viewType,
+  toggleView,
+  handleAddNewIntegration,
+  handleAddNewConnection
 }: DataTableToolbarProps<TData>) {
   const { setShowColumnSearch , showColumnSearch, setIsAddNewRow, setIsAddNewColumn } = useDatatableStore();
-  const { dispatch, state: {viewType} } = useIntegrationContext();
-  const { dispatch: connectionDispatch } = useConnectionContext();
-
-  const handleNewIntegration = () => {
-    dispatch({ type: "SET_FLOW", payload: "create" });
-  };
-
-  const handleNewConnection = () => {
-    connectionDispatch({ type: "SET_FLOW", payload: "create" });
-  };
 
   const ViewTypeSelector = () => {
     return (
@@ -65,10 +61,10 @@ export default function DataTableToolbar<TData>({
           </>)}
         </PopoverTrigger>
         <PopoverContent className="w-fit p-2">
-          <button disabled={viewType === "list"} onClick={() => dispatch({ type: "SET_VIEW_TYPE", payload: "list" })} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
+          <button disabled={viewType === "list"} onClick={toggleView} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
             <FaListUl className="w-5 h-5" /> List
           </button>
-          <button disabled={viewType === "grid"} onClick={() => dispatch({ type: "SET_VIEW_TYPE", payload: "grid" })} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
+          <button disabled={viewType === "grid"} onClick={toggleView} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
             <IoGridOutline className="w-5 h-5" /> Grid
           </button>
         </PopoverContent>
@@ -76,8 +72,62 @@ export default function DataTableToolbar<TData>({
     );
   };
 
+  const AddButton = ({ type }: { type: string }) => {
+    switch(type){
+      case "integration":
+        return (
+          <button 
+          className="flex items-center gap-3 text-[#007AF5]"
+          onClick={handleAddNewIntegration}
+        >
+          <span className="text-[14px] font-semibold uppercase">
+            New Integration
+          </span>
+          <PlusIcon className="w-5 h-5" />
+        </button>
+        )
+      case "view":
+        return (
+          <button 
+          className="flex items-center gap-3 text-[#007AF5]"
+          onClick={handleAddNewConnection}
+        >
+          <span className="text-[14px] font-semibold uppercase">
+            New Connection
+          </span>
+          <PlusIcon className="w-5 h-5" />
+        </button>
+        )
+      case "listing":
+        return null
+      case "company":
+        return null
+      default:
+        return (
+          <Popover>
+            <PopoverTrigger>
+            <button className="flex items-center gap-3 text-[#007AF5] ">
+              <span className="text-[14px] font-semibold">
+                New 
+              </span>
+              <PlusIcon className="w-5 h-5" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <button onClick={() => setIsAddNewRow(true)} className="flex items-center gap-3 text-[#007AF5] ">
+              Add New Row
+            </button>
+            <button onClick={() => setIsAddNewColumn(true)} className="flex items-center gap-3 text-[#007AF5]"> 
+              Add New Column
+            </button>
+          </PopoverContent>
+        </Popover>
+      )
+    }
+  }
+
   return (
-    <div className="rounded-lg shadow-lg  bg-white space-y-4">
+    <div className="rounded-lg bg-white space-y-4">
       {/* Top section */}
       <div className="grid grid-cols-3 py-5 px-6 items-center ">
         <div className="flex gap-2 items-center">
@@ -111,46 +161,7 @@ export default function DataTableToolbar<TData>({
         </div>
      
         <div className="flex items-center justify-end cursor-pointer  gap-3">
-          {type === "integration" ? (
-              <button 
-                className="flex items-center gap-3 text-[#007AF5]"
-                onClick={handleNewIntegration}
-              >
-                <span className="text-[14px] font-semibold uppercase">
-                  New Integration
-                </span>
-                <PlusIcon className="w-5 h-5" />
-              </button>
-            ) : type === "listing" || type === "view" ? (
-              <button 
-                className="flex items-center gap-3 text-[#007AF5]"
-                onClick={handleNewConnection}
-              >
-                <span className="text-[14px] font-semibold uppercase">
-                  New Connection
-                </span>
-                <PlusIcon className="w-5 h-5" />
-              </button>
-            ) : type === "company" ? null :(
-              <Popover>
-                <PopoverTrigger>
-                  <button className="flex items-center gap-3 text-[#007AF5] ">
-                    <span className="text-[14px] font-semibold">
-                      New 
-                    </span>
-                    <PlusIcon className="w-5 h-5" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <button onClick={() => setIsAddNewRow(true)} className="flex items-center gap-3 text-[#007AF5] ">
-                    Add New Row
-                  </button>
-                  <button onClick={() => setIsAddNewColumn(true)} className="flex items-center gap-3 text-[#007AF5]"> 
-                    Add New Column
-                  </button>
-                </PopoverContent>
-              </Popover>
-            )}
+          <AddButton type={type!} />
         </div>
       
       </div>

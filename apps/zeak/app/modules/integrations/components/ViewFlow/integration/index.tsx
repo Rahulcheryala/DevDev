@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useParams } from "@remix-run/react";
-import { useIntegrationContext } from "../../../context";
+import { useUnifiedContext } from "../../../context";
 import { ViewContainer } from "../../../../../components/Layout/Screen";
 import { ITab } from "../../../../../components/Layout/Screen/Creation/CreationTabs";
 import { IntegrationViewFlowTabs } from "../../../models/constants";
@@ -9,25 +9,26 @@ import IntegrationListingPanel from "./IntegrationListingPanel";
 import IntegrationDetails from "./IntegrationDetails";
 import CompaniesDataTable from "./CompaniesDataTable";
 
-function IntegrationView() {
-  // const { integrationId } = useParams();
+export default function IntegrationView() {
+  const { integrationId } = useParams();
   const {
-    state: { selectedIntegration },
-  } = useIntegrationContext();
+    state: { records, selectedIntegration, integrationFlow },
+    dispatch
+  } = useUnifiedContext();
 
-  // useEffect(() => {
-  //   if (integrationId && records.length > 0) {
-  //     const selectedIntegration = records.find(
-  //       (record) => record.id.toString() === integrationId
-  //     );
-  //     if (selectedIntegration && currentFlow !== "create") {
-  //       dispatch({
-  //         type: "SET_SELECTED_INTEGRATION",
-  //         payload: selectedIntegration,
-  //       });
-  //     }
-  //   }
-  // }, [integrationId, records, dispatch]);
+  useEffect(() => {
+    if (integrationId && records.length > 0) {
+      const integration = records.find(
+        (record) => record.id.toString() === integrationId
+      );
+      if (integration && integrationFlow !== "create") {
+        dispatch({
+          type: "SET_SELECTED_INTEGRATION",
+          payload: integration,
+        });
+      }
+    }
+  }, [integrationId, records, dispatch]);
 
   const onTabChangeHandler = (tab: ITab) => {};
 
@@ -65,8 +66,5 @@ function IntegrationView() {
       tabs={StepTabs}
       onTabChange={onTabChangeHandler}
     />
-    // <div className="w-[500px] bg-red-400 h-[500px]">IntegrationView</div>
   );
 }
-
-export default IntegrationView;

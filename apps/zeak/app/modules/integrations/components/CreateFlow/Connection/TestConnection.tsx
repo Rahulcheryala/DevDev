@@ -1,4 +1,4 @@
-import { useIntegrationContext } from "../../../context";
+import { useUnifiedContext } from "../../../context";
 import { useState } from "react";
 import Image from "../../../../../components/Image";
 import { PiSpinnerGap } from "react-icons/pi";
@@ -16,7 +16,7 @@ type TestStatus = {
 };
 
 export const TestConnection = () => {
-  const { state } = useIntegrationContext();
+  const { state } = useUnifiedContext();
   const [testStatuses, setTestStatuses] = useState<TestStatus[]>([
     {
       event: "Integration Test",

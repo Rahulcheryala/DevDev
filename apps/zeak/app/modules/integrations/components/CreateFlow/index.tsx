@@ -1,7 +1,6 @@
 import { toast } from "@zeak/react";
 import { Fragment, useMemo, useState } from "react";
-import { useIntegrationContext } from "../../context";
-import { useConnectionContext } from "../../context/connection";
+import { useUnifiedContext } from "../../context";
 import { CreationTabs } from "../../../../components/Layout";
 import { ButtonProps } from "../../../../components/Layout/Screen/Creation/SaveButton";
 import { createIntegrationFn } from "../../utils/api.utils";
@@ -21,9 +20,8 @@ interface IntegrationCreateFlowProps {
 
 const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) => {
   const [activeTab, setActiveTab] = useState<IntegrationAddFlowTabs>(IntegrationAddFlowTabs.STEP_1);
-  const { state, dispatch } = useIntegrationContext();
-  const { state: connectionState, dispatch: connectionDispatch } = useConnectionContext();
-  const { integrationForm, currentFlow } = state;
+  const { state, dispatch, openConnectionDrawer } = useUnifiedContext();
+  const { integrationForm, integrationFlow } = state;
 
   const onCloseHandler = (bool?: boolean) => {
     setActiveTab(IntegrationAddFlowTabs.STEP_1)
@@ -49,9 +47,10 @@ const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) =
       saveData(true);
     } else if (action === "save_clear") {
       saveData(false);
-    } else if (action === "draft") {
-      saveData(true, { status: "draft" });
-    }
+    } 
+    // else if (action === "draft") {
+    //   saveData(true, { status: "draft" });
+    // }
   };
 
   const saveData = async (
@@ -68,8 +67,8 @@ const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) =
       if (close) {
         onCloseHandler(true);
       } else {
-        dispatch({ type: "RESET_FORM" });
-        dispatch({ type: "CLEAR_ERRORS" });
+        dispatch({ type: "RESET_INTEGRATION_FORM" });
+        dispatch({ type: "CLEAR_INTEGRATION_ERRORS" });
       }
 
       return toast.success("Integration created successfully!");
@@ -96,13 +95,13 @@ const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) =
         return {
           label: 'Next',
           id: 'next',
-          onClickHandler: (mode: string) => setActiveTab(IntegrationAddFlowTabs.STEP_2)
+          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_2)
         };
       case IntegrationAddFlowTabs.STEP_2:
         return {
           label: 'Next',
           id: 'next',
-          onClickHandler: (mode: string) => setActiveTab(IntegrationAddFlowTabs.STEP_3)
+          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_3)
         };
       case IntegrationAddFlowTabs.STEP_3:
         return {
@@ -134,9 +133,9 @@ const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) =
         return [
           {
             label: "Save & Add New Connection",
-            id: "save_clear",
+            id: "save_add_new_connection",
             onClickHandler: (mode: string) => {
-              connectionDispatch({ type: "SET_FLOW", payload: "create" });
+              openConnectionDrawer("create");
               onSubmit(mode as ButtonTypes);
             },
           },

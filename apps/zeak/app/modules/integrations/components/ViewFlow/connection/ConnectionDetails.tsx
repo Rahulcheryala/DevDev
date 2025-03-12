@@ -1,40 +1,14 @@
-import { useIntegrationContext } from "../../../context";
+import { useUnifiedContext } from "../../../context";
 import { motion } from "framer-motion";
 import { DetailsSection, StatusPill } from "../../../../../components/Layout/Screen";
 import TypePill from "~/components/Layout/Screen/View/TypePill";
-import { ChevronDown, ChevronUp, PenLine } from "lucide-react";
-import { IntegrationResourceTypes } from "~/modules/integrations/models/constants";
-
-const EnvironmentType = ({ type }: { type: string }) => {
-  return (
-    <div className="flex items-center gap-3 text-sm">
-      {type === "PROD" && (
-        <>
-          <span className="bg-yellow-500 w-fit px-4 py-1 rounded-full text-white">PROD</span>
-        </>
-      )}
-      {type === "DEV" && (
-        <>
-          <span className="bg-gray-600 w-fit px-4 py-1 rounded-full text-white">DEV</span>
-        </>
-      )}
-      {type === "UAT" && (
-        <>
-          <span className="bg-orange-500 w-fit px-4 py-1 rounded-full text-white">UAT</span>
-        </>
-      )}
-    </div>
-    )
-  };
-  
 
 function ConnectionDetails() {
   const {
-    state: { selectedConnection, selectedIntegration, currentFlow },
-    dispatch,
-  } = useIntegrationContext();
+    state: { selectedConnection, selectedIntegration, integrationFlow },
+  } = useUnifiedContext();
 
-  // console.log(selectedIntegration, selectedConnection);
+  if (!selectedConnection || !selectedIntegration) return null;
 
   type ConfigKeys = "Connection Details" | "Credentials" | "Advanced";
 
@@ -44,32 +18,31 @@ function ConnectionDetails() {
         title: "Connection Name",
         value: selectedConnection.connectionName,
       },
-      { title: "Connection ID", value: selectedConnection.id },
-      { title: "Purpose", value: selectedConnection.purpose },
+      { title: "Connection ID", value: selectedConnection.connectionCode},
       {
         title: "Environment Type",
-        value: <EnvironmentType type={selectedConnection.environmentType}/>
+        value: selectedConnection.connectionDetails?.environmentType,
       },
       {
         title: "Environment URL",
-        value: selectedConnection.environmentURL,
+        value: selectedConnection.connectionDetails?.environmentURL,
       },
       {
         title: "Integration Type",
         value: (
           <TypePill
-            type={selectedIntegration?.type!}
+            type={selectedIntegration.integrationType}
           />
         ),
       },
       {
         title: "Application",
-        value: selectedIntegration?.application,
-        icon: selectedIntegration?.logo || '/images/dynamics365.png'
+        value: selectedIntegration.applicationName.replace(/_/g, ' '),
+        icon: selectedIntegration.logo
       },
       {
         title: "Purpose",
-        value: selectedIntegration?.purpose,
+        value: selectedConnection.connectionDescription,
       },
       {
         title: "Connection status",
@@ -77,16 +50,12 @@ function ConnectionDetails() {
       },
       {
         title: "Integration Category",
-        value: selectedIntegration?.integrationCategory,
+        value: selectedIntegration.integrationCategory.replace(/_/g, ' '),
       }
     ],
     "Credentials": [],
     "Advanced": []
   }
-
-  const editConnectionHandler = () => {
-    dispatch({ type: "SET_FLOW", payload: "edit" });
-  };
 
   if (!selectedConnection) return null;
 
@@ -98,25 +67,15 @@ function ConnectionDetails() {
     >
       <div className="flex flex-col gap-4 mb-10">
         {Object.keys(CONNECTION_DETAILS_SECTIONS).map((item) => (
-        <div className="relative" key={item}>
-          <div className="absolute top-6 right-2 flex items-center gap-2 z-[999]">
-           <PenLine onClick={editConnectionHandler} className="h-5 w-5 mr-1.5 text-text-tertiary cursor-pointer" />
-            <ChevronDown className="w-6 h-6 text-text-tertiary cursor-pointer" />
-          </div>
           <DetailsSection
             key={item}
             title={item}
             items={CONNECTION_DETAILS_SECTIONS[item as keyof typeof CONNECTION_DETAILS_SECTIONS]}
             className="bg-[#F7F9FE]"
-            //   selectedIntegration={selectedIntegration}
-            currentFlow={currentFlow}
-            resourceType={IntegrationResourceTypes.CONNECTION}
-            selectedIntegration={selectedIntegration}
-            selectedConnection={selectedConnection}
-          />  
-        </div>
+            // selectedIntegration={selectedIntegration}
+            currentFlow={integrationFlow}
+          />
         ))}
-        
       </div>
     </motion.div>
   );

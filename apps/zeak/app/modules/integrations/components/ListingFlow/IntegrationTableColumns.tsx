@@ -1,31 +1,36 @@
+import moment from "moment-timezone";
 import { ColumnDef } from "@tanstack/react-table";
 import { cn, Popover, PopoverContent, PopoverTrigger } from "@zeak/react";
-import { CiViewColumn } from "react-icons/ci";
-import { BsThreeDotsVertical } from "react-icons/bs";
 import { DataTableCheckbox } from "../../../../components/DataTable";
 import RowDragHandleCell from "../../../../components/DataTable/RowDragHanle";
-import { NameColumn, StatusPill } from "../../../../components/Layout/Screen";
+import { NameColumn } from "../../../../components/Layout/Screen";
+import { useUnifiedContext } from "../../context";
 import IntegrationActionOptions from "../misc/IntegrationActionOptions";
-import moment from "moment-timezone";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { CiViewColumn } from "react-icons/ci";
 import { FiPlus } from "react-icons/fi";
-import { useConnectionContext } from "../../context/connection";
 import ConnectionsPill from "../misc/connectionsPill";
 
-const AddConnectionButton = () => {
-  const { dispatch } = useConnectionContext();
+const AddConnectionButton = ({ id }: { id: string }) => {
+  const {
+    dispatch,
+    state: { records },
+    openConnectionDrawer
+  } = useUnifiedContext();
 
-  const handleCreateConnection = () => {
+  const onClickHandler = () => {
     dispatch({
-      type: "SET_FLOW",
-      payload: "create",
+      type: "SET_SELECTED_INTEGRATION",
+      payload: records.find((record) => record.id.toString() === id) || null,
     });
+    openConnectionDrawer("create");
   };
 
   return (
     <button
       className="w-full text-blue-500 font-semibold flex justify-center items-center gap-2"
-      onClick={handleCreateConnection}
+      onClick={onClickHandler}
     >
       <FiPlus className="text-lg" />
       Connection
@@ -47,14 +52,14 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
     ),
     cell: ({ row }) => (
       <div
-        className={cn("flex h-[64px] w-[60px] rounded-l-[12px]", {
+        className={cn("flex h-[64px] w-[60px]", {
           "bg-[#FFDF41]": row.getIsSelected(),
         })}
       >
         <RowDragHandleCell rowId={row.id} />
         <div
           className={cn(
-            " flex items-center justify-center rounded-l-[12px] relative"
+            " flex items-center justify-center relative"
           )}
         >
           <DataTableCheckbox
@@ -136,7 +141,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         style={{ maxWidth: column.getSize() }}
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
-        {row.original.integrationCategory || "-"}
+        {row.original.integrationCategory.replace(/_/g, " ") || "-"}
       </div>
     ),
     meta: {
@@ -161,9 +166,10 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
         <div className="flex flex-col text-left">
-          <span>{moment(row.original.createdAt).format("DD MMM, YYYY")}</span>
+          <span>{moment(row.original.updatedAt || row.original.createdAt).format("DD MMM, YYYY")}</span>
           <span className="text-[11px] text-muted-foreground">
-            {moment(row.original.createdAt).format("hh:mm A")} | {moment(row.original.createdAt).tz('America/Chicago').format('z')}
+            {moment(row.original.updatedAt || row.original.createdAt).format("hh:mm A")} |{" "}
+            {moment(row.original.updatedAt || row.original.createdAt).tz("America/Chicago").format("z")}
           </span>
         </div>
       </div>
@@ -189,9 +195,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         style={{ maxWidth: column.getSize() }}
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
-        connection details  
-        {/* TODO(vamsi): Add connection details with backend functionality */}
-        {/* <ConnectionsPill connections={row.original.connections} /> */}
+        <ConnectionsPill id={row.original.id} type="table" />
       </div>
     ),
     meta: {
@@ -245,7 +249,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         style={{ maxWidth: column.getSize() }}
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-center"
       >
-        <AddConnectionButton />
+        <AddConnectionButton id={row.original.id.toString()} />
       </div>
     ),
     meta: {

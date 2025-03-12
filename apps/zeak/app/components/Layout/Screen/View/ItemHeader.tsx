@@ -44,7 +44,7 @@ export type ISelectedItem = {
   // for integrations
   integrationCategory?: string;
   connectionType?: string;
-  type?: string;
+  integrationType?: string;
   // for connections
   integrationName?: string;
   application?: string;
@@ -74,14 +74,14 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
           <div className="flex items-center gap-8 text-sm">
             <p className="flex items-center gap-2 ">
               <span className="text-secondary-tertiary">CATEGORY</span>
-              <span className="text-secondary uppercase">{selectedItem.integrationCategory}</span>
+              <span className="text-secondary uppercase font-semibold">{selectedItem.integrationCategory}</span>
             </p>
             <p className="flex items-center gap-2">
               <LuPlug2 className="text-secondary-tertiary" size={18} />
-              <span className="text-secondary uppercase">{selectedItem.connectionType}</span>
+              <span className="text-secondary uppercase font-semibold">{selectedItem.connectionType}</span>
             </p>
             <p className="flex items-center gap-2">
-              <TypePill type={selectedItem.type!} />
+              <TypePill type={selectedItem.integrationType!} className="uppercase" />
             </p>
           </div>
         )
@@ -95,7 +95,7 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
             </p>
             <p className="flex items-center gap-2 ">
               <span className="text-secondary-tertiary">APPLICATION</span>
-              <Image src={selectedItem.logo || '/images/dynamics365.png'} alt={selectedItem.name} className='min-h-[20px] min-w-[20px] h-[20px] w-[20px] rounded-full text-xs' />
+              <Image src={selectedItem.logo} alt={selectedItem.name} className='min-h-[20px] min-w-[20px] h-[20px] w-[20px] rounded-full text-xs' />
               <span className="text-secondary font-medium uppercase">{selectedItem.application}</span>
             </p>
           </div>
@@ -171,7 +171,7 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
               onClick={onEdit}
               disabled={type === 'System'}
               >
-              <BiEditAlt className="text-2xl text-textLink" />
+              <BiEditAlt className="text-xl text-textLink" />
               <span className="text-secondary">Edit</span>
             </button>
             <Popover>
@@ -199,7 +199,7 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
         <div className="flex justify-between items-end">
           <div className="flex gap-6 items-center">
             {component !== "connection" && (
-              <Image src={selectedItem.logo || '/images/dynamics365.png'} alt={selectedItem.name} className='min-h-[72px] min-w-[72px] h-[72px] w-[72px] p-3.5 bg-white rounded-full' />
+              <Image src={selectedItem.logo} alt={selectedItem.name} className='min-h-[72px] min-w-[72px] h-[72px] w-[72px] p-3.5 bg-white rounded-full' />
             )}
             <div className="flex flex-col gap-4">
               <div className="flex gap-4 items-center">

@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@zeak/react";
-import { useIntegrationContext } from "../../../context";
+import { useUnifiedContext } from "../../../context";
 import { z } from "zod";
 import { RiArrowDownSLine } from "react-icons/ri";
 
@@ -19,7 +19,7 @@ export const schedulePoliciesSchema = z.object({
 });
 
 export const Schedule = () => {
-  const { state, dispatch } = useIntegrationContext();
+  const { state, dispatch } = useUnifiedContext();
   const { integrationForm } = state;
   const [executionType, setExecutionType] = useState<string>(
     integrationForm.executionType || "on-demand"

@@ -1,26 +1,22 @@
 import { TbPlus } from "react-icons/tb";
+import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../../../../../components/DataTable";
-import { ConnectionTableColumns } from "./ConnectionTableColumns";
-import { useConnectionContext } from "../../../context/connection";
-import { useIntegrationContext } from "../../../context";
+import { useUnifiedContext } from "../../../context";
+import { IConnectionModel } from "~/modules/integrations/models/connection.model";
 
 type ConnectionDataTableProps = {
-  component?: "listing" | "view";
+  type: "listing" | "view";
+  columns: ColumnDef<any>[];
+  data: IConnectionModel[];
 };
 
-export default function ConnectionDataTable({ component }: ConnectionDataTableProps) {
-  const {
-    state: { selectedIntegration, connectionsList },
-  } = useIntegrationContext();
-
-  const connections = component === "listing" ? connectionsList : connectionsList!.filter((connection) => connection.integrationId === selectedIntegration?.id);
-
+export default function ConnectionDataTable({ type, columns, data }: ConnectionDataTableProps) {
   return (
     <div className="bg-[#F0F4FD] flex flex-col h-full">
       <DataTable
-        type={component}
-        columns={ConnectionTableColumns}
-        data={connections!}
+        type={type}
+        columns={columns}
+        data={data}
       >
         <InitiateConnectionScreen />
       </DataTable>
@@ -29,16 +25,12 @@ export default function ConnectionDataTable({ component }: ConnectionDataTablePr
 }
 
 function InitiateConnectionScreen() {
-  const { dispatch } = useConnectionContext();
-
-  const onCreateHandler = () => {
-    dispatch({ type: "SET_FLOW", payload: "create" });
-  };
+  const { openConnectionDrawer } = useUnifiedContext();
 
   return (
     <div
       className="w-full h-full rounded-[12px] bg-white flex-1 flex flex-col cursor-pointer"
-      onClick={onCreateHandler}
+      onClick={() => openConnectionDrawer("create")}
     >
       <div className="h-[64px] w-full bg-[#66D4CF1A] rounded-t-zeak"></div>
       <div className="h-[64px] w-full bg-[#66D4CF2A]"></div>

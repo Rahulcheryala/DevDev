@@ -1,6 +1,9 @@
 import { PageHeader } from "~/components/Shared";
+import { Navigate, useNavigate } from "@remix-run/react";
 
 export default function IntegrationPageHeader() {
+  const navigate = useNavigate();
+  
   const breadcrumbs = [
     {
       label: "Settings",
@@ -8,6 +11,7 @@ export default function IntegrationPageHeader() {
     },
     {
       label: "Integrations",
+      to: "/x/access-settings/integrations",
     },
   ];
 
@@ -16,7 +20,7 @@ export default function IntegrationPageHeader() {
       breadcrumbs={breadcrumbs}
       title="Integrations"
       onAction={() => {}}
-      onClose={() => {}}
+      onClose={() => { navigate("/x")}}
       showDropdown={true}
     />
   );

@@ -67,7 +67,7 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
     const [sortBy, setSortBy] = useState<string>('name-asc');
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    console.log(records)
+    // console.log(records)
 
     const sortOptions = [
         { id: 'name-asc', label: 'Name A-Z' },
@@ -149,7 +149,7 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
     >
         <div className="top-section bg-white rounded-[12px]">
             <div className='py-4 px-[18px]'>
-                {type === 'connection' ? backButton : (
+                {backButton ? backButton : (
                     <div
                     title={`Back to ${caption}s`}
                     className='flex gap-2 py-3 cursor-pointer'
@@ -235,7 +235,7 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
                                     ${selectedId === record.id ? 'bg-accent-primary hover:opacity-100 rounded-[12px]' : 'bg-white hover:opacity-80'}`}
                             >
                                 <div className='flex items-center gap-4'>
-                                    <Image src={record.logo || '/images/dynamics365.png'} alt={record.name} className={`h-10 w-10 min-h-10 min-w-10 p-2 object-cover ${type === 'integration' ? 'rounded-full' : 'rounded-zeak'} ${selectedId === record.id ? 'bg-white' : 'bg-[#00000010]'}`} />
+                                    <Image src={record.logo || '/images/dynamics365.png'} alt={record.name} className={`h-10 w-10 min-h-10 min-w-10 p-2 object-cover group-hover:bg-white ${type === 'integration' ? 'rounded-full' : 'rounded-zeak'} ${selectedId === record.id ? 'bg-white' : 'bg-[#00000010]'}`} />
                                     <div className='flex-1'>
                                         <p className='flex justify-between items-center'>
                                             <span
@@ -282,10 +282,10 @@ const ListingPanel: React.FC<ListingPanelProps> = ({ type, selectedId, records, 
                                             </span>
                                         </div>
                                         <div className='flex flex-nowrap justify-end'>
-                                        <span className={`text-sm mx-2 ${selectedId === record.id ? 'text-white' : 'text-accent-primary group-hover:text-white'}`}>|</span>
+                                        <span className={`text-sm mx-2 ${selectedId === record.id ? 'text-white' : 'text-secondary group-hover:text-white'}`}>|</span>
                                         <span
                                             title="Last Updated On"
-                                            className={`text-sm truncate ${selectedId === record.id ? 'text-white opacity-60' : 'text-tertiary group-hover:text-white group-hover:opacity-60'}`}>
+                                            className={`text-sm truncate ${selectedId === record.id ? 'text-white opacity-60' : 'text-secondary group-hover:text-white group-hover:opacity-60'}`}>
                                             {record.updatedAt ? new Date(record.updatedAt!).toLocaleDateString('en-GB', {
                                                 day: '2-digit',
                                                 month: 'short',

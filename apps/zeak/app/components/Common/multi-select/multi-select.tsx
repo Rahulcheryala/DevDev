@@ -15,7 +15,7 @@ export default function MultiSelect({ options, selectedOptions, onSelect, width,
     <Popover>
       <PopoverTrigger>
         <div className="flex items-center justify-between relative w-full">
-          <div className={`flex w-[${width}px] gap-3 bg-[#F7F7F8] items-center h-[56px] px-4 rounded-[12px] text-muted-foreground border border-input`}>
+          <div className={`flex ${width ? `w-[${width}px]` : 'w-full'} gap-3 bg-[#F7F7F8] items-center h-[56px] px-4 rounded-[12px] text-muted-foreground border border-input`}>
             {selectedOptions.length === 0 ? (
               <div className="flex items-center">Select a Company(s)</div>
             ) : (

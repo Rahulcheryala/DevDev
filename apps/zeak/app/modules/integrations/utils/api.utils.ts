@@ -2,6 +2,8 @@ import { path } from "~/utils/path";
 import { IntegrationForm } from "../models/integration-form.model";
 import { IIntegrationModel } from "../models/integration.model";
 import { IntegrationsQuery } from "../services/getPaginatedIntegrationList";
+import { IConnectionModel } from "../models/connection.model";
+import { ConnectionsQuery } from "../services/getPaginatedConnectionList";
 
 export const fetchIntegrationsList = async (filters?: Partial<IntegrationsQuery>): Promise<{
   data: IIntegrationModel[];
@@ -39,9 +41,37 @@ export const fetchIntegrationsList = async (filters?: Partial<IntegrationsQuery>
     return records;
 };
 
-export const fetchConnectionsList = async () => {
-    const url = `${path.to.api.connectionsList}`;
+export const fetchConnectionsList = async (filters?: Partial<ConnectionsQuery>): Promise<{
+    data: IConnectionModel[];
+    pagination: {
+      total: number;
+      pageSize: number;
+      current: number;
+      totalPages: number;
+    };
+  }> => {
+    let url = `${path.to.api.connectionsList}?`;
+    if (filters) {
+        const queryParams = new URLSearchParams();
+        
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                if (Array.isArray(value)) {
+                    value.forEach(val => queryParams.append(`${key}[]`, val));
+                } else {
+                    queryParams.append(key, String(value));
+                }
+            }
+        });
+        
+        url += queryParams.toString();
+    }
+    // console.log(url);
     const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch integrations');
+    }
     const records = await response.json(); 
     return records;
 };
@@ -68,6 +98,13 @@ export const createIntegrationFn = async (data: IntegrationForm) => {
         console.error('Error creating integration:', error);
         throw error;
     }
+};
+
+export const fetchIntegrationConnections = async (integrationId: string) => {
+    const url = path.to.api.integrationConnections(integrationId);
+    const response = await fetch(url);
+    const records = await response.json(); 
+    return records;
 };
 
 export const updateIntegrationFn = async (id: string, data: Partial<IntegrationForm>): Promise<void> => {

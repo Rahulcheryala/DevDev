@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@zeak/react";
-import { useIntegrationContext } from "../../context";
+import { useUnifiedContext } from "../../context";
 import { z } from "zod";
 import { RiArrowDownSLine } from "react-icons/ri";
 
@@ -19,15 +19,15 @@ export const schedulePoliciesSchema = z.object({
 });
 
 export const SchedulePolicies = () => {
-  const { state, dispatch } = useIntegrationContext();
+  const { state, dispatch } = useUnifiedContext();
   const { integrationForm } = state;
   const [executionType, setExecutionType] = useState<string>(
-    integrationForm.executionType || "on-demand"
+    integrationForm.executionFrequency || "on-demand"
   );
 
   const handleChange = (name: string, value: string) => {
     dispatch({
-      type: "UPDATE_FORM",
+      type: "UPDATE_INTEGRATION_FORM",
       payload: { [name]: value },
     });
   };
@@ -35,11 +35,11 @@ export const SchedulePolicies = () => {
   const handleBlur = async (name: string, value: string) => {
     try {
       (schedulePoliciesSchema as any).pick({ [name]: true }).parse({ [name]: value });
-      dispatch({ type: "UPDATE_ERROR", payload: { [name]: null } });
+      dispatch({ type: "UPDATE_INTEGRATION_ERROR", payload: { [name]: null } });
     } catch (error) {
       if (error instanceof z.ZodError) {
         dispatch({
-          type: "UPDATE_ERROR",
+          type: "UPDATE_INTEGRATION_ERROR",
           payload: { [name]: error.errors[0].message },
         });
       }
@@ -94,7 +94,7 @@ export const SchedulePolicies = () => {
                   min={1}
                   placeholder="Enter max no.of retries"
                   className="border-0"
-                  value={integrationForm.maxRetries}
+                  value={integrationForm.maxRetries!}
                   onChange={(e) => handleChange("maxRetries", e.target.value)}
                   onBlur={(e) => handleBlur("maxRetries", e.target.value)}
                 />
@@ -112,7 +112,7 @@ export const SchedulePolicies = () => {
                   min={1}
                   placeholder="Enter retry delay"
                   className="border-0"
-                  value={integrationForm.retryDelay}
+                  value={integrationForm.retryDelay!}
                   onChange={(e) => handleChange("retryDelay", e.target.value)}
                   onBlur={(e) => handleBlur("retryDelay", e.target.value)}
                 />
@@ -127,7 +127,7 @@ export const SchedulePolicies = () => {
                 </Label>
                 <Select
                   name="timeout"
-                  value={integrationForm.timeout}
+                  value={integrationForm.timeout?.toString()}
                   onValueChange={(value) => handleChange("timeout", value)}
                 >
                   <SelectTrigger className="border-0 bg-white">

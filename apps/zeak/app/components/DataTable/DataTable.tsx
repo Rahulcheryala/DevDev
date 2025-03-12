@@ -56,9 +56,7 @@ import {
 import { motion } from "framer-motion";
 import AddNewRow from "./AddNewRow";
 import AddNewColumn from "./AddNewColumn"
-import { IntegrationProvider } from "~/modules/integrations/context";
-import { ConnectionProvider } from "~/modules/integrations/context/connection";
-// import { IntegrationProvider } from "~/modules/integrations/context";
+import IntegrationCard from "~/modules/integrations/components/misc/IntegrationCard";
 
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -86,14 +84,25 @@ interface DataTableProps<TData extends { id: string | number }> {
   data: TData[];
   columns: ColumnDef<TData>[];
   type?: string;
-
+  // for integrations
+  gridComponent?: React.ReactNode;
+  viewType?: string;
+  toggleView?: () => void;
+  handleAddNewIntegration?: () => void;
+  handleAddNewConnection?: () => void;
 }
 
 function DataTable<TData extends { id: string | number }>({
   data: initialData,
   columns,
   children,
-  type
+  type,
+  // for integrations
+  gridComponent,
+  viewType,
+  toggleView,
+  handleAddNewIntegration,
+  handleAddNewConnection
 }: PropsWithChildren<DataTableProps<TData>>) {
   const columnsmemo = React.useMemo<ColumnDef<TData>[]>(
     () => columns,
@@ -135,9 +144,6 @@ function DataTable<TData extends { id: string | number }>({
       .toLowerCase()
       .includes(String(filterValue).toLowerCase());
   };
-
-
-
 
   const table = useReactTable({
     data,
@@ -281,20 +287,22 @@ function DataTable<TData extends { id: string | number }>({
       
       <AddNewRow columns={cols} setData={setData} data={data} />
       <AddNewColumn addNewColumn={() => handleAddNewColumn()} />
-      <IntegrationProvider>
-        <ConnectionProvider>
-          <DataTableToolbar
-            type={type}
-            columns={columns}
-            setIsCompact={setIsCompact}
-            isCompact={isCompact}
-            data={data}
-            table={table}
-            currentPageData={table.getRowModel().rows.map(row => row.original)}
-            setColumnFilters={setColumnFilters}
-          />
-        </ConnectionProvider>
-      </IntegrationProvider>
+      <DataTableToolbar
+        type={type}
+        columns={columns}
+        setIsCompact={setIsCompact}
+        isCompact={isCompact}
+        data={data}
+        table={table}
+        currentPageData={table.getRowModel().rows.map(row => row.original)}
+        setColumnFilters={setColumnFilters}
+
+        // for integrations
+        viewType={viewType}
+        toggleView={toggleView}
+        handleAddNewIntegration={handleAddNewIntegration}
+        handleAddNewConnection={handleAddNewConnection}
+      />
 
       <DndContext
         collisionDetection={closestCenter}
@@ -304,7 +312,10 @@ function DataTable<TData extends { id: string | number }>({
       >
         <div className=" mt-2 rounded-zeak overflow-x-auto">
 
-          <motion.table
+          {viewType === "grid" ? (
+            gridComponent
+          ):(
+            <motion.table
             initial={{ opacity: 0, }}
             animate={{ opacity: 1, width: table.getTotalSize() }}
             id="notifications-data-table"
@@ -320,16 +331,17 @@ function DataTable<TData extends { id: string | number }>({
                 <SortableContext
                 items={dataIds}
                 strategy={verticalListSortingStrategy}
-              >
+                >
                 {table.getRowModel().rows.map((row) => (
                   <React.Fragment key={row.original.id}>
                     <TableRow isCompact={isCompact} row={row} />
                     {row.getIsExpanded() && <ExpandedCard />}
                   </React.Fragment>
                 ))}
-              </SortableContext>
-            </motion.tbody> : children}
-          </motion.table> 
+                </SortableContext>
+              </motion.tbody> : children}
+            </motion.table> 
+          )}
 
         </div>
       </DndContext>

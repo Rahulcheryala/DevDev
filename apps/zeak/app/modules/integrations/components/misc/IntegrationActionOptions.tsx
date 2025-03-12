@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { IntegrationFlow, useIntegrationContext } from "../../context";
+import { IntegrationFlow, useUnifiedContext } from "../../context";
 import { IntegrationForm } from "../../models/integration-form.model";
 import { IntegrationComponents } from "../../models/constants";
 
@@ -15,7 +15,7 @@ function IntegrationActionOptions({
   const {
     dispatch,
     state: { selectedIntegration, records },
-  } = useIntegrationContext();
+  } = useUnifiedContext();
 
   const onClickHandler = (flow: IntegrationFlow) => {
     if (flow === "edit") {

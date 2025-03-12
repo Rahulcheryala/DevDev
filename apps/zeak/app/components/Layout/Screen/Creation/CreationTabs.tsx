@@ -80,6 +80,7 @@ const CreationTabs: React.FC<CreationTabsProps> = ({
             closeDrawer(); // Close the drawer if on the first tab
         } else {
             setActiveTab(tabs[currentIndex - 1]); // Go back to the previous tab
+            onTabChanged?.(tabs[currentIndex - 1])
         }
     }
 
@@ -93,6 +94,7 @@ const CreationTabs: React.FC<CreationTabsProps> = ({
         const newActiveTab = tabs.find(tab => tab.value === selectedTab);
         if (newActiveTab) {
             setActiveTab(newActiveTab);
+            onTabChanged?.(newActiveTab)
         }
     }, [selectedTab, tabs])
     

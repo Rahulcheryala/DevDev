@@ -1,22 +1,18 @@
-import { useIntegrationContext } from "../../../context";
+import { useUnifiedContext } from "../../../context";
 import IntegrationActionOptions from "../../misc/IntegrationActionOptions";
 import { ItemHeader } from "../../../../../components/Layout/Screen";
 import { ISelectedItem } from "../../../../../components/Layout/Screen/View/ItemHeader";
 import ConnectionActionOptions from "../../misc/ConnectionActionOptions";
-import { ConnectionProvider } from "~/modules/integrations/context/connection";
 
 export default function ConnectionHeader() {
   const {
     state: { selectedConnection, selectedIntegration },
     dispatch,
-  } = useIntegrationContext();
+  } = useUnifiedContext();
 
-  // Ensure selectedIntegration is not null before destructuring
-  if (!selectedIntegration) return null;
-  if (!selectedConnection) return null;
+  if (!selectedIntegration || !selectedConnection) return null;
 
-  const { integrationName, application, logo } = selectedIntegration;
-
+  const { logo, integrationName, applicationName, integrationType } = selectedIntegration;
   const { id, connectionName, connectionStatus } = selectedConnection;
 
   const breadcrumbs = [
@@ -30,12 +26,12 @@ export default function ConnectionHeader() {
     },
   ];
 
-  const unsetConnectionHandler = () => {
-    // dispatch({ type: "SET_SELECTED_INTEGRATION", payload: null });
+  const closeConnectionHandler = () => {
+    dispatch({ type: "SET_SELECTED_CONNECTION", payload: null });
   };
 
   const editConnectionHandler = () => {
-    // dispatch({ type: "SET_FLOW", payload: "edit" });
+    dispatch({ type: "SET_CONNECTION_FLOW", payload: "edit" });
   };
 
   return (
@@ -44,12 +40,9 @@ export default function ConnectionHeader() {
       breadcrumbs={breadcrumbs}
       backUrl={`/x/access-settings/integrations/${selectedIntegration.id}`}
       onEdit={editConnectionHandler}
-      onClose={unsetConnectionHandler}
-      type={selectedIntegration.type}
+      onClose={closeConnectionHandler}
       actionPopover={
-        <ConnectionProvider>
-          <ConnectionActionOptions connectionId={id} />
-        </ConnectionProvider>
+        <ConnectionActionOptions connectionId={id} />
       }
       selectedItem={
         {
@@ -58,7 +51,7 @@ export default function ConnectionHeader() {
           name: connectionName,
           status: connectionStatus,
           integrationName: integrationName,
-          application: application,
+          application: applicationName,
         } as ISelectedItem
       }
     />

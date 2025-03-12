@@ -1,5 +1,6 @@
 import Image from "../../../Image";
 import React from "react";
+import { cn } from "@zeak/react";
 import { FaRegUserCircle } from "react-icons/fa";
 
 type TypePillProps = {
@@ -7,17 +8,21 @@ type TypePillProps = {
   className?: string;
 };
 
-const TypePill: React.FC<TypePillProps> = ({ type, className }: TypePillProps) => {
+const TypePill: React.FC<TypePillProps> = ({
+  type,
+  className,
+}: TypePillProps) => {
   return (
     <>
       {type === "System" ? (
-        <div className={`w-fit flex items-center gap-2 rounded-md uppercase ${className}`}>
-          <Image
-            src="/zeak-z-logo.png"
-            alt="Zeak Logo"
-            className="w-4 h-4"
-          />
-          {type}
+        <div
+          className={cn(
+            "w-fit flex items-center gap-2 rounded-md font-semibold text-secondary",
+            className
+          )}
+        >
+          <Image src="/zeak-z-logo.png" alt="Zeak Logo" className="w-5 h-5" />
+          <span className="text-accent-dark font-[500]">{type}</span>
         </div>
       ) : (
         <div className="flex items-center gap-2 uppercase">

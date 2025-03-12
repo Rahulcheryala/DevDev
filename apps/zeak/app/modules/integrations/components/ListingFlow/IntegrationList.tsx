@@ -1,36 +1,25 @@
-import { useIntegrationContext } from "../../context";
-import { ConnectionProvider, useConnectionContext } from "../../context/connection";
-import IntegrationCard from "../misc/IntegrationCard";
+import { useMemo } from "react";
+import { useIntegrationData } from "../../hooks/useIntegrationData";
 import IntegrationDataTable from "./IntegrationDataTable";
 
 type IntegrationListProps = {
   type?: "favorites" | "all";
 };
 
-export default function IntegrationList({ type = "all" }: IntegrationListProps) {
-  const {
-    state: { records, viewType },
-  } = useIntegrationContext();
-  const { dispatch } = useConnectionContext();
+export default function IntegrationList({
+  type = "all",
+}: IntegrationListProps) {
+  const { integrations } = useIntegrationData();
 
-  const addConnection = () => {
-    dispatch({
-      type: "SET_FLOW",
-      payload: "create",
-    });
-  }
-
-  const filteredRecords = type === "favorites" ? records.filter((record) => record.isFavorite) : records;
+  const filteredIntegrations = useMemo(() => {
+    return type === "favorites"
+      ? integrations.filter((integration) => integration.isFavorite)
+      : integrations;
+  }, [integrations, type]);
 
   return (
     <div className="bg-[#F0F4FD] flex flex-col h-full">
-      <ConnectionProvider>
-        {viewType === "list" ? (
-          <IntegrationDataTable records={filteredRecords} />
-        ) : (
-          <IntegrationCard records={filteredRecords} onAddConnection={addConnection} onToggleFavorite={() => {}} />
-        )}
-      </ConnectionProvider>
+      <IntegrationDataTable records={filteredIntegrations} />
     </div>
   );
 }
