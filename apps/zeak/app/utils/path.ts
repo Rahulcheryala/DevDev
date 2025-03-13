@@ -76,6 +76,7 @@ export const path = {
       connectionsList: `${api}/connections/list`,
       integrationConnections: (integrationId: string) =>
         generatePath(`${api}/integration/connections?integrationId=${integrationId}`),
+      integrationCreate: `${api}/integrations/create`,
     },
     file: {
       previewImage: (bucket: string, path: string) =>

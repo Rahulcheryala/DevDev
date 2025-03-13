@@ -5,6 +5,7 @@ import {
     ConnectionType,
     AuthType,
     ExecutionFrequency,
+    Status,
   } from "@prisma/client";
 
 export type IntegrationForm = {
@@ -18,6 +19,7 @@ export type IntegrationForm = {
     connectionType: ConnectionType | '';
     authentication: AuthType | '';
     connectionLimit: number;
+    status: Status | ''
     companies: string[];
     executionFrequency: ExecutionFrequency | '';
     maxRetries: number | null;
@@ -37,6 +39,7 @@ export const initialIntegrationForm: IntegrationForm = {
     connectionType: '',
     authentication: '',
     connectionLimit: 0,
+    status: '',
     companies: [],
     executionFrequency: 'On_Demand',
     maxRetries: null,

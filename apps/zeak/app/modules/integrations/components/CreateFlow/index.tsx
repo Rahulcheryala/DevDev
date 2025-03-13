@@ -11,20 +11,25 @@ import { SchedulePolicies } from "./SchedulePolicies";
 import { TestConnect } from "./TestConnect";
 import { FaRegUserCircle } from "react-icons/fa";
 
-type ButtonTypes = "next" | "save" | "draft" | "save_clear";
+type ButtonTypes = "next" | "save" | "draft" | "save_add_new_connection";
 
 interface IntegrationCreateFlowProps {
   isOpen: boolean;
   closeDrawer: (bool?: boolean) => void;
 }
 
-const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) => {
-  const [activeTab, setActiveTab] = useState<IntegrationAddFlowTabs>(IntegrationAddFlowTabs.STEP_1);
+const IntegrationAddFlow = ({
+  isOpen,
+  closeDrawer,
+}: IntegrationCreateFlowProps) => {
+  const [activeTab, setActiveTab] = useState<IntegrationAddFlowTabs>(
+    IntegrationAddFlowTabs.STEP_1
+  );
   const { state, dispatch, openConnectionDrawer } = useUnifiedContext();
   const { integrationForm, integrationFlow } = state;
 
   const onCloseHandler = (bool?: boolean) => {
-    setActiveTab(IntegrationAddFlowTabs.STEP_1)
+    setActiveTab(IntegrationAddFlowTabs.STEP_1);
     closeDrawer(bool);
   };
 
@@ -42,15 +47,15 @@ const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) =
 
   const onSubmit = async (action: ButtonTypes) => {
     if (action === "next") {
-      setActiveTab(IntegrationAddFlowTabs.STEP_2)
+      setActiveTab(IntegrationAddFlowTabs.STEP_2);
     } else if (action === "save") {
       saveData(true);
-    } else if (action === "save_clear") {
-      saveData(false);
-    } 
-    // else if (action === "draft") {
-    //   saveData(true, { status: "draft" });
-    // }
+    } else if (action === "draft") {
+      saveData(true, { status: "Draft" });
+    } else if (action === "save_add_new_connection") {
+      saveData(true);
+      openConnectionDrawer("create");
+    }
   };
 
   const saveData = async (
@@ -78,42 +83,31 @@ const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) =
     }
   };
 
-  // Variable Assignments
-  const label = (
-    <Fragment>
-      New Integration 
-      <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-500 px-4 py-2.5 rounded-xl ml-4">
-       <FaRegUserCircle className="text-lg" />
-      <span className="text-base font-medium">User Defined</span>
-    </div>
-    </Fragment>
-  );
-
   const mainButton: ButtonProps = useMemo(() => {
     switch (activeTab) {
       case IntegrationAddFlowTabs.STEP_1:
         return {
-          label: 'Next',
-          id: 'next',
-          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_2)
+          label: "Next",
+          id: "next",
+          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_2),
         };
       case IntegrationAddFlowTabs.STEP_2:
         return {
-          label: 'Next',
-          id: 'next',
-          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_3)
+          label: "Next",
+          id: "next",
+          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_3),
         };
       case IntegrationAddFlowTabs.STEP_3:
         return {
-          label: 'Save & Finish',
-          id: 'save_finish',
-          onClickHandler: (mode: string) => onSubmit(mode as ButtonTypes)
+          label: "Save & Finish",
+          id: "save",
+          onClickHandler: (action: string) => onSubmit(action as ButtonTypes),
         };
       default:
         return {
-          label: 'Next',
-          id: 'next',
-          onClickHandler: (mode: string) => setActiveTab(IntegrationAddFlowTabs.STEP_1)
+          label: "Next",
+          id: "next",
+          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_1),
         };
     }
   }, [activeTab]);
@@ -127,7 +121,7 @@ const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) =
             label: "Save as Draft",
             id: "draft",
             onClickHandler: (mode: string) => onSubmit(mode as ButtonTypes),
-          }
+          },
         ];
       case IntegrationAddFlowTabs.STEP_3:
         return [
@@ -143,7 +137,7 @@ const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) =
             label: "Save as Draft",
             id: "draft",
             onClickHandler: (mode: string) => onSubmit(mode as ButtonTypes),
-          }
+          },
         ];
       default:
         return [];
@@ -152,27 +146,38 @@ const IntegrationAddFlow = ({isOpen, closeDrawer}: IntegrationCreateFlowProps) =
 
   const StepTabs = [
     {
-        id: '1',
-        title: "1. General",
-        value: IntegrationAddFlowTabs.STEP_1,
-        containerClassName: 'overflow-y-auto',
-        component: <GeneralInfo />
+      id: "1",
+      title: "1. General",
+      value: IntegrationAddFlowTabs.STEP_1,
+      containerClassName: "overflow-y-auto",
+      component: <GeneralInfo />,
     },
     {
-        id: '2',
-        title: "2. Schedule & Policies",
-        value: IntegrationAddFlowTabs.STEP_2,
-        containerClassName: 'overflow-auto',
-        component: <SchedulePolicies />
+      id: "2",
+      title: "2. Schedule & Policies",
+      value: IntegrationAddFlowTabs.STEP_2,
+      containerClassName: "overflow-auto",
+      component: <SchedulePolicies />,
     },
     {
-        id: '3',
-        title: "3. Test & Connect",
-        value: IntegrationAddFlowTabs.STEP_3,
-        containerClassName: 'overflow-auto',
-        component: <TestConnect />
+      id: "3",
+      title: "3. Test & Connect",
+      value: IntegrationAddFlowTabs.STEP_3,
+      containerClassName: "overflow-auto",
+      component: <TestConnect />,
     },
-]
+  ];
+
+  // Variable Assignments
+  const label = (
+    <Fragment>
+      New Integration
+      <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-500 px-4 py-2.5 rounded-xl ml-4">
+        <FaRegUserCircle className="text-lg" />
+        <span className="text-base font-medium">User Defined</span>
+      </div>
+    </Fragment>
+  );
 
   return (
     <CreationTabs

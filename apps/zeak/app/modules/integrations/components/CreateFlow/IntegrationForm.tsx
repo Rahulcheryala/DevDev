@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ExpandableTextArea,
   Input,
@@ -11,7 +11,7 @@ import {
 } from "@zeak/react";
 import { InfoTooltip } from "../../../../components/Layout/Screen";
 import type { IntegrationForm } from "../../models/integration-form.model";
-import { IntegrationFlow } from "../../context";
+import { IntegrationFlow, UnifiedAction } from "../../context";
 import { IIntegrationModel } from "../../models/integration.model";
 import {
   ApplicationName,
@@ -21,8 +21,10 @@ import {
   Status,
 } from "@prisma/client";
 import { MultiSelect } from "~/components/Common";
+import { fetchIntegrationsList } from "../../utils/api.utils";
 
 type IntegrationFormProps = {
+  dispatch?: React.Dispatch<UnifiedAction>;
   integrationForm?: IntegrationForm;
   errors?: { [key: string]: string | null };
   handleChange?: (
@@ -36,6 +38,7 @@ type IntegrationFormProps = {
 };
 
 const IntegrationForm = ({
+  dispatch,
   integrationForm,
   errors,
   handleChange,
@@ -43,6 +46,46 @@ const IntegrationForm = ({
   currentFlow,
   selectedIntegration,
 }: IntegrationFormProps) => {
+  const [isEditing, setIsEditing] = useState<boolean>(true);
+
+  const generateCode = () => {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const length = 8;
+    const timestamp = new Date().getTime().toString().slice(-4);
+    let result = "";
+    for (let i = 0; i < length / 2; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      result += characters[randomIndex];
+    }
+    result += timestamp;
+    return result;
+  };
+
+  const checkDuplicacy = async (value: string) => {
+    try {
+      if (
+        currentFlow === "edit" &&
+        selectedIntegration?.integrationName === value
+      ) {
+        return false;
+      }
+      const response = await fetchIntegrationsList({ integrationName: value });
+      if (response.data.length > 0) {
+        dispatch!({
+          type: "SET_INTEGRATION_ERROR",
+          payload: {
+            name: "integrationName Error",
+            message: "Integration with this name already exists",
+          },
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking duplicacy:", error);
+      return false;
+    }
+  };
 
   const initialValues = {
     integrationName:
@@ -142,7 +185,10 @@ const IntegrationForm = ({
 
       <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
         <div className="flex flex-col gap-3 relative">
-          <Label htmlFor="purpose" className="text-textLink h-7 inline-flex items-center">
+          <Label
+            htmlFor="purpose"
+            className="text-textLink h-7 inline-flex items-center"
+          >
             Purpose
           </Label>
           <ExpandableTextArea
@@ -181,7 +227,7 @@ const IntegrationForm = ({
             <SelectContent>
               {Object.values(ApplicationName).map((application) => (
                 <SelectItem key={application} value={application}>
-                  {application?.replace(/_/g, ' ')}
+                  {application?.replace(/_/g, " ")}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -215,7 +261,7 @@ const IntegrationForm = ({
             <SelectContent>
               {Object.values(IntegrationCategory).map((category) => (
                 <SelectItem key={category} value={category}>
-                  {category?.replace(/_/g, ' ')}
+                  {category?.replace(/_/g, " ")}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -258,7 +304,7 @@ const IntegrationForm = ({
             <SelectContent>
               {Object.values(ConnectionType).map((connectionType) => (
                 <SelectItem key={connectionType} value={connectionType}>
-                  {connectionType?.replace(/_/g, ' ')}
+                  {connectionType?.replace(/_/g, " ")}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -299,7 +345,7 @@ const IntegrationForm = ({
             </Select>
           </div>
         )} */}
-    
+
       <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
         <div className="flex flex-col gap-3 relative">
           <Label htmlFor="authentication" className="text-textLink">
@@ -320,7 +366,7 @@ const IntegrationForm = ({
             <SelectContent>
               {Object.values(AuthType).map((authType) => (
                 <SelectItem key={authType} value={authType}>
-                  {authType?.replace(/_/g, ' ')}
+                  {authType?.replace(/_/g, " ")}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -358,8 +404,16 @@ const IntegrationForm = ({
           <MultiSelect
             options={integrationForm?.companies!}
             selectedOptions={initialValues.companies!}
-            onSelect={(value) => handleChange!({ target: { name: "companies", value } } as React.ChangeEvent<HTMLInputElement>)}
-            onDelete={(value) => handleChange!({ target: { name: "companies", value } } as React.ChangeEvent<HTMLInputElement>)}
+            onSelect={(value) =>
+              handleChange!({
+                target: { name: "companies", value },
+              } as React.ChangeEvent<HTMLInputElement>)
+            }
+            onDelete={(value) =>
+              handleChange!({
+                target: { name: "companies", value },
+              } as React.ChangeEvent<HTMLInputElement>)
+            }
           />
           {errors?.companies && (
             <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">

@@ -1,4 +1,3 @@
-import { UnifiedProvider } from "~/modules/integrations/context";
 import {
   IntegrationPageHeader,
   IntegrationPageTabs,
@@ -7,10 +6,8 @@ import {
 export default function Integrations() {
   return (
     <div className="w-[calc(100vw-260px)] px-4 h-full">
-      {/* <UnifiedProvider key="integration-list-provider"> */}
-        <IntegrationPageHeader />
-        <IntegrationPageTabs />
-      {/* </UnifiedProvider> */}
+      <IntegrationPageHeader />
+      <IntegrationPageTabs />
     </div>
   );
 }

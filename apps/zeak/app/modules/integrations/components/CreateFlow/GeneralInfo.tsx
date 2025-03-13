@@ -118,6 +118,7 @@ export const GeneralInfo = () => {
           </div>
 
           <IntegrationForm
+            dispatch={dispatch}
             errors={state.integrationErrors}
             integrationForm={integrationForm}
             handleChange={(e) => handleChange(e)}

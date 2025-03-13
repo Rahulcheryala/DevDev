@@ -391,9 +391,9 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     fetchData(true);
   }, [fetchData]);
 
-  // useEffect(() => {
-  //   console.log(state.integrationForm)
-  // }, [state.integrationForm])
+  useEffect(() => {
+    console.log(state.integrationForm)
+  }, [state.integrationForm])
 
   // useEffect(() => {
   //   console.log(state.selectedIntegration)
