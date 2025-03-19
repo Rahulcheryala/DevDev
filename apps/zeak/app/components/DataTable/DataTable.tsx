@@ -86,8 +86,6 @@ interface DataTableProps<TData extends { id: string | number }> {
   type?: string;
   // for integrations
   gridComponent?: React.ReactNode;
-  viewType?: string;
-  toggleView?: () => void;
   handleAddNewIntegration?: () => void;
   handleAddNewConnection?: () => void;
 }
@@ -99,8 +97,6 @@ function DataTable<TData extends { id: string | number }>({
   type,
   // for integrations
   gridComponent,
-  viewType,
-  toggleView,
   handleAddNewIntegration,
   handleAddNewConnection
 }: PropsWithChildren<DataTableProps<TData>>) {
@@ -108,6 +104,8 @@ function DataTable<TData extends { id: string | number }>({
     () => columns,
     [columns],
   );
+  const viewTypes = ["list", "grid"]
+  const [viewType, setViewType] = React.useState(viewTypes[0])
   const { newColumnName, newColType } = useDatatableStore()
   const [cols, setCols] = React.useState(columns)
   const [isCompact, setIsCompact] = React.useState(false);
@@ -299,7 +297,8 @@ function DataTable<TData extends { id: string | number }>({
 
         // for integrations
         viewType={viewType}
-        toggleView={toggleView}
+        viewTypes={viewTypes}
+        setViewType={setViewType}
         handleAddNewIntegration={handleAddNewIntegration}
         handleAddNewConnection={handleAddNewConnection}
       />
@@ -312,7 +311,7 @@ function DataTable<TData extends { id: string | number }>({
       >
         <div className=" mt-2 rounded-zeak overflow-x-auto">
 
-          {viewType === "grid" ? (
+          {viewType === viewTypes[1] ? (
             gridComponent
           ):(
             <motion.table

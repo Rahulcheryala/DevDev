@@ -109,7 +109,7 @@ export interface IntegrationsQuery {
         skip,
         take: pageSize,
         orderBy: {
-          createdAt: 'desc',
+          integrationName: 'asc',
         },
       //   include: {
       //     createdByUser: {

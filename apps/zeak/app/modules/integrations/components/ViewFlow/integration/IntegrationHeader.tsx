@@ -2,6 +2,7 @@ import { useUnifiedContext } from "../../../context";
 import { ItemHeader } from "../../../../../components/Layout/Screen";
 import { ISelectedItem } from "../../../../../components/Layout/Screen/View/ItemHeader";
 import IntegrationActionOptions from "../../misc/IntegrationActionOptions";
+import { IntegrationType } from "../../../models/constants";
 
 export default function IntegrationHeader() {
   const {
@@ -48,9 +49,15 @@ export default function IntegrationHeader() {
       backUrl="/x/access-settings/integrations/"
       onEdit={editIntegrationHandler}
       onClose={unsetIntegrationHandler}
-      type={selectedIntegration.integrationType}
+      type={integrationType.replace(/_/g, " ")}
       actionPopover={
-        <IntegrationActionOptions type={selectedIntegration.integrationType} />
+        <IntegrationActionOptions
+          component="details"
+          integrationId={id}
+          integrationType={
+            integrationType.replace(/_/g, " ") as IntegrationType
+          }
+        />
       }
       selectedItem={
         {
@@ -60,7 +67,7 @@ export default function IntegrationHeader() {
           code: id,
           integrationCategory: integrationCategory.replace(/_/g, " "),
           connectionType,
-          integrationType,
+          integrationType: integrationType.replace(/_/g, " "),
         } as ISelectedItem
       }
     />

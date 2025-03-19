@@ -11,7 +11,6 @@ import { IConnectionModel } from "../models/connection.model";
 export const useIntegrationData = () => {
   const {
     state: { records, connectionsList, isIntegrationLoading, integrationError },
-    refreshData
   } = useUnifiedContext();
   
   const [lastRefresh, setLastRefresh] = useState<number | null>(null);
@@ -20,7 +19,6 @@ export const useIntegrationData = () => {
   const forceRefreshIfStale = () => {
     const now = Date.now();
     if (!lastRefresh || now - lastRefresh > 5 * 60 * 1000) {
-      refreshData();
       setLastRefresh(now);
     }
   };
@@ -32,7 +30,6 @@ export const useIntegrationData = () => {
   
   // Explicit refresh method for components to use
   const refresh = () => {
-    refreshData();
     setLastRefresh(Date.now());
   };
   

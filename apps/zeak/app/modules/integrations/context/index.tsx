@@ -16,13 +16,14 @@ import { IConnectionModel } from "../models/connection.model";
 // import { toast } from "@zeak/react";
 import { useNavigate } from "@remix-run/react";
 import { ConfirmationModal } from "../../../components/Layout/Screen";
-import IntegrationAddFlow from "../components/CreateFlow";
+import IntegrationAddFlow from "../components/CreateFlow/Integration";
 import ConnectionAddFlow from "../components/CreateFlow/Connection";
 import {
   ConnectionForm,
   initialConnectionFormData,
 } from "../models/connection-form.model";
 import {
+  fetchCompany,
   fetchConnectionsList,
   fetchIntegrationConnections,
   fetchIntegrationsList,
@@ -50,7 +51,6 @@ export type ConnectionFlow =
 // Unified state for both integrations and connections
 export type UnifiedState = {
   // Integration state
-  viewType: "list" | "grid";
   records: IIntegrationModel[];
   selectedIntegration: IIntegrationModel | null;
   integrationForm: IntegrationForm;
@@ -70,12 +70,14 @@ export type UnifiedState = {
   connectionError: Error | null;
   connectionErrors: { [key: string]: string | null };
   isConnectionFormDirty: boolean;
+
+  // company state
+  company: { name: string, id: string } | null;
 };
 
 // Initial state for the unified context
 const initialState: UnifiedState = {
-  // Integration state
-  viewType: "list",
+  // Integration state,
   records: [],
   selectedIntegration: null,
   integrationForm: initialIntegrationForm,
@@ -95,6 +97,9 @@ const initialState: UnifiedState = {
   connectionError: null,
   connectionErrors: {},
   isConnectionFormDirty: false,
+
+  // company state
+  company: null,
 };
 
 // Unified action type
@@ -120,7 +125,6 @@ export type UnifiedAction =
       payload: { [key: string]: string | null };
     }
   | { type: "CLEAR_INTEGRATION_ERRORS" }
-  | { type: "SET_VIEW_TYPE"; payload: "list" | "grid" }
 
   // Connection actions
   | { type: "SET_CONNECTION_LOADING"; payload: boolean }
@@ -138,7 +142,10 @@ export type UnifiedAction =
       type: "UPDATE_CONNECTION_ERROR";
       payload: { [key: string]: string | null };
     }
-  | { type: "CLEAR_CONNECTION_ERRORS" };
+  | { type: "CLEAR_CONNECTION_ERRORS" }
+
+  // Company actions
+  | { type: "SET_COMPANY"; payload: { name: string, id: string } }  
 
 // Unified reducer function
 function unifiedReducer(
@@ -178,9 +185,7 @@ function unifiedReducer(
         integrationErrors: { ...state.integrationErrors, ...action.payload },
       };
     case "CLEAR_INTEGRATION_ERRORS":
-      return { ...state, integrationErrors: {} };
-    case "SET_VIEW_TYPE":
-      return { ...state, viewType: action.payload };
+      return { ...state, integrationErrors: {} };;
 
     // Connection reducers
     case "SET_CONNECTION_LOADING":
@@ -213,6 +218,10 @@ function unifiedReducer(
       };
     case "CLEAR_CONNECTION_ERRORS":
       return { ...state, connectionErrors: {} };
+
+    // company actions
+    case "SET_COMPANY":
+      return { ...state, company: action.payload };
     default:
       return state;
   }
@@ -259,7 +268,6 @@ const UnifiedContext = createContext<
       onIntegrationCancelHandler: () => void;
       onConnectionConfirmHandler: () => Promise<void>;
       onConnectionCancelHandler: () => void;
-      refreshData: () => void;
     }
   | undefined
 >(undefined);
@@ -345,9 +353,10 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
         dispatch({ type: "SET_CONNECTION_ERROR", payload: null });
 
         if (dataFetchStatus.isFetched) return;
-        const [integrations, connectionsList] = await Promise.all([
+        const [integrations, connectionsList, company] = await Promise.all([
           fetchIntegrationsList(),
           fetchConnectionsList(),
+          fetchCompany(),
         ]);
 
         // console.log("Fetching done in unified context");
@@ -357,6 +366,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
           type: "SET_CONNECTIONS_LIST",
           payload: connectionsList.data,
         });
+        dispatch({ type: "SET_COMPANY", payload: company });
 
         // Update fetch status
         setDataFetchStatus({
@@ -386,14 +396,13 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     fetchData();
   }, []);
 
-  // Add a function to manually refresh data when needed
-  const refreshData = useCallback(() => {
-    fetchData(true);
-  }, [fetchData]);
-
   useEffect(() => {
-    console.log(state.integrationForm)
-  }, [state.integrationForm])
+    console.log(state.connectionForm)
+  }, [state.connectionForm])
+
+//   useEffect(()=>{
+//     console.log(state.company);
+// },[state.company])
 
   // useEffect(() => {
   //   console.log(state.selectedIntegration)
@@ -550,7 +559,6 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
         onIntegrationCancelHandler,
         onConnectionConfirmHandler,
         onConnectionCancelHandler,
-        refreshData,
       }}
     >
       {/* Integration UI components */}

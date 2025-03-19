@@ -65,7 +65,7 @@ const ConnectionNameLink = ({
     // }
     // }
     >
-      <NameColumn name={connectionName} columnSize={columnSize} />
+      {/* <NameColumn  name={connectionName} columnSize={columnSize} /> */}
     </div>
   );
 };
@@ -120,16 +120,17 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row, column }) => (
-      <ConnectionNameLink
-        connectionName={row.original.connectionName}
-        connectionId={row.original.id}
-        columnSize={column.getSize()}
-      />
-      // <NameColumn
-      //   link={`connections/${row.original.id}`}
-      //   name={row.original.connectionName}
+      // <ConnectionNameLink
+      //   connectionName={row.original.connectionName}
+      //   connectionId={row.original.id}
       //   columnSize={column.getSize()}
       // />
+      <NameColumn
+        // link={`connections/${row.original.id}`}
+        src={row.original.integration.logo}
+        name={row.original.connectionName}
+        columnSize={column.getSize()}
+      />
     ),
     meta: {
       filterVariant: "text",

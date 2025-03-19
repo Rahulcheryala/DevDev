@@ -159,10 +159,6 @@ export const DepartmentProvider: React.FC<{ children: ReactNode }> = ({ children
         fetchData();
     }, [fetchData]);
 
-    useEffect(()=>{
-        console.log(state.records);
-    },[state.records])
-
     useEffect(() => {
         switch (currentFlow) {
             case 'create':

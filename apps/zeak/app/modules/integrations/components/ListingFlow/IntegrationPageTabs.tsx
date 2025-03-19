@@ -4,6 +4,7 @@ import IntegrationCharts from "./IntegrationCharts";
 import IntegrationList from "./IntegrationList";
 import ConnectionList from "../ViewFlow/integration/ConnectionList";
 import { UnifiedProvider } from "../../context";
+
 export default function IntegrationPageTabs() {
   return (
     <UnifiedProvider key="integration-list-provider">
@@ -36,7 +37,7 @@ export default function IntegrationPageTabs() {
             <div className="text-2xl font-bold py-10">No Dashboard</div>
           </div>
         </TabsContent>
-
+        {/* Integrations */}
         <TabsContent
           value={IntegrationTab.INTEGRATIONS}
           className="h-full mt-2"
@@ -44,7 +45,7 @@ export default function IntegrationPageTabs() {
           <IntegrationCharts />
           <IntegrationList />
         </TabsContent>
-
+        {/* Connections */}
         <TabsContent
           value={IntegrationTab.CONNECTIONS}
           className="h-full mt-2"
@@ -52,7 +53,7 @@ export default function IntegrationPageTabs() {
           <IntegrationCharts />
           <ConnectionList component="listing" />
         </TabsContent>
-
+        {/* Favorites */}
         <TabsContent
           value={IntegrationTab.FAVORITES}
           className="h-full mt-2"

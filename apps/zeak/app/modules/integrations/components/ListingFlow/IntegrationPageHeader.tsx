@@ -1,5 +1,5 @@
 import { PageHeader } from "~/components/Shared";
-import { Navigate, useNavigate } from "@remix-run/react";
+import { useNavigate } from "@remix-run/react";
 
 export default function IntegrationPageHeader() {
   const navigate = useNavigate();

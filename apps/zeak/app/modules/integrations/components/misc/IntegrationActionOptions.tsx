@@ -1,31 +1,44 @@
 import React, { useEffect } from "react";
 import { IntegrationFlow, useUnifiedContext } from "../../context";
 import { IntegrationForm } from "../../models/integration-form.model";
-import { IntegrationComponents } from "../../models/constants";
+import { FiEdit3 } from "react-icons/fi";
+import { RxCopy } from "react-icons/rx";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { CiExport } from "react-icons/ci";
+
+type IntegrationActionOptionsProps = {
+  integrationId: string;
+  component: string;
+  integrationType?: "System" | "User Defined";
+};
 
 function IntegrationActionOptions({
   integrationId,
   component,
-  type,
-}: {
-  integrationId?: string;
-  component?: IntegrationComponents;
-  type?: string;
-}) {
+  integrationType = "System",
+}: IntegrationActionOptionsProps) {
   const {
     dispatch,
     state: { selectedIntegration, records },
+    openIntegrationDrawer
   } = useUnifiedContext();
 
   const onClickHandler = (flow: IntegrationFlow) => {
-    if (flow === "edit") {
-      dispatch({
-        type: "UPDATE_FORM",
-        payload: selectedIntegration as unknown as IntegrationForm,
-        setFormDirty: false,
-      });
+    // First ensure the correct integration is selected
+    if (integrationId && !selectedIntegration) {
+      const integration = records.find((int) => int.id.toString() === integrationId);
+      if (integration) {
+        dispatch({ type: "SET_SELECTED_INTEGRATION", payload: integration });
+      }
     }
-    dispatch({ type: "SET_FLOW", payload: flow });
+    
+    // Then open the appropriate drawer/flow
+    if (flow === "edit" || flow === "duplicate") {
+      // openIntegrationDrawer(flow);
+      console.log("flow", flow);
+    } else if (flow === "delete") {
+      dispatch({ type: "SET_INTEGRATION_FLOW", payload: flow });
+    }
   };
 
   useEffect(() => {
@@ -37,38 +50,48 @@ function IntegrationActionOptions({
     }
   }, [integrationId]);
 
+  const buttons = [
+    {
+      icon: <FiEdit3 className="text-accent-dark" />,
+      label: "Edit Info",
+      onClick: () => onClickHandler("edit"),
+      disabled: integrationType === "System",
+    },
+    {
+      icon: <RxCopy className="text-accent-dark" />,
+      label: "Duplicate Integration",
+      onClick: () => onClickHandler("duplicate"),
+    },
+    {
+      icon: <RiDeleteBin6Line className="text-accent-dark" />,
+      label: "Delete Integration",
+      onClick: () => onClickHandler("delete"),
+      disabled: integrationType === "System",
+    },
+    {
+      icon: <CiExport className="text-accent-dark" />,
+      label: "Export Data",
+      onClick: () => {
+        // Handle export data functionality
+        console.log("Export data for integration:", integrationId);
+        // Implement export functionality
+      },
+    },
+  ];
+
   return (
-    <div className="flex flex-col">
-      {type !== "System" && (
+    <div className="flex flex-col rounded-zeak overflow-hidden">
+      {buttons.map((button, index) => (
         <button
-          className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]"
-          onClick={() => onClickHandler("edit")}
+          key={index}
+          className="h-14 flex items-center gap-4 px-6 text-left text-sm font-semibold text-accent-dark hover:bg-accent-bgHoverNew disabled:opacity-50"
+          onClick={button.onClick}
+          disabled={button.disabled}
         >
-          Edit Integration info
+          {button.icon}
+          {button.label}
         </button>
-      )}
-      <button className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]">
-        <span onClick={() => onClickHandler("connection")}>
-          Manage Connections
-        </span>
-      </button>
-      <button className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]">
-        <span onClick={() => onClickHandler("activation")}>
-          {selectedIntegration?.isFavorite ? "Remove from" : "Add to"} Favorites
-        </span>
-      </button>
-      <button className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]">
-        <span onClick={() => onClickHandler("duplicate")}>
-          Duplicate {selectedIntegration?.integrationName}
-        </span>
-      </button>
-      {type !== "System" && (
-        <button className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]">
-          <span onClick={() => onClickHandler("delete")}>
-            Delete {selectedIntegration?.integrationName}
-          </span>
-        </button>
-      )}
+      ))}
     </div>
   );
 }

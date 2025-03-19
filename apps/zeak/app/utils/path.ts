@@ -73,10 +73,14 @@ export const path = {
       teamMembersMap: `${api}/teams/members/update`,
 
       integrationsList: `${api}/integrations/list`,
+      integrationCreate: `${api}/integration/create`,
+      integrationEdit: `${api}/integration/update`,
+
       connectionsList: `${api}/connections/list`,
       integrationConnections: (integrationId: string) =>
         generatePath(`${api}/integration/connections?integrationId=${integrationId}`),
-      integrationCreate: `${api}/integrations/create`,
+      connectionCreate: `${api}/connection/create`,
+      connectionEdit: `${api}/connection/update`,
     },
     file: {
       previewImage: (bucket: string, path: string) =>

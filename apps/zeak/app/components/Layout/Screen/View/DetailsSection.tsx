@@ -1,8 +1,8 @@
 import { cn } from "@zeak/react";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useState } from "react";
-import IntegrationForm from "~/modules/integrations/components/CreateFlow/IntegrationForm";
-import { IntegrationFlow } from "~/modules/integrations/context";
+import IntegrationForm from "~/modules/integrations/components/CreateFlow/Integration/IntegrationForm";
+import { IntegrationFlow, UnifiedAction } from "~/modules/integrations/context";
 import { IIntegrationModel } from "~/modules/integrations/models/integration.model";
 import { ChevronDown, ChevronUp, PenLine } from "lucide-react";
 
@@ -22,6 +22,7 @@ type DetailsSectionProps = {
   selectedIntegration?: IIntegrationModel;
   className?: string;
   currentFlow?: IntegrationFlow;
+  dispatch?: React.Dispatch<UnifiedAction>;
 };
 
 const DetailsSection: React.FC<DetailsSectionProps> = ({
@@ -30,6 +31,7 @@ const DetailsSection: React.FC<DetailsSectionProps> = ({
   selectedIntegration,
   className,
   currentFlow,
+  dispatch,
 }: DetailsSectionProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -88,7 +90,9 @@ const DetailsSection: React.FC<DetailsSectionProps> = ({
                 <div className="absolute top-0 right-0 flex items-center gap-2">
                   <button
                     className="disabled:opacity-50 disabled:cursor-default"
-                    onClick={() => {}}
+                    onClick={() => {
+                      dispatch!({ type: "SET_INTEGRATION_FLOW", payload: "edit" });
+                    }}
                     disabled={selectedIntegration?.integrationType === "System"}
                   >
                     <PenLine className="h-5 w-5 mr-1.5 text-text-tertiary" />

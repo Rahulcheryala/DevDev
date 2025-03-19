@@ -98,10 +98,10 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
     ),
     cell: ({ row, column }) => (
       <NameColumn
+        src={row.original.integration.logo}
         link={`/x/access-settings/connections/${row.original.id}`}
         name={row.original.connectionName}
         columnSize={column.getSize()}
-        src={row.original.integration.logo}
       />
     ),
     meta: {

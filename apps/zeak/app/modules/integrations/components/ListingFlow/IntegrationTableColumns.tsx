@@ -11,12 +11,15 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { CiViewColumn } from "react-icons/ci";
 import { FiPlus } from "react-icons/fi";
 import ConnectionsPill from "../misc/connectionsPill";
+import { updateIntegrationFn } from "../../utils/api.utils";
+import { toast } from "@zeak/react";
+import { refreshIntegrationsAction } from "../../context/action";
 
 const AddConnectionButton = ({ id }: { id: string }) => {
   const {
     dispatch,
     state: { records },
-    openConnectionDrawer
+    openConnectionDrawer,
   } = useUnifiedContext();
 
   const onClickHandler = () => {
@@ -35,6 +38,64 @@ const AddConnectionButton = ({ id }: { id: string }) => {
       <FiPlus className="text-lg" />
       Connection
     </button>
+  );
+};
+
+const FavoriteToggle = ({ integration }: { integration: any }) => {
+  const { dispatch } = useUnifiedContext();
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    try {
+      const newFavoriteStatus = !integration.isFavorite;
+
+      await updateIntegrationFn(integration.id, {
+        isFavorite: newFavoriteStatus,
+      } as any);
+
+      toast.success(
+        `${integration.integrationName} ${newFavoriteStatus ? "added to" : "removed from"} favorites`
+      );
+
+      await refreshIntegrationsAction({}, dispatch);
+    } catch (error) {
+      console.error("Failed to update favorite status:", error);
+      toast.error("Failed to update favorite status");
+    }
+  };
+
+  return (
+    <div className="flex justify-center items-center">
+      {integration.isFavorite ? (
+        <FaHeart
+          className="text-red-500 cursor-pointer"
+          onClick={handleToggleFavorite}
+        />
+      ) : (
+        <FaRegHeart className="cursor-pointer text-secondary" onClick={handleToggleFavorite} />
+      )}
+    </div>
+  );
+};
+
+const CompanyNames = ({ companyIds }: { companyIds: any[] }) => {
+  const {
+    state: { company },
+  } = useUnifiedContext();
+  return (
+    <>
+      <div className="w-11/12 text-ellipsis text-nowrap overflow-hidden text-left">
+        {/* {companyIds.map((company: any) => company.companyName).join(", ") ||
+          "N/A"} */}
+        {company?.name}
+      </div>
+      {companyIds && companyIds.length - 3 > 0 && (
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-500 font-semibold text-xs">
+          +{companyIds.length - 3}
+        </div>
+      )}
+    </>
   );
 };
 
@@ -57,11 +118,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         })}
       >
         <RowDragHandleCell rowId={row.id} />
-        <div
-          className={cn(
-            " flex items-center justify-center relative"
-          )}
-        >
+        <div className={cn(" flex items-center justify-center relative")}>
           <DataTableCheckbox
             className={cn("rounded-full", { "bg-white": row.getIsSelected() })}
             checked={row.getIsSelected()}
@@ -111,15 +168,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         Favorites
       </div>
     ),
-    cell: ({ row }) => (
-      <div className="flex justify-center items-center">
-        {row.original.isFavorite ? (
-          <FaHeart className="text-red-500 cursor-pointer" />
-        ) : (
-          <FaRegHeart className="cursor-pointer" />
-        )}
-      </div>
-    ),
+    cell: ({ row }) => <FavoriteToggle integration={row.original} />,
     meta: {
       filterVariant: "text",
       name: "Favorites",
@@ -166,10 +215,19 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
         <div className="flex flex-col text-left">
-          <span>{moment(row.original.updatedAt || row.original.createdAt).format("DD MMM, YYYY")}</span>
+          <span>
+            {moment(row.original.updatedAt || row.original.createdAt).format(
+              "DD MMM, YYYY"
+            )}
+          </span>
           <span className="text-[11px] text-muted-foreground">
-            {moment(row.original.updatedAt || row.original.createdAt).format("hh:mm A")} |{" "}
-            {moment(row.original.updatedAt || row.original.createdAt).tz("America/Chicago").format("z")}
+            {moment(row.original.updatedAt || row.original.createdAt).format(
+              "hh:mm A"
+            )}{" "}
+            |{" "}
+            {moment(row.original.updatedAt || row.original.createdAt)
+              .tz("America/Chicago")
+              .format("z")}
           </span>
         </div>
       </div>
@@ -216,16 +274,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
     ),
     cell: ({ row, column }) => (
       <div style={{ maxWidth: column.getSize() }} className="px-5 relative">
-        <div className="w-11/12 text-ellipsis text-nowrap overflow-hidden text-left">
-          {row.original.companyIds
-            .map((company: any) => company.companyName)
-            .join(", ") || "N/A"}
-        </div>
-        {row.original.companyIds && row.original.companyIds.length > 0 && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-500 font-semibold text-xs">
-            +{row.original.companyIds.length}
-          </div>
-        )}
+        <CompanyNames companyIds={row.original.companyIds} />
       </div>
     ),
     meta: {
@@ -279,10 +328,11 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
               <BsThreeDotsVertical />
             </button>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-64 p-0">
+          <PopoverContent align="end" className="w-56 p-0 rounded-zeak">
             <IntegrationActionOptions
               integrationId={row.original.id}
               component="listing"
+              integrationType={row.original.integrationType}
             />
           </PopoverContent>
         </Popover>

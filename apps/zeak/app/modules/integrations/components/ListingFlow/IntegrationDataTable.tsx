@@ -12,22 +12,13 @@ type IntegrationDataTableProps = {
 export default function IntegrationDataTable({
   records,
 }: IntegrationDataTableProps) {
-  const { state: {viewType}, dispatch, openIntegrationDrawer } = useUnifiedContext();
-  const toggleViewFunction = () => {
-    if (viewType === "list") {
-      dispatch({ type: "SET_VIEW_TYPE", payload: "grid" });
-    } else {
-      dispatch({ type: "SET_VIEW_TYPE", payload: "list" });
-    }
-  }
+  const { openIntegrationDrawer } = useUnifiedContext();
 
   return (
     <DataTable
       type="integration"
       columns={IntegrationTableColumns}
       data={records}
-      viewType={viewType}
-      toggleView={toggleViewFunction}
       handleAddNewIntegration={() => openIntegrationDrawer("create")}
       gridComponent={<IntegrationCard records={records} />}
     >

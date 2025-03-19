@@ -7,7 +7,7 @@ import ConnectionList from "./ConnectionList";
 
 function IntegrationDetails() {
   const {
-    state: { selectedIntegration, integrationFlow },
+    state: { selectedIntegration, integrationFlow }, dispatch
   } = useUnifiedContext();
 
   if (!selectedIntegration) return null;
@@ -24,6 +24,7 @@ function IntegrationDetails() {
           className="bg-[#F7F9FE]"
           selectedIntegration={selectedIntegration}
           currentFlow={integrationFlow}
+          dispatch={dispatch}
           items={[
             {
               title: "Integration Name",
@@ -51,7 +52,7 @@ function IntegrationDetails() {
               title: "Type",
               value: (
                 <TypePill
-                  type={selectedIntegration.integrationType}
+                  type={selectedIntegration.integrationType.replace(/_/g, " ")}
                   className="bg-green-100 px-3 py-1"
                 />
               ),
@@ -67,7 +68,7 @@ function IntegrationDetails() {
             },
             {
               title: "Application",
-              value: selectedIntegration.integrationName,
+              value: selectedIntegration.applicationName.replace(/_/g, " "),
               icon: selectedIntegration.logo
             },
           ]}

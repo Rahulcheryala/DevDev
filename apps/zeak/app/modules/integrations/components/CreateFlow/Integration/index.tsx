@@ -1,17 +1,16 @@
 import { toast } from "@zeak/react";
 import { Fragment, useMemo, useState } from "react";
-import { useUnifiedContext } from "../../../context";
-import { CreationTabs } from "../../../../../components/Layout";
+import CreationTabs from "~/components/Layout/Screen/Creation/CreationTabs";
 import { ButtonProps } from "../../../../../components/Layout/Screen/Creation/SaveButton";
-import { createConnectionFn, createIntegrationFn } from "../../../utils/api.utils";
-import { connectionGeneralInfoSchema } from "./General";
+import { useUnifiedContext } from "../../../context";
+import { createIntegrationFn } from "../../../utils/api.utils";
 import { CreationFlowTabs } from "../../../models/constants";
-import { General } from "./General";
-import { Schedule } from "./Schedule";
-import { TestConnection } from "./TestConnection";
+import { integrationGeneralInfoSchema } from "./GeneralInfo";
+import { GeneralInfo } from "./GeneralInfo";
+import { SchedulePolicies } from "./SchedulePolicies";
+import { TestConnect } from "./TestConnect";
 import { FaRegUserCircle } from "react-icons/fa";
 import { createIntegrationExample } from "~/modules/integrations/examples/create-integration-example";
-import { createConnectionExample } from "~/modules/integrations/examples/create-connection-example";
 
 type ButtonTypes = "next" | "save" | "draft" | "save_add_new_connection";
 
@@ -20,15 +19,15 @@ interface IntegrationCreateFlowProps {
   closeDrawer: (bool?: boolean) => void;
 }
 
-const ConnectionAddFlow = ({
+const IntegrationAddFlow = ({
   isOpen,
   closeDrawer,
 }: IntegrationCreateFlowProps) => {
   const [activeTab, setActiveTab] = useState<CreationFlowTabs>(
     CreationFlowTabs.STEP_1
   );
-  const { state, dispatch } = useUnifiedContext();
-  const { connectionForm, selectedIntegration } = state;
+  const { state, dispatch, openConnectionDrawer } = useUnifiedContext();
+  const { integrationForm, integrationFlow } = state;
 
   const onCloseHandler = (bool?: boolean) => {
     setActiveTab(CreationFlowTabs.STEP_1);
@@ -37,7 +36,7 @@ const ConnectionAddFlow = ({
 
   const validateForm = async () => {
     try {
-      await connectionGeneralInfoSchema.parseAsync(connectionForm);
+      await integrationGeneralInfoSchema.parseAsync(integrationForm);
       return true;
     } catch (error) {
       if (error instanceof Error) {
@@ -53,38 +52,36 @@ const ConnectionAddFlow = ({
     } else if (action === "save") {
       saveData(true);
     } else if (action === "draft") {
-      saveData(true, { connectionStatus: "Draft" });
+      saveData(true, { status: "Draft" });
     } else if (action === "save_add_new_connection") {
       saveData(true);
-      dispatch({ type: "RESET_CONNECTION_FORM" });
-      dispatch({ type: "CLEAR_CONNECTION_ERRORS" });
-      setActiveTab(CreationFlowTabs.STEP_1)
-    } 
-    
+      openConnectionDrawer("create");
+    }
   };
 
   const saveData = async (
     close: boolean = true,
-    updateBody?: Partial<typeof connectionForm>
+    updateBody?: Partial<typeof integrationForm>
   ) => {
     try {
       const isValid = await validateForm();
       if (!isValid) return;
+      console.log("integrationForm", integrationForm);
 
-      const body = { ...connectionForm, ...updateBody };
-      await createConnectionFn(body);
+      const body = { ...integrationForm, ...updateBody };
+      await createIntegrationFn(body);
 
       if (close) {
         onCloseHandler(true);
       } else {
-        dispatch({ type: "RESET_CONNECTION_FORM" });
-        dispatch({ type: "CLEAR_CONNECTION_ERRORS" });
+        dispatch({ type: "RESET_INTEGRATION_FORM" });
+        dispatch({ type: "CLEAR_INTEGRATION_ERRORS" });
       }
 
-      return toast.success("Connection created successfully!");
+      return toast.success("Integration created successfully!");
     } catch (error) {
       console.error("Unexpected error:", error);
-      return toast.error("Failed to create connection");
+      return toast.error("Failed to create integration");
     }
   };
 
@@ -104,10 +101,10 @@ const ConnectionAddFlow = ({
         };
       case CreationFlowTabs.STEP_3:
         return {
-          label: "Save & Create Another",
-          id: "save_clear",
+          label: "Save & Finish",
+          id: "save",
           onClickHandler: (action: string) => onSubmit(action as ButtonTypes),
-          // onClickHandler: () => createConnectionExample(selectedIntegration?.id!)
+          // onClickHandler: () => createIntegrationExample()
         };
       default:
         return {
@@ -132,9 +129,12 @@ const ConnectionAddFlow = ({
       case CreationFlowTabs.STEP_3:
         return [
           {
-            label: "Save & Add New",
+            label: "Save & Add New Connection",
             id: "save_add_new_connection",
-            onClickHandler: (mode: string) => onSubmit(mode as ButtonTypes),
+            onClickHandler: (mode: string) => {
+              openConnectionDrawer("create");
+              onSubmit(mode as ButtonTypes);
+            },
           },
           {
             label: "Save as Draft",
@@ -152,23 +152,23 @@ const ConnectionAddFlow = ({
       id: "1",
       title: "1. General",
       value: CreationFlowTabs.STEP_1,
-      containerClassName: "overflow-auto",
-      component: <General />,
+      containerClassName: "overflow-y-auto",
+      component: <GeneralInfo />,
     },
     {
       id: "2",
       title: "2. Schedule & Policies",
       value: CreationFlowTabs.STEP_2,
       containerClassName: "overflow-auto",
-      // component: <Schedule />,
-      component: <div>Schedule & Policies</div>,
+      // component: <SchedulePolicies />,
+      component: <div>Schedule Policies</div>,
     },
     {
       id: "3",
       title: "3. Test & Connect",
       value: CreationFlowTabs.STEP_3,
       containerClassName: "overflow-auto",
-      // component: <TestConnection />,
+      // component: <TestConnect />,
       component: <div>Test & Connect</div>,
     },
   ];
@@ -176,7 +176,7 @@ const ConnectionAddFlow = ({
   // Variable Assignments
   const label = (
     <Fragment>
-      New Connection
+      New Integration
       <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-500 px-4 py-2.5 rounded-xl ml-4">
         <FaRegUserCircle className="text-lg" />
         <span className="text-base font-medium">User Defined</span>
@@ -198,4 +198,4 @@ const ConnectionAddFlow = ({
   );
 };
 
-export default ConnectionAddFlow;
+export default IntegrationAddFlow;

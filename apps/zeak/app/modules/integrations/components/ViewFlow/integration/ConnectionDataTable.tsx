@@ -11,12 +11,14 @@ type ConnectionDataTableProps = {
 };
 
 export default function ConnectionDataTable({ type, columns, data }: ConnectionDataTableProps) {
+  const { openConnectionDrawer } = useUnifiedContext();
   return (
     <div className="bg-[#F0F4FD] flex flex-col h-full">
       <DataTable
         type={type}
         columns={columns}
         data={data}
+        handleAddNewConnection={() => openConnectionDrawer("create")}
       >
         <InitiateConnectionScreen />
       </DataTable>

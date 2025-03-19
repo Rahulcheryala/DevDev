@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import { ConnectionFlow } from "../../context/connection";
-import { IntegrationForm } from "../../models/integration-form.model";
 import { IntegrationComponents } from "../../models/constants";
-import { useConnectionContext } from "../../context/connection";
 import { ConnectionForm } from "../../models/connection-form.model";
+import { useUnifiedContext } from "../../context";
+import { ConnectionFlow } from "../../context";
+import { IConnectionModel } from "../../models/connection.model";
 
 function ConnectionActionOptions({
   connectionId,
@@ -17,24 +17,24 @@ function ConnectionActionOptions({
   const {
     dispatch,
     state: { selectedConnection, records },
-  } = useConnectionContext();
+  } = useUnifiedContext();
 
   const onClickHandler = (flow: ConnectionFlow) => {
     if (flow === "edit") {
       dispatch({
-        type: "UPDATE_FORM",
+        type: "UPDATE_CONNECTION_FORM",
         payload: selectedConnection as unknown as ConnectionForm,
         // setFormDirty: false,
       });
     }
-    dispatch({ type: "SET_FLOW", payload: flow });
+    dispatch({ type: "SET_CONNECTION_FLOW", payload: flow });
   };
 
   useEffect(() => {
     if (connectionId) {
       const rec = records.find((int) => int.id.toString() === connectionId);
       if (rec) {
-        dispatch({ type: "SET_SELECTED_CONNECTION", payload: rec });
+        dispatch({ type: "SET_SELECTED_CONNECTION", payload: rec as unknown as IConnectionModel });
       }
     }
   }, [connectionId]);

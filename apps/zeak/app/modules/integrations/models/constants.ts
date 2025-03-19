@@ -34,7 +34,7 @@ export enum IntegrationTab {
 }
 
 // for create flow
-export enum IntegrationAddFlowTabs {
+export enum CreationFlowTabs {
   STEP_1 = "General",
   STEP_2 = "Schedule & Policies",
   STEP_3 = "Test & Connect",
@@ -48,6 +48,7 @@ export enum IntegrationViewFlowTabs {
 }
 
 export type IntegrationComponents = "listing" | "individual" | null;
+export type IntegrationType = "System" | "User Defined";
 
 // export const integrations = [
 //   {

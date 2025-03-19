@@ -27,9 +27,11 @@ interface DataTableToolbarProps<TData> {
   setIsCompact: React.Dispatch<React.SetStateAction<boolean>>;
   isCompact: boolean;
   setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFilter[]>>;
+  // for integrations
   type?: string;
   viewType?: string;
-  toggleView?: () => void;
+  viewTypes?: string[];
+  setViewType?: (viewType: string) => void;
   handleAddNewIntegration?: () => void;
   handleAddNewConnection?: () => void;
 }
@@ -42,9 +44,11 @@ export default function DataTableToolbar<TData>({
   currentPageData,
   isCompact,
   setColumnFilters,
+  // for integrations
   type,
   viewType,
-  toggleView,
+  viewTypes,
+  setViewType,
   handleAddNewIntegration,
   handleAddNewConnection
 }: DataTableToolbarProps<TData>) {
@@ -61,10 +65,10 @@ export default function DataTableToolbar<TData>({
           </>)}
         </PopoverTrigger>
         <PopoverContent className="w-fit p-2">
-          <button disabled={viewType === "list"} onClick={toggleView} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
+          <button disabled={viewType === "list"} onClick={() => setViewType!(viewTypes![0])} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
             <FaListUl className="w-5 h-5" /> List
           </button>
-          <button disabled={viewType === "grid"} onClick={toggleView} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
+          <button disabled={viewType === "grid"} onClick={() => setViewType!(viewTypes![1])} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-sm disabled:cursor-default disabled:opacity-50">
             <IoGridOutline className="w-5 h-5" /> Grid
           </button>
         </PopoverContent>

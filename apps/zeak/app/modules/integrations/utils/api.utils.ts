@@ -4,6 +4,15 @@ import { IIntegrationModel } from "../models/integration.model";
 import { IntegrationsQuery } from "../services/getPaginatedIntegrationList";
 import { IConnectionModel } from "../models/connection.model";
 import { ConnectionsQuery } from "../services/getPaginatedConnectionList";
+import { ConnectionForm } from "../models/connection-form.model";
+import { toast } from "@zeak/react";
+
+export const fetchCompany = async (): Promise<{ name: string, id: string }> => {
+    let url = `${path.to.api.fetchCompany}?`;
+    const response = await fetch(url);
+    const records = await response.json();
+    return { name: records.data.name, id: records.data.id };
+}
 
 export const fetchIntegrationsList = async (filters?: Partial<IntegrationsQuery>): Promise<{
   data: IIntegrationModel[];
@@ -70,32 +79,33 @@ export const fetchConnectionsList = async (filters?: Partial<ConnectionsQuery>):
     const response = await fetch(url);
 
     if (!response.ok) {
-        throw new Error('Failed to fetch integrations');
+        throw new Error('Failed to fetch connections');
     }
     const records = await response.json(); 
+    // console.log(records.data);
     return records;
 };
 
-export const createIntegrationFn = async (data: IntegrationForm) => {
+export const createIntegrationFn = async (data: IntegrationForm): Promise<IIntegrationModel> => {
     try {
-        // TODO: Implement actual API call
-        // const response = await fetch('/api/integrations', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(data),
-        // });
+        const response = await fetch(
+            path.to.api.integrationCreate,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            }
+        );
         
-        // if (!response.ok) {
-        //     throw new Error('Failed to create integration');
-        // }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to create integration');
+        }
         
-        // return await response.json();
-
-        // console.log(data);
-    } catch (error) {
-        console.error('Error creating integration:', error);
+        const record = await response.json();
+        return record;
+    } catch (error: any) {
+        toast.error(error.message || 'Failed to create integration');
         throw error;
     }
 };
@@ -107,11 +117,78 @@ export const fetchIntegrationConnections = async (integrationId: string) => {
     return records;
 };
 
-export const updateIntegrationFn = async (id: string, data: Partial<IntegrationForm>): Promise<void> => {
-    // TODO: Implement API call to update integration
+export const updateIntegrationFn = async (id: string, data: Partial<IntegrationForm>): Promise<IIntegrationModel> => {
+    if (!id) throw new Error('Integration ID is required');
+    
+    try {
+        const response = await fetch(
+            path.to.api.integrationEdit,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...data, id }),
+            }
+        );
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update integration');
+        }
+        
+        const record = await response.json();
+        return record;
+    } catch (error: any) {
+        toast.error(error.message || 'Failed to update integration details');
+        throw error;
+    }
 };
 
-export const fetchCompany = async () => {
-    // TODO: Implement API call to fetch company details
-    return { id: '1', name: 'Company' };
-}; 
+export const createConnectionFn = async (data: ConnectionForm): Promise<IConnectionModel> => {
+    try {
+        const response = await fetch(
+            path.to.api.connectionCreate,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            }
+        );
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to create connection');
+        }
+        
+        const record = await response.json();
+        return record;
+    } catch (error: any) {
+        toast.error(error.message || 'Failed to create connection');
+        throw error;
+    }
+};
+
+export const updateConnectionFn = async (id: string, data: Partial<ConnectionForm>): Promise<IConnectionModel> => {
+    if (!id) throw new Error('Connection ID is required');
+    
+    try {
+        const response = await fetch(
+            path.to.api.connectionEdit,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...data, id }),
+            }
+        );
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update connection');
+        }
+        
+        const record = await response.json();
+        return record;
+    } catch (error: any) {
+        toast.error(error.message || 'Failed to update connection details');
+        throw error;
+    }
+};

@@ -9,40 +9,42 @@ import {
   } from "@prisma/client";
 
 export type IntegrationForm = {
-    logo?: string; 
-    integrationType: IntegrationType | '';
+    logo?: string;
+    isFavorite?: boolean;
     integrationName: string;
     integrationCode: string;
-    purpose?: string;
     applicationName: ApplicationName | '';
+    description?: string;
+    integrationType:  'System' | "User Defined";
     integrationCategory: IntegrationCategory | '';
     connectionType: ConnectionType | '';
-    authentication: AuthType | '';
-    connectionLimit: number;
+    authType: AuthType | '';
+    connectionLimit: number | null;
     status: Status | ''
     companies: string[];
-    executionFrequency: ExecutionFrequency | '';
-    maxRetries: number | null;
-    retryDelay: number | null;
-    timeout: number | null;
+    // executionFrequency: ExecutionFrequency | '';
+    // maxRetries: number | null;
+    // retryDelay: number | null;
+    // timeout: number | null;
 };
 
 // Initial states for the context
 export const initialIntegrationForm: IntegrationForm = {
     logo: '',
-    integrationType: 'User_Defined',
+    isFavorite: false,
     integrationName: '',
     integrationCode: '',
-    purpose: '',
     applicationName: '',
+    description: '',
+    integrationType: 'User Defined',
     integrationCategory: '',
     connectionType: '',
-    authentication: '',
+    authType: '',
     connectionLimit: 0,
-    status: '',
+    status: 'Active',
     companies: [],
-    executionFrequency: 'On_Demand',
-    maxRetries: null,
-    retryDelay: null,
-    timeout: null,
+    // executionFrequency: 'On_Demand',
+    // maxRetries: null,
+    // retryDelay: null,
+    // timeout: null,
 }; 

@@ -12,7 +12,7 @@ export interface IConnectionModel {
     connectionCode: string;
     connectionDescription?: string;
     companyIds: string[];
-    isOnline: boolean; // TODO(vamsi): change to isEnabled
+    isEnabled: boolean;
     connectionDetails: {
         environmentType: EnvironmentType;
         environmentURL: string;

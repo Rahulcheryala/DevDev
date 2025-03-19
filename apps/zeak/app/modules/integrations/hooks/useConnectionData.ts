@@ -9,7 +9,6 @@ import { IConnectionModel } from "../models/connection.model";
 export const useConnectionData = () => {
   const {
     state: { records, isLoading, error },
-    refreshData
   } = useConnectionContext();
   
   const [lastRefresh, setLastRefresh] = useState<number | null>(null);
@@ -18,7 +17,6 @@ export const useConnectionData = () => {
   const forceRefreshIfStale = () => {
     const now = Date.now();
     if (!lastRefresh || now - lastRefresh > 5 * 60 * 1000) {
-      refreshData();
       setLastRefresh(now);
     }
   };
@@ -30,7 +28,6 @@ export const useConnectionData = () => {
   
   // Explicit refresh method for components to use
   const refresh = () => {
-    refreshData();
     setLastRefresh(Date.now());
   };
   
