@@ -5,17 +5,21 @@ import { FiEdit3 } from "react-icons/fi";
 import { RxCopy } from "react-icons/rx";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { CiExport } from "react-icons/ci";
+import { TbLink } from "react-icons/tb";
+import { LuUnlink } from "react-icons/lu";
 
 type IntegrationActionOptionsProps = {
   integrationId: string;
   component: string;
   integrationType?: "System" | "User Defined";
+  integrationStatus?: "Active" | "Inactive" | "Blocked";
 };
 
 function IntegrationActionOptions({
   integrationId,
   component,
   integrationType = "System",
+  integrationStatus = "Active",
 }: IntegrationActionOptionsProps) {
   const {
     dispatch,
@@ -33,10 +37,23 @@ function IntegrationActionOptions({
     }
     
     // Then open the appropriate drawer/flow
-    if (flow === "edit" || flow === "duplicate") {
-      // openIntegrationDrawer(flow);
+    if (flow === "edit") {
       console.log("flow", flow);
-    } else if (flow === "delete") {
+      // openIntegrationDrawer(flow);
+      
+    } else if (flow === "duplicate"){
+      console.log("flow", flow);
+      dispatch({ type: "SET_INTEGRATION_FLOW", payload: flow });
+    }else if (flow === "activation"){
+      console.log("flow", flow);
+      dispatch({ type: "SET_INTEGRATION_FLOW", payload: flow });
+      // dispatch({ type: "SET_INTEGRATION_FLOW", payload: flow });
+    }else if (flow === "deactivation"){
+      console.log("flow", flow);
+      dispatch({ type: "SET_INTEGRATION_FLOW", payload: flow });
+    }
+    else if (flow === "delete") {
+      console.log("flow", flow);
       dispatch({ type: "SET_INTEGRATION_FLOW", payload: flow });
     }
   };
@@ -67,6 +84,18 @@ function IntegrationActionOptions({
       label: "Delete Integration",
       onClick: () => onClickHandler("delete"),
       disabled: integrationType === "System",
+    },
+    {
+      icon: <LuUnlink className="text-accent-dark" />,
+      label: "Deactivate Integration",
+      onClick: () => onClickHandler("deactivation"),
+      disabled:  integrationStatus === "Inactive",
+    },
+    {
+      icon: <TbLink className="text-accent-dark" />,
+      label: "Activate Integration",
+      onClick: () => onClickHandler("activation"),
+      disabled: integrationStatus === "Active",
     },
     {
       icon: <CiExport className="text-accent-dark" />,

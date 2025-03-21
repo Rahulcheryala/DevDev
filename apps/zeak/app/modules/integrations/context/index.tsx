@@ -28,6 +28,9 @@ import {
   fetchIntegrationConnections,
   fetchIntegrationsList,
 } from "../utils/api.utils";
+import { updateIntegrationFn, createIntegrationFn } from "../utils/api.utils";
+import { toast } from "@zeak/react";
+import { refreshIntegrationsAction } from "../context/action";
 
 // Define flow types for integrations
 export type IntegrationFlow =
@@ -35,6 +38,7 @@ export type IntegrationFlow =
   | "edit"
   | "connection"
   | "activation"
+  | "deactivation"
   | "duplicate"
   | "delete"
   | null;
@@ -238,7 +242,27 @@ const UnifiedContext = createContext<
       closeConnectionDrawer: (ignoreCheck?: boolean) => void;
       isIntegrationDrawerOpen: boolean;
       isConnectionDrawerOpen: boolean;
-      isDeleteIntegrationOpen: boolean;
+      DeleteIntegrationOpen: {
+        message: string;
+        title: string;
+        flag: boolean;
+        onClose?: void;
+        onConfirm?: Promise<void>;
+      };
+      integrationTaskState: {
+        message: string;
+        title: string;
+        flag: boolean;
+        onClose?: void;
+        onConfirm?: Promise<void>;
+      }
+      integrationTaskStateDuplicate: {
+        message: string;
+        title: string;
+        flag: boolean;
+        onClose?: void;
+        onConfirm?: Promise<void>;
+      }
       integrationConfirmationOpen: {
         message: string;
         title: string;
@@ -263,11 +287,25 @@ const UnifiedContext = createContext<
           flag: boolean;
         }>
       >;
-      setIsDeleteIntegrationOpen: React.Dispatch<React.SetStateAction<boolean>>;
+      setDeleteIntegrationOpen: React.Dispatch<
+      React.SetStateAction<{
+        message: string;
+        title: string;
+        flag: boolean;
+        onConfirm?: Promise<void>;
+        onClose?: void;
+      }>
+      >;
       onIntegrationConfirmHandler: () => Promise<void>;
       onIntegrationCancelHandler: () => void;
       onConnectionConfirmHandler: () => Promise<void>;
       onConnectionCancelHandler: () => void;
+      onDeleteIntegrtionHandler: () => Promise<void>;
+      onDeleteCancelHandler: () => void;
+      onDeActivateIntegrtionHandler: () => Promise<void>;
+      onDeActivateCancelHandler: () => void;
+      onDuplicateIntegrtionHandler: () => Promise<void>;
+      onDuplicateCancelHandler: () => void;      
     }
   | undefined
 >(undefined);
@@ -287,7 +325,15 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
 
   // Integration state
   const [isIntegrationDrawerOpen, setIsIntegrationDrawerOpen] = useState(false);
-  const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useState(false);
+  const [DeleteIntegrationOpen, setDeleteIntegrationOpen] = useState({
+    ...initialConfirmationValues,
+  });
+  const [integrationTaskState, setIntegrationTaskState] = useState({
+    ...initialConfirmationValues,
+  });
+  const [integrationTaskStateDuplicate, setIntegrationTaskStateDuplicate] = useState({
+    ...initialConfirmationValues,
+  });
   const [integrationConfirmationOpen, setIntegrationConfirmationOpen] =
     useState({
       ...initialConfirmationValues,
@@ -435,18 +481,26 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     switch (integrationFlow) {
       case "create":
       case "edit":
-      case "duplicate":
         setIsIntegrationDrawerOpen(true);
         if (state.selectedIntegration) {
           // Additional side effects for different flows
           // ...
         }
         break;
+      case "duplicate":
+        HandleDuplicateIntegration()
+        break;
       case "activation":
         // Handle activation flow
+        HandleStatus();
+        break;
+      case "deactivation":
+        // Handle activation flow
+        HandleStatus();
         break;
       case "delete":
-        setIsDeleteIntegrationOpen(true);
+        // setDeleteIntegrationOpen(true);
+        HandleDelete();
         break;
       default:
         break;
@@ -538,6 +592,148 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     setConnectionConfirmationOpen({ ...initialConfirmationValues });
   };
 
+  const HandleDelete = () =>{
+    console.log('In Handle Delete')
+    // setDeleteIntegrationOpen(true);
+    setDeleteIntegrationOpen({
+      message: "Are you sure want to delete this Integration?",
+      title: "Delete Integration",
+      flag: true,
+    });
+  }
+
+  const HandleStatus = () =>{
+    console.log('In Handle status')
+    const changingStatus =  selectedIntegration?.status === 'Active'?'DeActivate':'Activate';
+    // setDeleteIntegrationOpen(true);
+    setIntegrationTaskState({
+      message: `Are you sure want to ${changingStatus} this Integration?`,
+      title: `${changingStatus} Integration`,
+      flag: true,
+    });
+  }
+
+  const HandleDuplicateIntegration = () =>{
+    console.log('In HandleDuplicateIntegration')
+    const changingStatus =  selectedIntegration?.status === 'Active'?'DeActivate':'Activate';
+    // setDeleteIntegrationOpen(true);
+    setIntegrationTaskStateDuplicate({
+      message: 'Are you sure want to duplicate this Integration?',
+      title: 'Duplicate Integration',
+      flag: true,
+    });
+  }
+  
+
+
+  const onDeleteIntegrtionHandler: React.MouseEventHandler<HTMLButtonElement> = async (e) =>{
+    e.stopPropagation();
+    console.log('on DeleteIntegrationHandler', selectedIntegration);
+    
+    try {
+      var userId = '2e8f113c-f772-4afb-b24b-f27d0af681ad';
+      const deletedTime = new Date().toISOString();
+      const deletedBy = userId
+      const integrationId = selectedIntegration?.id; 
+
+      console.log('on DeleteIntegrationHandler try', deletedTime, deletedBy);
+      await updateIntegrationFn(integrationId!, {
+        deletedAt: deletedTime,
+        deletedBy: userId
+      } as any);
+
+      toast.success(
+        `${selectedIntegration?.integrationName} deleted successfully`
+      );
+
+      await refreshIntegrationsAction({}, dispatch);
+    } catch (error) {
+      console.error("Failed to delete integration", error);
+      toast.error("Failed to delete integration");
+    } finally {
+      setDeleteIntegrationOpen({ ...initialConfirmationValues });
+    }
+    
+  }
+
+  const onDeleteCancelHandler = () =>{
+    setDeleteIntegrationOpen({ ...initialConfirmationValues });
+  }
+
+  const onDeActivateIntegrtionHandler: React.MouseEventHandler<HTMLButtonElement> = async (e) =>{
+    e.stopPropagation();
+    try {
+      const newStatus =  selectedIntegration?.status === 'Active'? 'Inactive':'Active';
+      const integrationId = selectedIntegration?.id; 
+
+      await updateIntegrationFn(integrationId!, {
+        status: newStatus
+      } as any);
+
+      toast.success(
+        `${selectedIntegration?.integrationName} status updated successfully`
+      );
+
+      await refreshIntegrationsAction({}, dispatch);
+    } catch (error) {
+      console.error("Failed to update integration status", error);
+      toast.error("Failed to update integration status");
+    } finally {
+      setIntegrationTaskState({ ...initialConfirmationValues });
+    }
+    
+  }
+
+  const onDeActivateCancelHandler = () =>{
+    setIntegrationTaskState({ ...initialConfirmationValues });
+  } 
+
+  const onDuplicateIntegrtionHandler: React.MouseEventHandler<HTMLButtonElement> = async (e) =>{
+    e.stopPropagation();
+    console.log('onDuplicateIntegrationHandleer', selectedIntegration);
+    try {
+      
+      const copyIntegrationName =  `Copy Of ${selectedIntegration?.integrationName}`;
+      const updatedData = {
+        ...selectedIntegration,
+        integrationName: copyIntegrationName
+      }
+      console.log('In duplicate', updatedData);
+      await createIntegrationFn({
+        logo: selectedIntegration?.logo,
+        isFavorite: selectedIntegration?.isFavorite,
+        integrationName: copyIntegrationName,
+        integrationCode: selectedIntegration?.integrationCode!,
+        applicationName: selectedIntegration?.applicationName!,
+        description: selectedIntegration?.description,
+        integrationType: selectedIntegration?.integrationType!,
+        integrationCategory: selectedIntegration?.integrationCategory!,
+        connectionType: selectedIntegration?.connectionType!,
+        authType: selectedIntegration?.authType!,
+        connectionLimit: selectedIntegration?.connectionLimit!,
+        status: selectedIntegration?.status!,
+        companies: selectedIntegration?.companies!,
+      });
+
+      toast.success(
+        `${selectedIntegration?.integrationName} duplicated successfully`
+      );
+
+      dispatch({ type: "RESET_INTEGRATION_FORM" });
+      dispatch({ type: "CLEAR_INTEGRATION_ERRORS" });
+    } catch (error) {
+      console.error("Failed to duplicate integration", error);
+      toast.error("Failed to duplicate integration");
+    } finally {
+      setIntegrationTaskStateDuplicate({ ...initialConfirmationValues });
+    }
+    
+  }
+
+  const onDuplicateCancelHandler = () =>{
+    setIntegrationTaskStateDuplicate({ ...initialConfirmationValues });
+  }
+
   return (
     <UnifiedContext.Provider
       value={{
@@ -549,12 +745,14 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
         closeConnectionDrawer,
         isIntegrationDrawerOpen,
         isConnectionDrawerOpen,
-        isDeleteIntegrationOpen,
+        DeleteIntegrationOpen,
+        integrationTaskState,
+        integrationTaskStateDuplicate,
         integrationConfirmationOpen,
         connectionConfirmationOpen,
         setIntegrationConfirmationOpen,
         setConnectionConfirmationOpen,
-        setIsDeleteIntegrationOpen,
+        setDeleteIntegrationOpen,
         onIntegrationConfirmHandler,
         onIntegrationCancelHandler,
         onConnectionConfirmHandler,
@@ -569,6 +767,36 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
           title={integrationConfirmationOpen.title}
           onClose={onIntegrationCancelHandler}
           onConfirm={onIntegrationConfirmHandler}
+        />
+      )}
+
+      {DeleteIntegrationOpen.flag && (
+        <ConfirmationModal
+          isOpen={DeleteIntegrationOpen.flag}
+          message={DeleteIntegrationOpen.message}
+          title={DeleteIntegrationOpen.title}
+          onClose={onDeleteCancelHandler}
+          onConfirm={onDeleteIntegrtionHandler}
+        />
+      )}
+
+      {integrationTaskState.flag && (
+        <ConfirmationModal
+          isOpen={integrationTaskState.flag}
+          message={integrationTaskState.message}
+          title={integrationTaskState.title}
+          onClose={onDeActivateCancelHandler}
+          onConfirm={onDeActivateIntegrtionHandler}
+        />
+      )}
+
+      {integrationTaskStateDuplicate.flag && (
+        <ConfirmationModal
+          isOpen={integrationTaskStateDuplicate.flag}
+          message={integrationTaskStateDuplicate.message}
+          title={integrationTaskStateDuplicate.title}
+          onClose={onDuplicateCancelHandler}
+          onConfirm={onDuplicateIntegrtionHandler}
         />
       )}
 

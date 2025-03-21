@@ -68,6 +68,12 @@ export const action: ActionFunction = async ({ request }) => {
         if (typeof integration.lastTestResult === 'string') {
             updatedIntegration.lastTestResult = integration.lastTestResult;
         }
+        if (typeof integration.deletedAt === 'string') {
+            updatedIntegration.deletedAt = integration.deletedAt;
+        }
+        if (typeof integration.deletedBy === 'string') {
+            updatedIntegration.deletedBy = integration.deletedBy;
+        }
 
         // Add standard audit fields
         updatedIntegration.lastUpdatedBy = userId;

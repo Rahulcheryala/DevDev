@@ -99,7 +99,7 @@ const IntegrationForm = ({
     purpose:
       currentFlow === "edit"
         ? selectedIntegration?.description
-        : integrationForm?.purpose,
+        : integrationForm?.description,
     applicationName:
       currentFlow === "edit"
         ? selectedIntegration?.applicationName
@@ -115,7 +115,7 @@ const IntegrationForm = ({
     authentication:
       currentFlow === "edit"
         ? selectedIntegration?.authType
-        : integrationForm?.authentication,
+        : integrationForm?.authType,
     // status: currentFlow === "edit" ? selectedIntegration?.status : integrationForm?.status,
     connectionLimit:
       currentFlow === "edit"
@@ -389,7 +389,7 @@ const IntegrationForm = ({
             min={1}
             placeholder="Enter the connection limit"
             className="bg-inputBg border-0"
-            value={initialValues.connectionLimit}
+            value={initialValues.connectionLimit!}
             onChange={(e) => handleChange!(e)}
             onBlur={(e) => handleBlur!(e)}
           />

@@ -5,7 +5,7 @@ import { CreationTabs } from "../../../../components/Layout";
 import { ButtonProps } from "../../../../components/Layout/Screen/Creation/SaveButton";
 import { createIntegrationFn } from "../../utils/api.utils";
 import { integrationGeneralInfoSchema } from "./GeneralInfo";
-import { IntegrationAddFlowTabs } from "../../models/constants";
+import { CreationFlowTabs } from "../../models/constants";
 import { GeneralInfo } from "./GeneralInfo";
 import { SchedulePolicies } from "./SchedulePolicies";
 import { TestConnect } from "./TestConnect";
@@ -22,14 +22,14 @@ const IntegrationAddFlow = ({
   isOpen,
   closeDrawer,
 }: IntegrationCreateFlowProps) => {
-  const [activeTab, setActiveTab] = useState<IntegrationAddFlowTabs>(
-    IntegrationAddFlowTabs.STEP_1
+  const [activeTab, setActiveTab] = useState<CreationFlowTabs>(
+    CreationFlowTabs.STEP_1
   );
   const { state, dispatch, openConnectionDrawer } = useUnifiedContext();
   const { integrationForm, integrationFlow } = state;
 
   const onCloseHandler = (bool?: boolean) => {
-    setActiveTab(IntegrationAddFlowTabs.STEP_1);
+    setActiveTab(CreationFlowTabs.STEP_1);
     closeDrawer(bool);
   };
 
@@ -47,7 +47,7 @@ const IntegrationAddFlow = ({
 
   const onSubmit = async (action: ButtonTypes) => {
     if (action === "next") {
-      setActiveTab(IntegrationAddFlowTabs.STEP_2);
+      setActiveTab(CreationFlowTabs.STEP_2);
     } else if (action === "save") {
       saveData(true);
     } else if (action === "draft") {
@@ -63,8 +63,8 @@ const IntegrationAddFlow = ({
     updateBody?: Partial<typeof integrationForm>
   ) => {
     try {
-      const isValid = await validateForm();
-      if (!isValid) return;
+      // const isValid = await validateForm();
+      // if (!isValid) return;
 
       const body = { ...integrationForm, ...updateBody };
       await createIntegrationFn(body);
@@ -85,19 +85,19 @@ const IntegrationAddFlow = ({
 
   const mainButton: ButtonProps = useMemo(() => {
     switch (activeTab) {
-      case IntegrationAddFlowTabs.STEP_1:
+      case CreationFlowTabs.STEP_1:
         return {
           label: "Next",
           id: "next",
-          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_2),
+          onClickHandler: () => setActiveTab(CreationFlowTabs.STEP_2),
         };
-      case IntegrationAddFlowTabs.STEP_2:
+      case CreationFlowTabs.STEP_2:
         return {
           label: "Next",
           id: "next",
-          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_3),
+          onClickHandler: () => setActiveTab(CreationFlowTabs.STEP_3),
         };
-      case IntegrationAddFlowTabs.STEP_3:
+      case CreationFlowTabs.STEP_3:
         return {
           label: "Save & Finish",
           id: "save",
@@ -107,15 +107,15 @@ const IntegrationAddFlow = ({
         return {
           label: "Next",
           id: "next",
-          onClickHandler: () => setActiveTab(IntegrationAddFlowTabs.STEP_1),
+          onClickHandler: () => setActiveTab(CreationFlowTabs.STEP_1),
         };
     }
   }, [activeTab]);
 
   const optionButtons: ButtonProps[] = useMemo(() => {
     switch (activeTab) {
-      case IntegrationAddFlowTabs.STEP_1:
-      case IntegrationAddFlowTabs.STEP_2:
+      case CreationFlowTabs.STEP_1:
+      case CreationFlowTabs.STEP_2:
         return [
           {
             label: "Save as Draft",
@@ -123,7 +123,7 @@ const IntegrationAddFlow = ({
             onClickHandler: (mode: string) => onSubmit(mode as ButtonTypes),
           },
         ];
-      case IntegrationAddFlowTabs.STEP_3:
+      case CreationFlowTabs.STEP_3:
         return [
           {
             label: "Save & Add New Connection",
@@ -148,21 +148,21 @@ const IntegrationAddFlow = ({
     {
       id: "1",
       title: "1. General",
-      value: IntegrationAddFlowTabs.STEP_1,
+      value: CreationFlowTabs.STEP_1,
       containerClassName: "overflow-y-auto",
       component: <GeneralInfo />,
     },
     {
       id: "2",
       title: "2. Schedule & Policies",
-      value: IntegrationAddFlowTabs.STEP_2,
+      value: CreationFlowTabs.STEP_2,
       containerClassName: "overflow-auto",
       component: <SchedulePolicies />,
     },
     {
       id: "3",
       title: "3. Test & Connect",
-      value: IntegrationAddFlowTabs.STEP_3,
+      value: CreationFlowTabs.STEP_3,
       containerClassName: "overflow-auto",
       component: <TestConnect />,
     },
@@ -188,7 +188,7 @@ const IntegrationAddFlow = ({
       optionButtons={optionButtons}
       closeDrawer={onCloseHandler}
       selectedTab={activeTab}
-      onTabChanged={(tab) => setActiveTab(tab.value as IntegrationAddFlowTabs)}
+      onTabChanged={(tab) => setActiveTab(tab.value as CreationFlowTabs)}
     />
   );
 };
