@@ -26,6 +26,8 @@ export type IntegrationForm = {
     // maxRetries: number | null;
     // retryDelay: number | null;
     // timeout: number | null;
+    deletedAt?: String | null;
+    deletedBy?: String | null;
 };
 
 // Initial states for the context

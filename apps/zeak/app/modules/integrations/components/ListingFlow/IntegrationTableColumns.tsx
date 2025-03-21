@@ -333,6 +333,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
               integrationId={row.original.id}
               component="listing"
               integrationType={row.original.integrationType}
+              integrationStatus={row.original.status}
             />
           </PopoverContent>
         </Popover>
