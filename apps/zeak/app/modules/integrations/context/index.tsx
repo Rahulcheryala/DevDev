@@ -664,10 +664,10 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     e.stopPropagation();
     try {
       const newStatus =  selectedIntegration?.status === 'Active'? 'Inactive':'Active';
-      const integrationId = selectedIntegration?.id; 
+      const integrationId  = selectedIntegration?.id;
 
       await updateIntegrationFn(integrationId!, {
-        status: newStatus
+        status: String(newStatus)
       } as any);
 
       toast.success(
@@ -692,27 +692,34 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     e.stopPropagation();
     console.log('onDuplicateIntegrationHandleer', selectedIntegration);
     try {
-      
+      if(!selectedIntegration) return;
       const copyIntegrationName =  `Copy Of ${selectedIntegration?.integrationName}`;
       const updatedData = {
         ...selectedIntegration,
-        integrationName: copyIntegrationName
+        integrationName: copyIntegrationName,
+        integrationCode: `CP-${selectedIntegration?.integrationCode!}`,
       }
+      const cpIntegrationType = selectedIntegration.integrationType.replace(/_/g, " ");
       console.log('In duplicate', updatedData);
+      // await createIntegrationFn({})
+      // await createIntegrationExample()
       await createIntegrationFn({
+
         logo: selectedIntegration?.logo,
         isFavorite: selectedIntegration?.isFavorite,
         integrationName: copyIntegrationName,
-        integrationCode: selectedIntegration?.integrationCode!,
+        integrationCode: `CP-${selectedIntegration?.integrationCode!}`,
         applicationName: selectedIntegration?.applicationName!,
+        // applicationName: ApplicationName.Azure_DevOps,
         description: selectedIntegration?.description,
-        integrationType: selectedIntegration?.integrationType!,
-        integrationCategory: selectedIntegration?.integrationCategory!,
+        integrationType: cpIntegrationType!,
+        integrationCategory: selectedIntegration?.integrationCategory!.replace(/_/g, " "),
         connectionType: selectedIntegration?.connectionType!,
         authType: selectedIntegration?.authType!,
         connectionLimit: selectedIntegration?.connectionLimit!,
         status: selectedIntegration?.status!,
-        companies: selectedIntegration?.companies!,
+        companyIds: selectedIntegration?.companyIds!,
+        tags: ["Project Management", "Azure DevOps", "Project Management"],
       });
 
       toast.success(

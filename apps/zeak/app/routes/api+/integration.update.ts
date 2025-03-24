@@ -20,6 +20,9 @@ export const action: ActionFunction = async ({ request }) => {
         if (typeof integration.integrationName === 'string') {
             updatedIntegration.integrationName = integration.integrationName;
         }
+        if (typeof integration.applicationName === 'string') {
+            updatedIntegration.applicationName = integration.applicationName;
+        }
         if (typeof integration.integrationCode === 'string') {
             updatedIntegration.integrationCode = integration.integrationCode;
         }
