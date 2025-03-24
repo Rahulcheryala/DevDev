@@ -15,17 +15,19 @@ export type IntegrationForm = {
     integrationCode: string;
     applicationName: ApplicationName | '';
     description?: string;
-    integrationType:  'System' | "User Defined";
+    integrationType: "System" | "User Defined";
     integrationCategory: IntegrationCategory | '';
     connectionType: ConnectionType | '';
     authType: AuthType | '';
     connectionLimit: number | null;
     status: Status | ''
-    companies: string[];
+    companyIds: string[];
     // executionFrequency: ExecutionFrequency | '';
     // maxRetries: number | null;
     // retryDelay: number | null;
     // timeout: number | null;
+    deletedAt?: String | null;
+    deletedBy?: String | null;
 };
 
 // Initial states for the context
@@ -42,7 +44,8 @@ export const initialIntegrationForm: IntegrationForm = {
     authType: '',
     connectionLimit: 0,
     status: 'Active',
-    companies: [],
+    companyIds: [],
+    tags:[],
     // executionFrequency: 'On_Demand',
     // maxRetries: null,
     // retryDelay: null,

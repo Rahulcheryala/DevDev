@@ -20,6 +20,9 @@ export const action: ActionFunction = async ({ request }) => {
         if (typeof integration.integrationName === 'string') {
             updatedIntegration.integrationName = integration.integrationName;
         }
+        if (typeof integration.applicationName === 'string') {
+            updatedIntegration.applicationName = integration.applicationName;
+        }
         if (typeof integration.integrationCode === 'string') {
             updatedIntegration.integrationCode = integration.integrationCode;
         }
@@ -67,6 +70,12 @@ export const action: ActionFunction = async ({ request }) => {
         }
         if (typeof integration.lastTestResult === 'string') {
             updatedIntegration.lastTestResult = integration.lastTestResult;
+        }
+        if (typeof integration.deletedAt === 'string') {
+            updatedIntegration.deletedAt = integration.deletedAt;
+        }
+        if (typeof integration.deletedBy === 'string') {
+            updatedIntegration.deletedBy = integration.deletedBy;
         }
 
         // Add standard audit fields

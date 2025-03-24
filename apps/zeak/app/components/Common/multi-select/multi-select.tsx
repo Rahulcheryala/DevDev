@@ -16,17 +16,17 @@ export default function MultiSelect({ options, selectedOptions, onSelect, width,
       <PopoverTrigger>
         <div className="flex items-center justify-between relative w-full">
           <div className={`flex ${width ? `w-[${width}px]` : 'w-full'} gap-3 bg-[#F7F7F8] items-center h-[56px] px-4 rounded-[12px] text-muted-foreground border border-input`}>
-            {selectedOptions.length === 0 ? (
+            {selectedOptions?.length === 0 ? (
               <div className="flex items-center">Select a Company(s)</div>
             ) : (
               <>
-                {selectedOptions.slice(0, 2).map((option) => (
+                {selectedOptions?.slice(0, 2).map((option) => (
                   <div key={option} className={`flex items-center h-[33px] gap-2 py-[6px] px-2 rounded-[12px] justify-center bg-white text-[#101828]`}>
                     {option}
                     <XIcon onClick={() => onDelete(option)} className="w-5 h-5 text-[#101828]" />
                   </div>
                 ))}
-                {selectedOptions.length > 2 && (
+                {selectedOptions?.length > 2 && (
                   <div className={`flex items-center h-[33px] gap-2 py-[6px] px-2 rounded-[12px] justify-center bg-white text-[#101828]`}>
                     +{selectedOptions.length - 2}
                   </div>
@@ -39,7 +39,7 @@ export default function MultiSelect({ options, selectedOptions, onSelect, width,
       </PopoverTrigger>
       <PopoverContent className={`w-[${width}px] p-4`}>
         <div className="flex gap-3">
-          {options.map((option) => (
+          {options?.map((option) => (
             <div key={option} onClick={() => onSelect(option)} className="flex p-3 flex-col justify-center items-start gap-[NaNpx] rounded-[12px] bg-[#F7F7F8]">
               {option}
             </div>

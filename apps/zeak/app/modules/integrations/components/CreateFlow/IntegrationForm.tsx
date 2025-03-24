@@ -99,7 +99,7 @@ const IntegrationForm = ({
     purpose:
       currentFlow === "edit"
         ? selectedIntegration?.description
-        : integrationForm?.purpose,
+        : integrationForm?.description,
     applicationName:
       currentFlow === "edit"
         ? selectedIntegration?.applicationName
@@ -115,16 +115,16 @@ const IntegrationForm = ({
     authentication:
       currentFlow === "edit"
         ? selectedIntegration?.authType
-        : integrationForm?.authentication,
+        : integrationForm?.authType,
     // status: currentFlow === "edit" ? selectedIntegration?.status : integrationForm?.status,
     connectionLimit:
       currentFlow === "edit"
         ? selectedIntegration?.connectionLimit
         : integrationForm?.connectionLimit,
-    companies:
+    companyIds:
       currentFlow === "edit"
         ? selectedIntegration?.companyIds
-        : integrationForm?.companies,
+        : integrationForm?.companyIds,
   };
 
   console.log(initialValues);
@@ -226,7 +226,7 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(ApplicationName).map((application) => (
-                <SelectItem key={application} value={application}>
+                <SelectItem key={application} value={application?.replace(/_/g, " ")}>
                   {application?.replace(/_/g, " ")}
                 </SelectItem>
               ))}
@@ -260,7 +260,7 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(IntegrationCategory).map((category) => (
-                <SelectItem key={category} value={category}>
+                <SelectItem key={category} value={category.replace(/_/g, " ")}>
                   {category?.replace(/_/g, " ")}
                 </SelectItem>
               ))}
@@ -303,7 +303,7 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(ConnectionType).map((connectionType) => (
-                <SelectItem key={connectionType} value={connectionType}>
+                <SelectItem key={connectionType} value={connectionType.replace(/_/g, " ")}>
                   {connectionType?.replace(/_/g, " ")}
                 </SelectItem>
               ))}
@@ -365,7 +365,7 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(AuthType).map((authType) => (
-                <SelectItem key={authType} value={authType}>
+                <SelectItem key={authType} value={authType.replace(/_/g, " ")}>
                   {authType?.replace(/_/g, " ")}
                 </SelectItem>
               ))}
@@ -389,7 +389,7 @@ const IntegrationForm = ({
             min={1}
             placeholder="Enter the connection limit"
             className="bg-inputBg border-0"
-            value={initialValues.connectionLimit}
+            value={initialValues.connectionLimit!}
             onChange={(e) => handleChange!(e)}
             onBlur={(e) => handleBlur!(e)}
           />
@@ -398,26 +398,26 @@ const IntegrationForm = ({
 
       <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
         <div className="flex flex-col gap-3 relative">
-          <Label htmlFor="companies" className="text-textLink">
+          <Label htmlFor="companyIds" className="text-textLink">
             Company(s) <span className="text-lg text-accent-red">*</span>
           </Label>
           <MultiSelect
-            options={integrationForm?.companies!}
-            selectedOptions={initialValues.companies!}
+            options={integrationForm?.companyIds!}
+            selectedOptions={initialValues.companyIds!}
             onSelect={(value) =>
               handleChange!({
-                target: { name: "companies", value },
+                target: { name: "companyIds", value },
               } as React.ChangeEvent<HTMLInputElement>)
             }
             onDelete={(value) =>
               handleChange!({
-                target: { name: "companies", value },
+                target: { name: "companyIds", value },
               } as React.ChangeEvent<HTMLInputElement>)
             }
           />
-          {errors?.companies && (
+          {errors?.companyIds && (
             <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.companies}
+              {errors.companyIds}
             </p>
           )}
         </div>
