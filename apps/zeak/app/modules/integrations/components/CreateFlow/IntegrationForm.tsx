@@ -226,8 +226,8 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(ApplicationName).map((application) => (
-                <SelectItem key={application} value={application?.replace(/_/g, " ")}>
-                  {application?.replace(/_/g, " ")}
+                <SelectItem key={application} value={application}>
+                  {application}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -260,8 +260,8 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(IntegrationCategory).map((category) => (
-                <SelectItem key={category} value={category.replace(/_/g, " ")}>
-                  {category?.replace(/_/g, " ")}
+                <SelectItem key={category} value={category}>
+                  {category}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -303,8 +303,8 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(ConnectionType).map((connectionType) => (
-                <SelectItem key={connectionType} value={connectionType.replace(/_/g, " ")}>
-                  {connectionType?.replace(/_/g, " ")}
+                <SelectItem key={connectionType} value={connectionType}>
+                  {connectionType}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -365,8 +365,8 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(AuthType).map((authType) => (
-                <SelectItem key={authType} value={authType.replace(/_/g, " ")}>
-                  {authType?.replace(/_/g, " ")}
+                <SelectItem key={authType} value={authType}>
+                  {authType}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -16,7 +16,7 @@ import { IConnectionModel } from "../models/connection.model";
 // import { toast } from "@zeak/react";
 import { useNavigate } from "@remix-run/react";
 import { ConfirmationModal } from "../../../components/Layout/Screen";
-import IntegrationAddFlow from "../components/CreateFlow/Integration";
+import { IntegrationAddFlow } from "../components/CreateFlow/Integration";
 import ConnectionAddFlow from "../components/CreateFlow/Connection";
 import {
   ConnectionForm,
@@ -481,7 +481,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     switch (integrationFlow) {
       case "create":
       case "edit":
-        setIsIntegrationDrawerOpen(true);
+        // setIsIntegrationDrawerOpen(true);
         if (state.selectedIntegration) {
           // Additional side effects for different flows
           // ...

@@ -49,9 +49,18 @@ const IntegrationForm = ({
 }: IntegrationFormProps) => {
   const [isEditing, setIsEditing] = useState<boolean>(true);
 
+  const validateDefaultValue = ( editedValue:any, inputValue:any) =>{
+    if(inputValue === '' || inputValue === 0){
+      return editedValue;
+    }
+    else {
+      return inputValue;
+    }
+  }
+
   // Helper function to get value based on edit mode
   const getValue = (editValue?: any, formValue?: any) => 
-    currentFlow === "edit" ? editValue : formValue;
+    currentFlow === "edit" ? validateDefaultValue(editValue, formValue) : formValue;
 
   const initialValues = {
     integrationName: getValue(selectedIntegration?.integrationName, integrationForm?.integrationName),
@@ -62,7 +71,7 @@ const IntegrationForm = ({
     connectionType: getValue(selectedIntegration?.connectionType, integrationForm?.connectionType),
     authType: getValue(selectedIntegration?.authType, integrationForm?.authType),
     connectionLimit: getValue(selectedIntegration?.connectionLimit, integrationForm?.connectionLimit),
-    companies: getValue(selectedIntegration?.companyIds, integrationForm?.companies),
+    companyIds: getValue(selectedIntegration?.companyIds, integrationForm?.companyIds),
   };
 
   // console.log(initialValues);
@@ -172,8 +181,8 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(ApplicationName).map((application) => (
-                <SelectItem key={application} value={application?.replace(/_/g, " ")}>
-                  {application?.replace(/_/g, " ")}
+                <SelectItem key={application} value={application}>
+                  {application}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -206,8 +215,8 @@ const IntegrationForm = ({
             </SelectTrigger>
             <SelectContent>
               {Object.values(IntegrationCategory).map((category) => (
-                <SelectItem key={category} value={category?.replace(/_/g, " ")}>
-                  {category?.replace(/_/g, " ")}
+                <SelectItem key={category} value={category}>
+                  {category}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -344,26 +353,26 @@ const IntegrationForm = ({
 
       <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
         <div className="flex flex-col gap-3 relative">
-          <Label htmlFor="companies" className="text-textLink">
+          <Label htmlFor="companyIds" className="text-textLink">
             Company(s) <span className="text-lg text-accent-red">*</span>
           </Label>
           <MultiSelect
-            options={integrationForm?.companies!}
-            selectedOptions={initialValues.companies!}
+            options={integrationForm?.companyIds!}
+            selectedOptions={initialValues.companyIds!}
             onSelect={(value) =>
               handleChange!({
-                target: { name: "companies", value },
+                target: { name: "companyIds", value },
               } as React.ChangeEvent<HTMLInputElement>)
             }
             onDelete={(value) =>
               handleChange!({
-                target: { name: "companies", value },
+                target: { name: "companyIds", value },
               } as React.ChangeEvent<HTMLInputElement>)
             }
           />
-          {errors?.companies && (
+          {errors?.companyIds && (
             <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.companies}
+              {errors.companyIds}
             </p>
           )}
         </div>

@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@remix-run/react";
 import { RxSlash } from "react-icons/rx";
 import { BuildingIcon } from "@zeak/icons"
 import { ChevronDown, ChevronLeft, ChevronRight, XIcon } from "lucide-react";
-import { BiEditAlt } from "react-icons/bi";
+import { BiEditAlt, BiSave } from "react-icons/bi";
 import { Popover, PopoverContent, PopoverTrigger } from "@zeak/react";
 import Image from "../../../Image";
 import StatusPill from "./StatusPill";
@@ -58,11 +58,14 @@ interface ItemHeaderProps {
   actionPopover: React.ReactNode;
   onClose: () => void;
   onEdit?: () => void;
+  onCloseEdit?: () => void;
   component?: string;
   type?: string;
+  currentFlow?: string;
+  saveEditedIntegration?: any;
 }
 
-const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedItem, breadcrumbs, actionPopover, onClose, onEdit, component, type }: ItemHeaderProps): JSX.Element => {
+const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedItem, breadcrumbs, actionPopover, onClose, onEdit, component, type, currentFlow, saveEditedIntegration, onCloseEdit }: ItemHeaderProps): JSX.Element => {
   const navigate = useNavigate();
 
   if (!selectedItem) return <></>;
@@ -168,12 +171,13 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
           <button
               title="Edit"
               className="flex items-center gap-2 py-2 px-6 text-sm disabled:opacity-50 disabled:cursor-default"
-              onClick={onEdit}
+              onClick={currentFlow==='edit'?onCloseEdit:onEdit}
               disabled={type === 'System'}
               >
               <BiEditAlt className="text-xl text-textLink" />
-              <span className="text-secondary">Edit</span>
+              <span className="text-secondary">{currentFlow==='edit'?'View':'Edit'}</span>
             </button>
+            
             <Popover>
               <PopoverTrigger className={`${selectedItem.isArchived ? 'cursor-not-allowed' : 'cursor-pointer'}`} asChild disabled={selectedItem.isArchived}>
                 <button
@@ -186,6 +190,15 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ companyName, backUrl, selectedI
                 {actionPopover}
               </PopoverContent>
             </Popover>
+            <button
+              title="Save"
+              className={`flex items-center gap-2 py-2 px-6 text-sm disabled:opacity-50 disabled:cursor-default bg-blue-500 rounded ${currentFlow !== 'edit'?'hidden':''}`}
+              onClick={saveEditedIntegration!}
+              disabled={currentFlow !== 'edit'}
+              >
+              <BiSave className="text-xl text-white" />
+              <span className="text-white">Save</span>
+            </button>
             <button
               title="Close"
               onClick={() => {
