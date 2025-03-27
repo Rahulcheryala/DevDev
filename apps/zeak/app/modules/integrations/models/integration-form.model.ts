@@ -45,7 +45,6 @@ export const initialIntegrationForm: IntegrationForm = {
     connectionLimit: 0,
     status: 'Active',
     companyIds: [],
-    tags:[],
     // executionFrequency: 'On_Demand',
     // maxRetries: null,
     // retryDelay: null,

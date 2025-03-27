@@ -7,7 +7,7 @@ import ConnectionList from "./ConnectionList";
 
 function IntegrationDetails() {
   const {
-    state: { selectedIntegration, integrationFlow }, dispatch
+    state: { selectedIntegration, integrationFlow, integrationForm }, dispatch
   } = useUnifiedContext();
 
   if (!selectedIntegration) return null;
@@ -24,6 +24,7 @@ function IntegrationDetails() {
           className="bg-[#F7F9FE]"
           selectedIntegration={selectedIntegration}
           currentFlow={integrationFlow}
+          integrationForm={integrationForm}
           dispatch={dispatch}
           items={[
             {
