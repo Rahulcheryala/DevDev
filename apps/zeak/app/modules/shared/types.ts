@@ -1,0 +1,61 @@
+// import type { getNotes } from "./shared.service";
+
+export type BillOfMaterialNodeType =
+  | "parent"
+  | "line"
+  | "assemblies"
+  | "operations"
+  | "materials"
+  | "assembly"
+  | "operation"
+  | "material";
+
+export type BillOfMaterialNode = {
+  id: string;
+  parentId?: string;
+  label: string;
+  type: BillOfMaterialNodeType;
+  meta?: any;
+  children?: BillOfMaterialNode[];
+};
+
+export enum DataType {
+  Boolean = 1,
+  Date = 2,
+  List = 3,
+  Numeric = 4,
+  Text = 5,
+  User = 6,
+}
+
+// export type Note = NonNullable<
+//   Awaited<ReturnType<typeof getNotes>>["data"]
+// >[number];
+
+export const standardFactorType = [
+  "Hours/Piece",
+  "Hours/100 Pieces",
+  "Hours/1000 Pieces",
+  "Minutes/Piece",
+  "Minutes/100 Pieces",
+  "Minutes/1000 Pieces",
+  "Pieces/Hour",
+  "Pieces/Minute",
+  "Seconds/Piece",
+  "Total Hours",
+  "Total Minutes",
+] as const;
+
+export type StandardFactor = (typeof standardFactorType)[number];
+
+export enum EmptyListOriginOptions {
+  FontManagerUpload = "font upload",
+}
+
+export type DropdownCustomOption = {
+  value: any;
+  labelHeading: string;
+  labelSubheading: string;
+  avatarName: string;
+  isChecked: boolean;
+};

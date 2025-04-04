@@ -1,0 +1,3 @@
+/** @format */
+
+module.exports = require("@zeak/tailwind/tailwind.config");

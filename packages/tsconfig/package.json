@@ -1,0 +1,9 @@
+{
+  "name": "@zeak/tsconfig",
+  "license": "MIT",
+  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "*"
+}

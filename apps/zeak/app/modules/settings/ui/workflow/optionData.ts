@@ -1,0 +1,63 @@
+export const optionData = [
+  {
+    optionsTitle: "Modules",
+    events: [
+      {
+        id: "1",
+        Icon: "apps/zeak/app/modules/react-flow/ui/Flow/assets/Integration.svg",
+        title: "Send email",
+        description: "When a sales order is created in my ERP",
+        showSecondaryOptions: false,
+        isDisabled: false,
+        background: "rgba(234, 27, 34, 0.12)",
+        notification_type: "email",
+        toEmail: [],
+      },
+      {
+        id: "2",
+        Icon: "apps/zeak/app/modules/react-flow/ui/Flow/assets/Integration.svg",
+        title: "Send sequential approval email",
+        description: "When a sales order is created in my ERP",
+        showSecondaryOptions: false,
+        isDisabled: false,
+        background: "rgba(234, 27, 34, 0.12)",
+        notification_type: "email",
+        toEmail: [
+          { email: "testuser@example.com" },
+          { email: "testuserOne@example.com" },
+          { email: "testuserTwo@example.com" },
+        ],
+      },
+      {
+        id: "3",
+        Icon: "apps/zeak/app/modules/react-flow/ui/Flow/assets/Integration.svg",
+        title: "Send parallel approval email",
+        description: "When a sales order is created in my ERP",
+        showSecondaryOptions: false,
+        isDisabled: false,
+        background: "rgba(234, 27, 34, 0.12)",
+        notification_type: "email",
+        toEmail: [
+          { email: "testuser@example.com" },
+          { email: "testuserOne@example.com" },
+          { email: "testuserTwo@example.com" },
+        ],
+      },
+      {
+        id: "4",
+        Icon: "apps/zeak/app/modules/react-flow/ui/Flow/assets/Integration.svg",
+        title: "Send all approved mail",
+        description: "When a sales order is created in my ERP",
+        showSecondaryOptions: false,
+        isDisabled: false,
+        background: "rgba(234, 27, 34, 0.12)",
+        notification_type: "email",
+        toEmail: [
+          { email: "testuser@example.com" },
+          { email: "testuserOne@example.com" },
+          { email: "testuserTwo@example.com" },
+        ],
+      },
+    ],
+  },
+];

@@ -1,0 +1,68 @@
+.user-table-search .trash-btn {
+  position: absolute;
+  right: 0;
+  top: 4px;
+}
+
+.user-table-search {
+  position: relative;
+}
+.ring-loader {
+  /* change color here */
+  color: hsl(var(--accent));
+}
+.ring-loader,
+.ring-loader:after {
+  box-sizing: border-box;
+}
+.ring-loader {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+}
+.ring-loader:after {
+  content: " ";
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  border-radius: 50%;
+  border: 3px solid currentColor;
+  border-color: currentColor transparent currentColor transparent;
+  animation: ring-loader 1.2s linear infinite;
+}
+@keyframes ring-loader {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.filepond--item-panel {
+  background-color: #d5f5d9 !important;
+}
+.filepond--file-info-main,
+.filepond--file-status-main {
+  color: hsl(var(--accent-dark));
+}
+.filepond--file-info-sub,
+.filepond--file-status-sub {
+  color: hsl(var(--tertiary));
+}
+
+[data-filepond-item-state*="error"] .filepond--item-panel,
+[data-filepond-item-state*="invalid"] .filepond--item-panel {
+  background-color: #ffdad7 !important;
+}
+
+
+.ant-picker-input >input {
+  font-size: 16px !important;
+}
+
+.ant-picker-input > input:placeholder-shown {
+  font-size: 16px !important;
+  color: var(--text-tertiary) !important;
+}

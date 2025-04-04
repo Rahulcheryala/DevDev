@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "ES2019"],
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["../../packages/react/src/*"]
+    }
+  },
+  "extends": "@zeak/tsconfig/react-library.json",
+  "include": ["src"],
+  "exclude": ["**/*.d.ts", "./dist", "node_modules"]
+}

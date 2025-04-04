@@ -1,0 +1,21 @@
+.react-.react-flow__node-input,
+.react-flow__node-default,
+.react-flow__node-output,
+.react-flow__node-group {
+  padding: 0 !important;
+  width: 600px !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.small-nodes .react-.react-flow__node-input,
+.small-nodes .react-flow__node-default,
+.small-nodes .react-flow__node-output,
+.small-nodes .react-flow__node-group {
+  padding: 0 !important;
+  width: fit-content !important;
+  max-width: 400 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}

@@ -1,0 +1,19 @@
+.custom-quill .ql-toolbar.ql-snow {
+  border: none;
+  border-bottom: 1px solid hsl(var(--stroke));
+}
+.custom-quill .ql-container.ql-snow {
+  border: none;
+}
+
+.has-variable-dropdown {
+  position: relative;
+}
+.has-variable-dropdown > .custom-quill {
+  padding-bottom: 54px;
+}
+.variable-dropdown {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+}

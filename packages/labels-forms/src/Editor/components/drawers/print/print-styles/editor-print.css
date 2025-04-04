@@ -1,0 +1,104 @@
+
+.print {
+
+    background-color: #ecf0f1;
+    color: #34495e;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    width: 100vw;
+    height: 100%;
+}
+
+.page {
+    width: 8.5in;
+    height: 11in;
+    border: 1px solid #bdc3c7;
+    position: relative;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    /* scale: 0.6; */
+    /* top: '-100px'; */
+}
+
+#controls {
+    width: 250px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-right: 20px;
+}
+
+#outerBox {
+    position: absolute;
+    /* border: 2px solid #2c3e50; */
+    box-sizing: border-box;
+}
+
+.label {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+.label.circle {
+    border-radius: 50%;
+}
+
+.label-content {
+    position: absolute;
+    border: 1px dashed #2c3e50;
+    box-sizing: border-box;
+}
+
+.label.circle .label-content {
+    border-radius: 50%;
+}
+
+.bleed-container,
+#bleedLine {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+#bleedLine {
+    pointer-events: none;
+    z-index: 1;
+}
+
+.measurement-line {
+    position: absolute;
+    background-color: #34495e;
+}
+
+.measurement-line.horizontal {
+    height: 1px;
+    left: 0;
+}
+
+.measurement-line.vertical {
+    width: 1px;
+    top: 0;
+}
+
+.measurement-label {
+    position: absolute;
+    background-color: white;
+    font-size: 8px;
+    padding: 1px 2px;
+    border: 1px solid #34495e;
+    white-space: nowrap;
+    display:none;
+}
+
+.measurement-label.outer {
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.bleed-box {
+    position: absolute;
+    box-sizing: content-box;
+}

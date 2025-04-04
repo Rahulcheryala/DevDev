@@ -1,0 +1,30 @@
+{
+  "name": "@zeak/logger",
+  "devDependencies": {
+    "@zeak/jest": "*",
+    "@types/jest": "^26.0.22",
+    "eslint": "^8.23.1",
+    "eslint-config-zeak": "*",
+    "jest": "^26.6.3",
+    "tsup": "^6.5.0",
+    "typescript": "^5.2.2"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "jest": {
+    "preset": "@zeak/jest/node"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "private": true,
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --external react",
+    "clean": "rimraf .turbo node_modules dist",
+    "dev": "tsup src/index.ts --format esm,cjs --watch --dts --external react",
+    "lint": "TIMING=1 eslint \"src/**/*.ts*\"",
+    "test": "jest"
+  },
+  "types": "./dist/index.d.ts",
+  "version": "*"
+}
