@@ -28,7 +28,7 @@ export default function CollapsiblePanel({
         <div className="flex items-center gap-2">
           <Label
             htmlFor={label}
-            className="text-[#0D0C22] text-xl font-medium font-sans"
+            className="text-[#0D0C22] text-lg font-['Suisse Int\'l'] font-medium"
           >
             {label}
           </Label>

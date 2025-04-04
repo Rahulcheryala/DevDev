@@ -189,13 +189,13 @@ export async function action({ request }: ActionFunctionArgs) {
   const url = new URL(request.url);
   const originUrl = `${url.protocol}//${url.host}`;
 
-  const slugifiedDomainUrl = slugify(companyName, {
+  const slugifiedDomainUrl = slugify(companyName as string, {
     lower: true, // convert to lowercase
     remove: /[*+~.()'"!:@#$%^&?/<>;:"'-]/g, // remove special characters
   });
 
   const tenantInsert = await insertTenant(supabaseClient, {
-    name: companyName,
+    name: companyName as string,
     status: companyStatusMap.ACTIVE,
     createdBy: userId
   });
@@ -222,7 +222,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   const companyInsert = await insertCompany(supabaseClient, {
-    name: companyName??'',
+    name: companyName ?? '',
     domainUrl: `${originUrl}/${slugifiedDomainUrl}`,
     status: companyStatusMap.ACTIVE,
     tenantId: tenantInsert.data?.id,

@@ -1,78 +1,79 @@
 import React, { useEffect } from "react";
-import { IntegrationComponents } from "../../models/constants";
-import { ConnectionForm } from "../../models/connection-form.model";
-import { useUnifiedContext } from "../../context";
-import { ConnectionFlow } from "../../context";
-import { IConnectionModel } from "../../models/connection.model";
+import { ConnectionFlow, useUnifiedContext } from "../../context";
+import { FiEdit3 } from "react-icons/fi";
+import { RxCopy } from "react-icons/rx";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { CiExport } from "react-icons/ci";
+import { TbLink } from "react-icons/tb";
+import { LuUnlink } from "react-icons/lu";
+import { ConnectionStatus } from "@prisma/client";
+import { ActionButtonProps } from "@zeak/ui";
 
-function ConnectionActionOptions({
-  connectionId,
-  component,
-  type,
-}: {
-  connectionId?: string;
-  component?: IntegrationComponents;
-  type?: string;
-}) {
+export function useConnectionActions(
+  connectionId: string,
+  connectionStatus: ConnectionStatus
+) {
   const {
     dispatch,
-    state: { selectedConnection, records },
+    state: { connectionsList },
   } = useUnifiedContext();
 
   const onClickHandler = (flow: ConnectionFlow) => {
-    if (flow === "edit") {
-      dispatch({
-        type: "UPDATE_CONNECTION_FORM",
-        payload: selectedConnection as unknown as ConnectionForm,
-        // setFormDirty: false,
-      });
+    // First ensure the correct connection is selected
+    const connection = connectionsList.find((conn) => conn.id.toString() === connectionId);
+    if (connection) {
+      dispatch({ type: "SET_SELECTED_CONNECTION", payload: connection });
     }
+    
+    // Then set the flow
     dispatch({ type: "SET_CONNECTION_FLOW", payload: flow });
   };
 
+  // Load selected connection when component mounts
   useEffect(() => {
     if (connectionId) {
-      const rec = records.find((int) => int.id.toString() === connectionId);
-      if (rec) {
-        dispatch({ type: "SET_SELECTED_CONNECTION", payload: rec as unknown as IConnectionModel });
+      const connection = connectionsList.find((conn) => conn.id.toString() === connectionId);
+      if (connection) {
+        dispatch({ type: "SET_SELECTED_CONNECTION", payload: connection });
       }
     }
-  }, [connectionId]);
+  }, [connectionId, connectionsList, dispatch]);
 
-  return (
-    <div className="flex flex-col">
-      {type !== "System" && (
-        <button
-          className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]"
-          onClick={() => onClickHandler("edit")}
-        >
-          Edit Connection info
-        </button>
-      )}
-      {/* <button className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]">
-        <span onClick={() => onClickHandler("connection")}>
-          Manage Connections
-        </span>
-      </button>
-      <button className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]">
-        <span onClick={() => onClickHandler("activation")}>
-          {selectedConnection?.isFavorite ? "Remove from" : "Add to"} Favorites
-        </span>
-      </button>
-      <button className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]">
-        <span onClick={() => onClickHandler("duplicate")}>
-          Duplicate {selectedIntegration?.integrationName}
-        </span>
-      </button>
-      {type !== "System" && (
-        <button className="flex items-center gap-2 px-4 text-left py-2 text-sm hover:rounded-sm hover:bg-[#B7DCFF]">
-          <span onClick={() => onClickHandler("delete")}>
-            Delete {selectedIntegration?.integrationName}
-          </span>
-        </button>
-      )} */}
-    </div>
-  );
+  const actionButtons: ActionButtonProps[] = [
+    // {
+    //   icon: <FiEdit3 className="text-accent-dark" />,
+    //   label: "Edit Info",
+    //   onClick: () => onClickHandler("edit"),
+    // },
+    {
+      icon: <LuUnlink className="text-accent-dark" />,
+      label: "Deactivate Connection",
+      onClick: () => onClickHandler("deactivation"),
+      disabled: connectionStatus === "Offline",
+    },
+    {
+      icon: <TbLink className="text-accent-dark" />,
+      label: "Activate Connection",
+      onClick: () => onClickHandler("activation"),
+      disabled: connectionStatus === "Online",
+    },
+    {
+      icon: <RxCopy className="text-accent-dark" />,
+      label: "Duplicate Connection",
+      onClick: () => onClickHandler("duplicate"),
+    },
+    {
+      icon: <RiDeleteBin6Line className="text-accent-dark" />,
+      label: "Delete Connection",
+      onClick: () => onClickHandler("delete"),
+    },
+    {
+      icon: <CiExport className="text-accent-dark" />,
+      label: "Export Data",
+      onClick: () => onClickHandler("export"),
+    },
+  ];
+
+  return actionButtons;
 }
 
-export default ConnectionActionOptions;

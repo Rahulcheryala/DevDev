@@ -2,7 +2,7 @@ import {
     ExecutionFrequency,
     ConnectionStatus,
     LastTestResult,
-    EnvironmentType
+    ConnectionEnvType
 } from "@prisma/client";
 
 export interface IConnectionModel {
@@ -14,14 +14,15 @@ export interface IConnectionModel {
     companyIds: string[];
     isEnabled: boolean;
     connectionDetails: {
-        environmentType: EnvironmentType;
+        environmentType: ConnectionEnvType;
         environmentURL: string;
         maxRetries: number;
-        timeout: number;
+        timeout: string;
         retryDelay: number;
     };
     executionFrequency: ExecutionFrequency;
     connectionStatus: ConnectionStatus;
+    copies: number;
     isTested: boolean;
     lastTestedAt?: Date;
     lastTestedBy?: string;
@@ -33,7 +34,8 @@ export interface IConnectionModel {
     deletedAt?: Date;
     deletedBy?: string;
     syncToken: string;
-    integration:{
+    integration: {
+        id: string;
         integrationName: string;
         applicationName: string;
         integrationCategory: string;

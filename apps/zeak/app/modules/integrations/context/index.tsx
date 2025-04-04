@@ -13,9 +13,9 @@ import {
 } from "../models/integration-form.model";
 import { IIntegrationModel } from "../models/integration.model";
 import { IConnectionModel } from "../models/connection.model";
-// import { toast } from "@zeak/react";
+import { toast } from "@zeak/ui";
 import { useNavigate } from "@remix-run/react";
-import { ConfirmationModal } from "../../../components/Layout/Screen";
+import { ConfirmationModal } from "@zeak/ui";
 import IntegrationAddFlow from "../components/CreateFlow/Integration";
 import ConnectionAddFlow from "../components/CreateFlow/Connection";
 import {
@@ -23,11 +23,19 @@ import {
   initialConnectionFormData,
 } from "../models/connection-form.model";
 import {
-  fetchCompany,
+  createConnectionFn,
+  createIntegrationFn,
+  fetchCompanyById,
   fetchConnectionsList,
   fetchIntegrationConnections,
   fetchIntegrationsList,
+  updateConnectionFn,
+  updateIntegrationFn,
 } from "../utils/api.utils";
+import { refreshConnectionsAction, refreshIntegrationsAction } from "./action";
+import { IntegrationType } from "@prisma/client";
+import { exportConnectionData, exportIntegrationData } from "../utils/download.utils";
+import UnableToDeleteModal from "../components/misc/UnableToDeleteModal";
 
 // Define flow types for integrations
 export type IntegrationFlow =
@@ -35,17 +43,21 @@ export type IntegrationFlow =
   | "edit"
   | "connection"
   | "activation"
+  | "deactivation"
   | "duplicate"
   | "delete"
+  | "export"
   | null;
 
 // Define flow types for connections
 export type ConnectionFlow =
   | "create"
   | "edit"
-  | "delete"
   | "activation"
+  | "deactivation"
   | "duplicate"
+  | "delete"
+  | "export"
   | null;
 
 // Unified state for both integrations and connections
@@ -72,7 +84,7 @@ export type UnifiedState = {
   isConnectionFormDirty: boolean;
 
   // company state
-  company: { name: string, id: string } | null;
+  companies: { name: string; id: string }[] | [];
 };
 
 // Initial state for the unified context
@@ -99,7 +111,7 @@ const initialState: UnifiedState = {
   isConnectionFormDirty: false,
 
   // company state
-  company: null,
+  companies: [],
 };
 
 // Unified action type
@@ -145,7 +157,7 @@ export type UnifiedAction =
   | { type: "CLEAR_CONNECTION_ERRORS" }
 
   // Company actions
-  | { type: "SET_COMPANY"; payload: { name: string, id: string } }  
+  | { type: "SET_COMPANIES"; payload: { name: string; id: string } };
 
 // Unified reducer function
 function unifiedReducer(
@@ -185,7 +197,7 @@ function unifiedReducer(
         integrationErrors: { ...state.integrationErrors, ...action.payload },
       };
     case "CLEAR_INTEGRATION_ERRORS":
-      return { ...state, integrationErrors: {} };;
+      return { ...state, integrationErrors: {} };
 
     // Connection reducers
     case "SET_CONNECTION_LOADING":
@@ -220,8 +232,8 @@ function unifiedReducer(
       return { ...state, connectionErrors: {} };
 
     // company actions
-    case "SET_COMPANY":
-      return { ...state, company: action.payload };
+    case "SET_COMPANIES":
+      return { ...state, companies: [...state.companies, action.payload] };
     default:
       return state;
   }
@@ -240,27 +252,31 @@ const UnifiedContext = createContext<
       isConnectionDrawerOpen: boolean;
       isDeleteIntegrationOpen: boolean;
       integrationConfirmationOpen: {
-        message: string;
+        message: ConfirmationMessage;
         title: string;
         flag: boolean;
+        type: ModalType;
       };
       connectionConfirmationOpen: {
-        message: string;
+        message: ConfirmationMessage;
         title: string;
         flag: boolean;
+        type: ModalType;
       };
       setIntegrationConfirmationOpen: React.Dispatch<
         React.SetStateAction<{
-          message: string;
+          message: ConfirmationMessage;
           title: string;
           flag: boolean;
+          type: ModalType;
         }>
       >;
       setConnectionConfirmationOpen: React.Dispatch<
         React.SetStateAction<{
-          message: string;
+          message: ConfirmationMessage;
           title: string;
           flag: boolean;
+          type: ModalType;
         }>
       >;
       setIsDeleteIntegrationOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -272,10 +288,14 @@ const UnifiedContext = createContext<
   | undefined
 >(undefined);
 
+type ConfirmationMessage = string | string[];
+type ModalType = "warning" | "info" | "danger" | "success" | "custom";
+
 const initialConfirmationValues = {
-  message: "",
+  message: "" as ConfirmationMessage,
   title: "",
   flag: false,
+  type: "warning" as ModalType,
 };
 
 // Global variable to track provider instances for debugging
@@ -300,7 +320,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // Access needed state variables
-  const { records, integrationFlow, selectedIntegration, connectionFlow } =
+  const { records, integrationFlow, selectedIntegration, connectionFlow, selectedConnection } =
     state;
 
   const navigate = useNavigate();
@@ -310,6 +330,13 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     isFetched: false,
     isFetching: false,
     lastFetched: null as number | null,
+  });
+
+  // Inside the UnifiedProvider component, add a new state for the unable to delete modal
+  const [unableToDeleteModalState, setUnableToDeleteModalState] = useState({
+    isOpen: false,
+    entityType: "integration" as "integration" | "connection",
+    dependencies: [] as { count: number; label: string; action?: () => void }[]
   });
 
   // Debug code to detect provider instances
@@ -353,20 +380,16 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
         dispatch({ type: "SET_CONNECTION_ERROR", payload: null });
 
         if (dataFetchStatus.isFetched) return;
-        const [integrations, connectionsList, company] = await Promise.all([
+        const [integrations, connectionsList] = await Promise.all([
           fetchIntegrationsList(),
           fetchConnectionsList(),
-          fetchCompany(),
         ]);
-
-        // console.log("Fetching done in unified context");
 
         dispatch({ type: "SET_INTEGRATIONS_LIST", payload: integrations.data });
         dispatch({
           type: "SET_CONNECTIONS_LIST",
           payload: connectionsList.data,
         });
-        dispatch({ type: "SET_COMPANY", payload: company });
 
         // Update fetch status
         setDataFetchStatus({
@@ -396,81 +419,186 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    console.log(state.connectionForm)
-  }, [state.connectionForm])
-
-//   useEffect(()=>{
-//     console.log(state.company);
-// },[state.company])
+  // useEffect(() => {
+  //   console.log(state.connectionsList);
+  // }, [state.connectionsList]);
 
   // useEffect(() => {
-  //   console.log(state.selectedIntegration)
-  // }, [state.selectedIntegration])
+  //   console.log(state.selectedConnection);
+  // }, [state.selectedConnection]);
 
-  // useEffect(()=>{
-  //   console.log("in useEffect")
-  //   if(state.selectedIntegration && state.connectionsList){
-  //     console.log("in if case")
-  //     dispatch({
-  //       type: "SET_SELECTED_INTEGRATION_CONNECTIONS",
-  //       payload: state.connectionsList?.filter(
-  //         (connection) => connection.integrationId === state.selectedIntegration?.id
-  //       ) || null,
-  //     });
-  //   }
-  //   else if(state.selectedIntegration && !state.connectionsList){
-  //     console.log("in else if case")
-  //     fetchIntegrationConnections(state.selectedIntegration?.id).then((connections)=>{
-  //       dispatch({
-  //         type: "SET_SELECTED_INTEGRATION_CONNECTIONS",
-  //         payload: connections,
-  //       });
-  //     });
-  //   }
-  // }, [state.selectedIntegration]);
+  useEffect(() => {
+    const fetchMissingCompanies = async () => {
+      if (records.length > 0) {
+        const allCompanyIds = new Set<string>();
+        records.forEach((record) => {
+          record.companyIds.forEach((id) => {
+            allCompanyIds.add(id);
+          });
+        });
+
+        const existingIds = new Set(
+          state.companies.map((company) => company.id)
+        );
+        const missingIds = Array.from(allCompanyIds).filter(
+          (id) => !existingIds.has(id)
+        );
+
+        if (missingIds.length > 0) {
+          // console.log(`Fetching ${missingIds.length} missing companies`);
+
+          const companyPromises = missingIds.map((id) => fetchCompanyById(id));
+          const results = await Promise.all(companyPromises);
+
+          // Create a Set of existing company IDs for quick lookup
+          const existingCompanyIds = new Set(state.companies.map(company => company.id));
+
+          results.forEach((result) => {
+            // Only add if the company doesn't already exist
+            if (result && result.name && result.id && !existingCompanyIds.has(result.id)) {
+              dispatch({
+                type: "SET_COMPANIES",
+                payload: { name: result.name, id: result.id },
+              });
+            }
+          });
+        }
+      }
+    };
+
+    fetchMissingCompanies();
+  }, [records]);
 
   // Handle different flows
   useEffect(() => {
     switch (integrationFlow) {
       case "create":
-      case "edit":
-      case "duplicate":
         setIsIntegrationDrawerOpen(true);
-        if (state.selectedIntegration) {
+        break;
+      case "edit":
+        if (selectedIntegration) {
           // Additional side effects for different flows
           // ...
         }
         break;
+      case "duplicate":
+        setIntegrationConfirmationOpen({
+          message: "Are you sure you want to duplicate this integration?",
+          title: "Duplicate Integration?",
+          flag: true,
+          type: "info"
+        });
+        break;
       case "activation":
-        // Handle activation flow
+        setIntegrationConfirmationOpen({
+          message: "Are you sure you want to activate this integration?",
+          title: "Activate Integration?",
+          flag: true,
+          type: "info"
+        });
+        break;
+      case "deactivation":
+        setIntegrationConfirmationOpen({
+          message: "Are you sure you want to deactivate this integration?",
+          title: "Deactivate Integration?",
+          flag: true,
+          type: "info"
+        });
         break;
       case "delete":
-        setIsDeleteIntegrationOpen(true);
+        // Check if the integration has dependencies that prevent deletion
+        const hasDependencies = selectedIntegration && checkIntegrationDependencies(selectedIntegration);
+        
+        if (hasDependencies) {
+          // If has dependencies, show the unable to delete modal instead
+          setUnableToDeleteModalState({
+            isOpen: true,
+            entityType: "integration",
+            dependencies: hasDependencies
+          });
+        } else {
+          // Otherwise show the normal delete confirmation
+          setIntegrationConfirmationOpen({
+            message: "Are you sure you want to delete this integration?",
+            title: "Delete Integration?",
+            flag: true,
+            type: "danger" as ModalType
+          });
+        }
+        break;
+      case "export":
+        const connections = state.connectionsList?.filter(
+          (connection) => connection.integrationId === state.selectedIntegration?.id
+        );
+        exportIntegrationData(state.selectedIntegration!, connections!);
         break;
       default:
         break;
     }
-  }, [integrationFlow, state.selectedIntegration]);
+  }, [integrationFlow, selectedIntegration]);
 
   // Handle connection flow changes
   useEffect(() => {
     switch (connectionFlow) {
       case "create":
-      case "edit":
-      case "duplicate":
         setIsConnectionDrawerOpen(true);
         break;
+      case "edit":
+        break;
+      case "duplicate":
+        setConnectionConfirmationOpen({
+          message: "Are you sure you want to duplicate this connection?",
+          title: "Duplicate Connection?",
+          flag: true,
+          type: "info"
+        });
+        break;
       case "activation":
-        // Handle activation flow
+        setConnectionConfirmationOpen({
+          message: "Are you sure you want to activate this connection?",
+          title: "Activate Connection?",
+          flag: true,
+          type: "info"
+        });
+        break;
+      case "deactivation":
+        setConnectionConfirmationOpen({
+          message: "Are you sure you want to deactivate this connection?",
+          title: "Deactivate Connection?",
+          flag: true,
+          type: "info"
+        });
         break;
       case "delete":
-        // Handle delete flow
+        // Check if the connection has dependencies that prevent deletion
+        const connectionDependencies = selectedConnection && checkConnectionDependencies(selectedConnection);
+        
+        if (connectionDependencies) {
+          // If has dependencies, show the unable to delete modal instead
+          setUnableToDeleteModalState({
+            isOpen: true,
+            entityType: "connection",
+            dependencies: connectionDependencies
+          });
+        } else {
+          // Otherwise show the normal delete confirmation
+          setConnectionConfirmationOpen({
+            message: "Are you sure you want to delete this connection?",
+            title: "Delete Connection?",
+            flag: true,
+            type: "danger" as ModalType
+          });
+        }
+        break;
+      case "export":
+        if (selectedConnection) {
+          exportConnectionData(selectedConnection!);
+        }
         break;
       default:
         break;
     }
-  }, [connectionFlow]);
+  }, [connectionFlow, selectedConnection]);
 
   // Integration drawer handlers
   const openIntegrationDrawer = (type: IntegrationFlow) => {
@@ -487,10 +615,190 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     }
 
     setIntegrationConfirmationOpen({
-      message: "You have unsaved changes. Are you sure you want to close?",
-      title: "Discard Changes?",
+      message: ["You're about to leave the record you are currently editing. Any unsaved changes will be lost", "Are you sure you want to continue?"],
+      title: "Attention!",
       flag: true,
+      type: "warning"
     });
+  };
+
+  const handleDuplicateIntegration = async () => {
+    try {
+      if (!selectedIntegration) return;
+      const currentCopies = selectedIntegration.copies || 0;
+      const newCopyNumber = currentCopies + 1;
+      
+      // Generate new name and code with copy number
+      const copyIntegrationName = `Copy ${newCopyNumber} of ${selectedIntegration?.integrationName}`;
+      const newIntegrationCode = `CP-${newCopyNumber}-${selectedIntegration?.integrationCode!}`;
+
+      const newIntegration = await createIntegrationFn({
+        logo: selectedIntegration.logo,
+        isFavorite: selectedIntegration.isFavorite,
+        integrationName: copyIntegrationName,
+        integrationCode: newIntegrationCode,
+        applicationName: selectedIntegration.applicationName,
+        description: selectedIntegration.description,
+        integrationType: IntegrationType.User_Defined,
+        integrationCategory: selectedIntegration.integrationCategory,
+        connectionType: selectedIntegration.connectionType,
+        authType: selectedIntegration.authType,
+        connectionLimit: selectedIntegration.connectionLimit,
+        status: selectedIntegration.status,
+        companyIds: selectedIntegration.companyIds,
+      });
+
+      const updatedIntegration = await updateIntegrationFn(selectedIntegration.id, {
+        copies: newCopyNumber
+      } as Partial<IntegrationForm>);
+
+      // console.log("updatedIntegration", updatedIntegration);
+
+      if(newIntegration && updatedIntegration){
+        toast.success(
+          "INTEGRATION DUPLICATED SUCCESSFULLY",
+          `Integration ${selectedIntegration?.integrationName} duplicated successfully`,
+          {
+            actions: [
+              {
+                label: "View Integration",
+                onClick: () => {
+                  navigate(`/x/access-settings/integrations/${newIntegration?.id}`);
+                },
+              },
+            ]
+          }
+        );
+        dispatch({ type: "RESET_INTEGRATION_FORM" });
+        dispatch({ type: "CLEAR_INTEGRATION_ERRORS" });
+        dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+        refreshIntegrationsAction({}, dispatch);
+      }
+    } catch (error) {
+      console.error("Failed to duplicate integration", error);
+      toast.error(
+        "INTEGRATION DUPLICATION FAILED",
+        "Failed to duplicate integration"
+      );
+    } finally {
+      setIntegrationConfirmationOpen({ ...initialConfirmationValues });
+    }
+  };
+
+  const handleDeleteIntegration = async () => {
+    if (!selectedIntegration) return;
+    // console.log("handleDeleteIntegration", selectedIntegration);
+    try {
+      const deletedTime = new Date().toISOString();
+      const integrationId = selectedIntegration?.id;
+
+      const response = await updateIntegrationFn(integrationId!, {
+        deletedAt: deletedTime,
+      } as Partial<IntegrationForm>);
+
+      // console.log("Delete response:", response);
+
+      if (response) {
+        toast.success(
+          "INTEGRATION DELETED SUCCESSFULLY",
+          `Integration ${selectedIntegration?.integrationName} deleted successfully`
+        );
+
+        await refreshIntegrationsAction({}, dispatch);
+        dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+        navigate("/x/access-settings/integrations");
+      }
+    } catch (error) {
+      console.error("Failed to delete integration", error);
+      // Show more details about the error if available
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      toast.error(
+        "INTEGRATION DELETION FAILED",
+        `Failed to delete integration: ${errorMessage}`
+      );
+    } finally {
+      setIntegrationConfirmationOpen({ ...initialConfirmationValues });
+    }
+  };
+
+  const handleIntegrationStatus = async (
+    selectedIntegration: IIntegrationModel
+  ) => {
+    if (!selectedIntegration) return;
+    try {
+      const integrationId = selectedIntegration.id;
+      const currentStatus = selectedIntegration.status;
+      // Status should be opposite of current status
+      const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
+
+      const response = await updateIntegrationFn(integrationId, {
+        status: newStatus,
+      } as Partial<IntegrationForm>);
+
+      // console.log("Status update response:", response);
+
+      const updatedStatus = response?.status || newStatus;
+      // console.log(`Response status: ${updatedStatus}, Expected: ${newStatus}`);
+
+      if (response) {
+        toast.success(
+          "INTEGRATION STATUS UPDATED SUCCESSFULLY",
+          `Integration ${selectedIntegration.integrationName} ${updatedStatus === "Active" ? "activated" : "deactivated"} successfully`
+        );
+
+        // Refresh the list to get updated data
+        await refreshIntegrationsAction({}, dispatch);
+        dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+      }
+    } catch (error) {
+      console.error("Failed to update integration status", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      toast.error(
+        "INTEGRATION STATUS UPDATE FAILED",
+        `Failed to update status: ${errorMessage}`
+      );
+    } finally {
+      setIntegrationConfirmationOpen({ ...initialConfirmationValues });
+    }
+  };
+
+  // Integration confirmation handlers
+  const onIntegrationConfirmHandler = async () => {
+    setIntegrationConfirmationOpen({ ...initialConfirmationValues });
+    setIsIntegrationDrawerOpen(false);
+    switch (integrationFlow) {
+      case "edit":
+        dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+        break;
+      case "duplicate":
+        handleDuplicateIntegration();
+        dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+        break;
+      case "delete":
+        handleDeleteIntegration();
+        dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+        break;
+      case "activation":
+        handleIntegrationStatus(selectedIntegration!);
+        dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+        break;
+      case "deactivation":
+        handleIntegrationStatus(selectedIntegration!);
+        dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+        break;
+      default:
+        break;
+    }
+    dispatch({ type: "RESET_INTEGRATION_FORM" });
+  };
+
+  const onIntegrationCancelHandler = () => {
+    if (integrationFlow !== "edit") {
+      dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
+    }
+    setIntegrationConfirmationOpen({ ...initialConfirmationValues });
   };
 
   // Connection drawer handlers
@@ -508,34 +816,251 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
     }
 
     setConnectionConfirmationOpen({
-      message: "You have unsaved changes. Are you sure you want to close?",
-      title: "Discard Changes?",
+      message: ["You're about to leave the record you are currently editing. Any unsaved changes will be lost", "Are you sure you want to continue?"],
+      title: "Attention!",
       flag: true,
+      type: "warning"
     });
-  };
-
-  // Integration confirmation handlers
-  const onIntegrationConfirmHandler = async () => {
-    setIntegrationConfirmationOpen({ ...initialConfirmationValues });
-    setIsIntegrationDrawerOpen(false);
-    dispatch({ type: "RESET_INTEGRATION_FORM" });
-    dispatch({ type: "SET_INTEGRATION_FLOW", payload: null });
-  };
-
-  const onIntegrationCancelHandler = () => {
-    setIntegrationConfirmationOpen({ ...initialConfirmationValues });
   };
 
   // Connection confirmation handlers
   const onConnectionConfirmHandler = async () => {
     setConnectionConfirmationOpen({ ...initialConfirmationValues });
     setIsConnectionDrawerOpen(false);
+    if (connectionFlow === "duplicate") handleDuplicateConnection();
+    else if (connectionFlow === "delete") handleDeleteConnection();
+    else if (
+      connectionFlow === "activation" ||
+      connectionFlow === "deactivation"
+    )
+      handleConnectionStatus(selectedConnection!);
     dispatch({ type: "RESET_CONNECTION_FORM" });
     dispatch({ type: "SET_CONNECTION_FLOW", payload: null });
   };
 
   const onConnectionCancelHandler = () => {
     setConnectionConfirmationOpen({ ...initialConfirmationValues });
+  };
+
+  // Connection handlers
+  const handleDuplicateConnection = async () => {
+    try {
+      if (!selectedConnection) return;      
+      const currentCopies = selectedConnection.copies || 0;
+      const newCopyNumber = currentCopies + 1;
+      
+      // Generate new name and code with copy number
+      const copyConnectionName = `Copy ${newCopyNumber} of ${selectedConnection.connectionName}`;
+      const newConnectionCode = `CP-${newCopyNumber}-${selectedConnection.connectionCode!}`;
+
+      // Update the original connection (increment copies count)
+      const updateConnectionFn = async (id: string, data: any) => {
+        const response = await fetch('/api/connection.update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, ...data })
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to update connection');
+        }
+        
+        return await response.json();
+      };
+      
+      // Create duplicate connection
+      const newConnection = await createConnectionFn({
+        integrationId: selectedConnection.integrationId,
+        connectionName: copyConnectionName,
+        connectionCode: newConnectionCode,
+        connectionDescription: selectedConnection.connectionDescription,
+        companyIds: selectedConnection.companyIds,
+        isEnabled: false, // Start as disabled for safety
+        connectionDetails: selectedConnection.connectionDetails,
+        executionFrequency: selectedConnection.executionFrequency,
+        connectionStatus: "Offline", // Start as offline
+      });
+
+      // Update the original connection's copies count
+      const updatedConnection = await updateConnectionFn(selectedConnection.id, {
+        copies: newCopyNumber
+      });
+
+      if (newConnection && updatedConnection) {
+        toast.success(
+          "CONNECTION DUPLICATED SUCCESSFULLY",
+          `Connection ${selectedConnection.connectionName} duplicated successfully`,
+          {
+            actions: [
+              {
+                label: "View Connection",
+                onClick: () => {
+                  navigate(`/x/access-settings/connections/${newConnection?.id}`);
+                },
+              },
+            ],
+          }
+        );
+        dispatch({ type: "RESET_CONNECTION_FORM" });
+        dispatch({ type: "CLEAR_CONNECTION_ERRORS" });
+        dispatch({ type: "SET_CONNECTION_FLOW", payload: null });
+        refreshConnectionsAction({}, dispatch);
+      }
+    } catch (error) {
+      console.error("Failed to duplicate connection", error);
+      toast.error(
+        "CONNECTION DUPLICATION FAILED",
+        "Failed to duplicate connection"
+      );
+    } finally {
+      setConnectionConfirmationOpen({ ...initialConfirmationValues });
+    }
+  };
+
+  const handleDeleteConnection = async () => {
+    if (!selectedConnection) return;
+    try {
+      const deletedTime = new Date().toISOString();
+      const connectionId = selectedConnection.id;
+
+      // Update the connection with deletedAt field
+      const updateConnectionFn = async (id: string, data: any) => {
+        const response = await fetch('/api/connection.update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, ...data })
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to update connection');
+        }
+        
+        return await response.json();
+      };
+
+      const response = await updateConnectionFn(connectionId, {
+        deletedAt: deletedTime
+      });
+
+      if (response) {
+        toast.success(
+          "CONNECTION DELETED SUCCESSFULLY",
+          `Connection ${selectedConnection.connectionName} deleted successfully`
+        );
+        
+        await refreshConnectionsAction({}, dispatch);
+        navigate(`/x/access-settings/integrations/${selectedConnection?.integrationId}`);
+      }
+    } catch (error) {
+      console.error("Failed to delete connection", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      toast.error(
+        "CONNECTION DELETION FAILED",
+        `Failed to delete connection: ${errorMessage}`
+      );
+    } finally {
+      setConnectionConfirmationOpen({ ...initialConfirmationValues });
+    }
+  };
+
+  const handleConnectionStatus = async (
+    selectedConnection: IConnectionModel
+  ) => {
+    if (!selectedConnection) return;
+    try {
+      const connectionId = selectedConnection.id;
+      const currentStatus = selectedConnection.connectionStatus;
+      // Toggle between Online and Offline
+      const newStatus = currentStatus === "Online" ? "Offline" : "Online";
+      // For connections, isEnabled should align with the status
+      // const newIsEnabled = newStatus === "Online";
+
+      const response = await updateConnectionFn(connectionId, {
+        connectionStatus: newStatus,
+        // isEnabled: newIsEnabled
+      });
+
+      if (response) {
+        toast.success(
+          "CONNECTION STATUS UPDATED SUCCESSFULLY",
+          `Connection ${selectedConnection.connectionName} ${newStatus === "Online" ? "activated" : "deactivated"} successfully`
+        );
+
+        dispatch({ type: "SET_CONNECTION_FLOW", payload: null });
+        await refreshConnectionsAction({}, dispatch);
+      }
+    } catch (error) {
+      console.error("Failed to update connection status", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      toast.error(
+        "CONNECTION STATUS UPDATE FAILED",
+        `Failed to update status: ${errorMessage}`
+      );
+    } finally {
+      setConnectionConfirmationOpen({ ...initialConfirmationValues });
+    }
+  };
+
+  // Add the helper functions to check dependencies
+  const checkIntegrationDependencies = (integration: IIntegrationModel) => {
+    const dependencies = [];
+    const activeConnections = state.connectionsList.filter(
+      conn => conn.integrationId === integration.id && 
+              conn.connectionStatus === "Online" && 
+              !conn.deletedAt
+    );
+    
+    if (activeConnections.length > 0) {
+      dependencies.push({
+        count: activeConnections.length,
+        label: 'Active Connections',
+        action: () => {
+          navigate(`/x/access-settings/integrations/${integration.id}`);
+        }
+      });
+    }
+    
+    if (integration.companyIds && integration.companyIds.length > 0) {
+      dependencies.push({
+        count: integration.companyIds.length,
+        label: 'Assigned Companies',
+        action: () => {
+          navigate(`/x/access-settings/integrations/${integration.id}`);
+        }
+      });
+    }
+    
+    return dependencies.length > 0 ? dependencies : null;
+  };
+
+  const checkConnectionDependencies = (connection: IConnectionModel) => {
+    const dependencies = [];
+    
+    if (connection.connectionStatus === "Online") {
+      dependencies.push({
+        count: 1,
+        label: 'Active Connection',
+        action: () => {
+          navigate(`/x/access-settings/connections/${connection.id}`);
+        }
+      });
+    }
+    
+    if (connection.companyIds && connection.companyIds.length > 0) {
+      dependencies.push({
+        count: connection.companyIds.length,
+        label: 'Assigned Companies',
+        action: () => {
+          navigate(`/x/access-settings/connections/${connection.id}`);
+        }
+      });
+    }
+    
+    return dependencies.length > 0 ? dependencies : null;
   };
 
   return (
@@ -564,24 +1089,40 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
       {/* Integration UI components */}
       {integrationConfirmationOpen.flag && (
         <ConfirmationModal
+          type={integrationConfirmationOpen.type}
           isOpen={integrationConfirmationOpen.flag}
-          message={integrationConfirmationOpen.message}
-          title={integrationConfirmationOpen.title}
           onClose={onIntegrationCancelHandler}
-          onConfirm={onIntegrationConfirmHandler}
+          title={integrationConfirmationOpen.title}
+          message={integrationConfirmationOpen.message}
+          leftButtonText="Cancel"
+          rightButtonText="Confirm"
+          onLeftButtonClick={onIntegrationCancelHandler}
+          onRightButtonClick={onIntegrationConfirmHandler}
         />
       )}
 
       {/* Connection UI components */}
       {connectionConfirmationOpen.flag && (
         <ConfirmationModal
+          type={connectionConfirmationOpen.type}
           isOpen={connectionConfirmationOpen.flag}
-          message={connectionConfirmationOpen.message}
           title={connectionConfirmationOpen.title}
+          message={connectionConfirmationOpen.message}
           onClose={onConnectionCancelHandler}
-          onConfirm={onConnectionConfirmHandler}
+          onLeftButtonClick={onConnectionCancelHandler}
+          onRightButtonClick={onConnectionConfirmHandler}
+          leftButtonText="Cancel"
+          rightButtonText="Confirm"
         />
       )}
+
+      {/* Unable to Delete Modal */}
+      <UnableToDeleteModal
+        isOpen={unableToDeleteModalState.isOpen}
+        onClose={() => setUnableToDeleteModalState(prev => ({ ...prev, isOpen: false }))}
+        entityType={unableToDeleteModalState.entityType}
+        dependencies={unableToDeleteModalState.dependencies}
+      />
 
       {children}
 

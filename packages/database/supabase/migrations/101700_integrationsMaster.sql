@@ -25,6 +25,7 @@ CREATE TABLE "golden"."integrationsMaster" (
     "connectionType" "golden"."connectionType" NOT NULL,
     "authType" "golden"."authType" NOT NULL,
     "connectionLimit" INT NOT NULL,
+    "copies" INT DEFAULT 0,
     "status" "golden"."status" NOT NULL,
     "companyIds" UUID[], -- Array of UUIDs referencing companyMaster
     "tags" JSONB,

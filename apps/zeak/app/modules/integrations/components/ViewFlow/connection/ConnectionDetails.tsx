@@ -1,63 +1,138 @@
-import { useUnifiedContext } from "../../../context";
+import {
+  PageDetailsSection,
+  DefaultFormField,
+  StatusPill,
+  TypePill,
+  Image,
+  Button,
+} from "@zeak/ui";
 import { motion } from "framer-motion";
-import { DetailsSection, StatusPill } from "../../../../../components/Layout/Screen";
-import TypePill from "~/components/Layout/Screen/View/TypePill";
+import { useUnifiedContext } from "../../../context";
+import ConnectionForm from "../../CreateFlow/Connection/ConnectionForm";
+import { safeReplace } from "../../../utils/utils";
 
-function ConnectionDetails() {
+interface ConnectionDetailsProps {
+  isEditing: boolean;
+  handleEditingChange: (editing: boolean) => void;
+}
+
+function ConnectionDetails({ isEditing, handleEditingChange }: ConnectionDetailsProps) {
   const {
-    state: { selectedConnection, selectedIntegration, integrationFlow },
+    state: {
+      selectedConnection,
+      selectedIntegration,
+      connectionFlow,
+      connectionForm,
+    },
   } = useUnifiedContext();
+
+  const handleEditing = () => {
+    handleEditingChange(!isEditing);
+  };
 
   if (!selectedConnection || !selectedIntegration) return null;
 
-  type ConfigKeys = "Connection Details" | "Credentials" | "Advanced";
+  console.log(connectionForm);
 
-  const CONNECTION_DETAILS_SECTIONS: Record<ConfigKeys, any> = {
-    "Connection Details": [
+
+  const bgPicker = (environmentType: string) => {
+    switch (environmentType) {
+      case "SANDBOX":
+        return "bg-accent-dark";
+      case "PROD":
+        return "bg-accent-yellow";
+      case "DEV":
+        return "bg-accent-green";
+      case "TEST":
+        return "bg-accent-blue";
+      default:
+        return "bg-red-500";
+    }
+  };
+
+
+  // Transform connection details into DefaultFormField format
+  const connectionFields: DefaultFormField[][] = [
+    [
       {
-        title: "Connection Name",
+        label: "Connection Name",
         value: selectedConnection.connectionName,
       },
-      { title: "Connection ID", value: selectedConnection.connectionCode},
       {
-        title: "Environment Type",
-        value: selectedConnection.connectionDetails?.environmentType,
+        label: "Connection ID",
+        value: selectedConnection.connectionCode,
+      },
+    ],
+    [
+      {
+        label: "Environment Type",
+        value: <Button onClick={() => {}} className={`rounded-zeak pointer-events-none ${bgPicker(connectionForm.connectionDetails.environmentType || selectedConnection.connectionDetails.environmentType)}`}>
+          {connectionForm.connectionDetails.environmentType || selectedConnection.connectionDetails.environmentType}
+        </Button>,
       },
       {
-        title: "Environment URL",
-        value: selectedConnection.connectionDetails?.environmentURL,
+        label: "Environment URL",
+        value: (
+          <span className="text-primary-bright">
+            {connectionForm.connectionDetails.environmentURL || selectedConnection.connectionDetails.environmentURL}
+          </span>
+        ),
       },
+    ],
+    [
       {
-        title: "Integration Type",
+        label: "Integration Type",
         value: (
           <TypePill
-            type={selectedIntegration.integrationType}
+            variant={
+              selectedIntegration.integrationType === "System"
+                ? "system"
+                : "user"
+            }
+            className="bg-green-50 px-2 py-0 h-9 rounded-zeak"
           />
         ),
       },
       {
-        title: "Application",
-        value: selectedIntegration.applicationName.replace(/_/g, ' '),
-        icon: selectedIntegration.logo
+        label: "Application",
+        value: (
+          <div className="flex items-center gap-2">
+            <Image
+              src={selectedIntegration.logo}
+              alt={safeReplace(selectedIntegration.applicationName)}
+              className="w-6 h-6 rounded-full"
+            />
+            <span>
+              {safeReplace(selectedIntegration.applicationName)}
+            </span>
+          </div>
+        ),
       },
-      {
-        title: "Purpose",
-        value: selectedConnection.connectionDescription,
-      },
-      {
-        title: "Connection status",
-        value: <StatusPill status={selectedConnection.connectionStatus} />,
-      },
-      {
-        title: "Integration Category",
-        value: selectedIntegration.integrationCategory.replace(/_/g, ' '),
-      }
     ],
-    "Credentials": [],
-    "Advanced": []
-  }
-
-  if (!selectedConnection) return null;
+    [
+      {
+        label: "Purpose",
+        value:
+          connectionForm.connectionDescription || selectedConnection.connectionDescription || "No description provided",
+      },
+      {
+        label: "Connection Status",
+        value: (
+          <StatusPill
+            status={selectedConnection.connectionStatus}
+            uppercase
+            className="gap-2"
+          />
+        ),
+      },
+    ],
+    [
+      {
+        label: "Integration Category",
+        value: safeReplace(selectedIntegration.integrationCategory),
+      },
+    ],
+  ];
 
   return (
     <motion.div
@@ -65,17 +140,44 @@ function ConnectionDetails() {
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
     >
-      <div className="flex flex-col gap-4 mb-10">
-        {Object.keys(CONNECTION_DETAILS_SECTIONS).map((item) => (
-          <DetailsSection
-            key={item}
-            title={item}
-            items={CONNECTION_DETAILS_SECTIONS[item as keyof typeof CONNECTION_DETAILS_SECTIONS]}
-            className="bg-[#F7F9FE]"
-            // selectedIntegration={selectedIntegration}
-            currentFlow={integrationFlow}
-          />
-        ))}
+      <div className="flex flex-col gap-4 pb-40">
+        <PageDetailsSection
+          title="Connection Details"
+          className="bg-[#F7F9FE]"
+          defaultFields={connectionFields}
+          onEditClick={handleEditing}
+          editable={true}
+          editing={isEditing}
+          defaultIsExpanded={true}
+          expandable={true}
+          editingForm={
+            <div className="flex flex-col gap-8">
+              <ConnectionForm
+                connectionForm={connectionForm}
+                currentFlow={connectionFlow}
+                selectedIntegration={selectedIntegration}
+              />
+            </div>
+          }
+        />
+
+        <PageDetailsSection
+          title="Credentials"
+          className="bg-[#F7F9FE]"
+          defaultFields={[]}
+          onEditClick={() => {}}
+          defaultIsExpanded={false}
+          expandable={true}
+        />
+
+        <PageDetailsSection
+          title="Advanced"
+          className="bg-[#F7F9FE]"
+          defaultFields={[]}
+          onEditClick={() => {}}
+          defaultIsExpanded={false}
+          expandable={true}
+        />
       </div>
     </motion.div>
   );

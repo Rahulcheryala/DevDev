@@ -1,3 +1,26 @@
+export const breadcrumbs = [
+  {
+    label: "Settings",
+    to: "/"
+  },
+  {
+    label: "Company"
+  }
+];
+
+export const tabsLinks = [
+  {
+    label: "Dashboard",
+    value: "dashboard",
+    disabled: true,
+  },
+  {
+    label: "All Companies",
+    value: "allCompanies",
+  },
+
+];
+
 export const stepsList = [
   {
     id: 1,
@@ -8,6 +31,7 @@ export const stepsList = [
     isCompleted: false,
     label: "1",
     isRequired: true,
+    clickable: true
   },
   {
     id: 2,
@@ -18,6 +42,7 @@ export const stepsList = [
     isCompleted: false,
     label: "2",
     isRequired: true,
+    clickable: true
   },
   {
     id: 3,
@@ -28,6 +53,7 @@ export const stepsList = [
     isCompleted: false,
     label: "3",
     isRequired: false,
+    clickable: true
   },
   {
     id: 4,
@@ -38,5 +64,6 @@ export const stepsList = [
     isCompleted: false,
     label: "4",
     isRequired: true,
+    clickable: false
   },
 ];

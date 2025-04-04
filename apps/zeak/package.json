@@ -9,6 +9,7 @@
     "@zeak/react": "*",
     "@zeak/redis": "*",
     "@zeak/remix-validated-form": "*",
+    "@zeak/ui": "*",
     "@zeak/utils": "*",
     "@zeak/datatable": "*",
     "@dnd-kit/core": "^6.3.1",

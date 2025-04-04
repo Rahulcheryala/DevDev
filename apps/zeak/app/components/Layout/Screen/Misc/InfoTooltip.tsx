@@ -8,7 +8,7 @@ type InfoTooltipProps = {
 
 const InfoTooltip: React.FC<InfoTooltipProps> = ({ title, subtext }: InfoTooltipProps): JSX.Element => {
     return (<Tooltip>
-        <TooltipTrigger className="outline-none focus:ring ring-[hsl(var(--accent-primary-bright),_0.09)] rounded-full">
+        <TooltipTrigger>
             <InfoCircleIcon size="20px" color="#9BA2AC" />
         </TooltipTrigger>
         <TooltipContent className="w-80 bg-black">

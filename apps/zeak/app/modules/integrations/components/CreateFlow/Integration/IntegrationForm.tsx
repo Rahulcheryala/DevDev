@@ -1,18 +1,8 @@
-import React, { useState } from "react";
-import {
-  ExpandableTextArea,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@zeak/react";
-import { InfoTooltip } from "../../../../../components/Layout/Screen";
-import type { IntegrationForm } from "../../../models/integration-form.model";
-import { IntegrationFlow, UnifiedAction } from "../../../context";
-import { IIntegrationModel } from "../../../models/integration.model";
+import React from "react";
+import type { IntegrationForm as IntegrationFormType } from "../../../models/integration-form.model";
+import { useIntegrationForm } from "../../../hooks/form/useIntegrationForm";
+import { IntegrationFlow, useUnifiedContext } from "../../../context";
+import { safeReplace } from "../../../utils/utils";
 import {
   ApplicationName,
   AuthType,
@@ -20,352 +10,231 @@ import {
   IntegrationCategory,
   Status,
 } from "@prisma/client";
-import { MultiSelect } from "~/components/Common";
-import { fetchIntegrationsList } from "../../../utils/api.utils";
-import { CiEdit } from "react-icons/ci";
+import {
+  LabeledTextArea,
+  LabelledInput,
+  Dropdown,
+  MultiSelect,
+  Option,
+} from "@zeak/ui";
 
 type IntegrationFormProps = {
-  dispatch?: React.Dispatch<UnifiedAction>;
-  integrationForm?: IntegrationForm;
-  errors?: { [key: string]: string | null };
-  handleChange?: (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => void;
-  handleBlur?: (
-    e: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => void;
-  currentFlow?: IntegrationFlow;
-  selectedIntegration?: IIntegrationModel;
+  currentFlow: IntegrationFlow;
+  integrationForm: IntegrationFormType;
+  errors: { [key: string]: string | null };
 };
 
 const IntegrationForm = ({
-  dispatch,
+  currentFlow,
   integrationForm,
   errors,
-  handleChange,
-  handleBlur,
-  currentFlow,
-  selectedIntegration,
 }: IntegrationFormProps) => {
-  const [isEditing, setIsEditing] = useState<boolean>(true);
+  const {
+    state: { companies },
+  } = useUnifiedContext();
 
-  // Helper function to get value based on edit mode
-  const getValue = (editValue?: any, formValue?: any) => 
-    currentFlow === "edit" ? editValue : formValue;
-
-  const initialValues = {
-    integrationName: getValue(selectedIntegration?.integrationName, integrationForm?.integrationName),
-    integrationCode: getValue(selectedIntegration?.integrationCode, integrationForm?.integrationCode),
-    description: getValue(selectedIntegration?.description, integrationForm?.description),
-    applicationName: getValue(selectedIntegration?.applicationName, integrationForm?.applicationName),
-    integrationCategory: getValue(selectedIntegration?.integrationCategory, integrationForm?.integrationCategory),
-    connectionType: getValue(selectedIntegration?.connectionType, integrationForm?.connectionType),
-    authType: getValue(selectedIntegration?.authType, integrationForm?.authType),
-    connectionLimit: getValue(selectedIntegration?.connectionLimit, integrationForm?.connectionLimit),
-    companies: getValue(selectedIntegration?.companyIds, integrationForm?.companies),
+  const {
+    handleChange,
+    handleSelectChange,
+    handleMultiSelectChange,
+    handleGeneralInfoBlur,
+  } = useIntegrationForm();
+  // Always use integrationForm values, which will be properly initialized with selectedIntegration data
+  // when in edit mode through our useIntegrationForm hook
+  const formValues = {
+    integrationName: integrationForm.integrationName || "",
+    integrationCode: integrationForm.integrationCode || "",
+    description: integrationForm.description || "",
+    applicationName: integrationForm.applicationName || "",
+    integrationCategory: integrationForm.integrationCategory || "",
+    connectionType: integrationForm.connectionType || "",
+    authType: integrationForm.authType || "",
+    connectionLimit: integrationForm.connectionLimit || 0,
+    status: integrationForm.status || "",
+    companyIds: integrationForm.companyIds || [],
   };
 
-  // console.log(initialValues);
+  // console.log(formValues)
+
+  // Pre-compute selected companies
+  const selectedCompanies = React.useMemo(() => {
+    if (!companies || !formValues.companyIds.length) return [];
+    // Ensure all IDs are strings for consistent comparison
+    const companyIdsSet = new Set(
+      formValues.companyIds.map((id) => String(id))
+    );
+    const filtered = companies.filter((company) =>
+      companyIdsSet.has(String(company.id))
+    );
+
+    return filtered.map((company) => ({
+      id: company.id,
+      value: company.id,
+      label: company.name,
+    }));
+  }, [companies, formValues.companyIds]);
 
   return (
     <>
       <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
-        <div className="flex flex-col gap-3 relative">
-          <Label
-            htmlFor="integrationName"
-            className="flex gap-1 items-center text-textLink"
-          >
-            Integration Name <span className="text-lg text-accent-red">*</span>
-            <InfoTooltip
-              title="Required"
-              subtext="Enter a unique name for the integration. The integration name must be distinct from other integrations."
-            />
-          </Label>
-          <Input
-            id="integrationName"
-            name="integrationName"
-            placeholder="Enter Integration Name"
-            className="bg-inputBg border-0"
-            value={initialValues.integrationName}
-            onChange={(e) => handleChange!(e)}
-            onBlur={(e) => handleBlur!(e)}
-          />
-          {errors?.integrationName && (
-            <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.integrationName}
-            </p>
-          )}
-        </div>
+        <LabelledInput
+          label="Integration Name"
+          id="integrationName"
+          name="integrationName"
+          value={formValues.integrationName}
+          onChange={
+            currentFlow === "create"
+              ? (e: any) => handleChange(e.target.name, e.target.value)
+              : undefined
+          }
+          onBlur={handleGeneralInfoBlur}
+          placeholder="Enter Integration name"
+          isRequired={true}
+          isDisabled={currentFlow === "edit"}
+          showTooltip={true}
+          tooltipTitle="Required, unique"
+          tooltipContent="Enter a unique name for the Integration. The Integration name must be distinct and cannot be duplicated within the company"
+          errorMessage={errors?.integrationName!}
+          isInvalid={!!errors?.integrationName}
+        />
 
-        <div className="flex flex-col gap-3 relative">
-          <Label
-            htmlFor="integrationCode"
-            className="flex gap-1 items-center text-textLink"
-          >
-            <div className="flex flex-1 gap-1 items-center">
-              Integration Code <span className="text-lg text-accent-red">*</span>
-              <InfoTooltip
-                title="Required, unique"
-                subtext="Enter a unique code for the integration."
-              />
-            </div>
-            <CiEdit className="self-center cursor-pointer text-xl" onClick={() => setIsEditing(!isEditing)} />
-          </Label>
-          <Input
-            id="integrationCode"
-            name="integrationCode"
-            placeholder="Enter Integration Code"
-            className="bg-inputBg border-0"
-            value={initialValues.integrationCode}
-            onChange={(e) => handleChange!(e)}
-            onBlur={(e) => handleBlur!(e)}
-            isDisabled={isEditing}
-          />
-          {errors?.integrationCode && (
-            <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.integrationCode}
-            </p>
-          )}
-        </div>
+        <LabelledInput
+          isCode={currentFlow === "create"}
+          label="Integration Code"
+          id="integrationCode"
+          name="integrationCode"
+          value={formValues.integrationCode}
+          onChange={
+            currentFlow === "create"
+              ? (e: any) => handleChange(e.target.name, e.target.value)
+              : undefined
+          }
+          onBlur={handleGeneralInfoBlur}
+          placeholder="Enter integration code"
+          isRequired={true}
+          isDisabled={currentFlow === "edit"}
+          errorMessage={errors?.integrationCode!}
+          isInvalid={!!errors?.integrationCode}
+        />
       </div>
 
       <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
-        <div className="flex flex-col gap-3 relative">
-          <Label
-            htmlFor="description"
-            className="text-textLink h-7 inline-flex items-center"
-          >
-            Purpose
-          </Label>
-          <ExpandableTextArea
-            id="description"
-            name="description"
-            placeholder="Enter Purpose"
-            className="bg-inputBg border-0 text-base"
-            inputClassname="text-base bg-inputBg placeholder:text-tertiary"
-            value={initialValues.description}
-            onChange={(e) => handleChange!(e)}
-            onBlur={(e) => handleBlur!(e)}
+        <LabeledTextArea
+          label="Purpose"
+          id="description"
+          name="description"
+          value={formValues.description}
+          onChange={(e: any) => handleChange(e.target.name, e.target.value)}
+          onBlur={handleGeneralInfoBlur}
+          placeholder="Enter Purpose"
+          errorMessage={errors?.description!}
+          isInvalid={!!errors?.description}
+        />
+
+        <Dropdown
+          name="applicationName"
+          label="Application"
+          placeholder="Select Application"
+          items={Object.values(ApplicationName).map((application) => ({
+            label: safeReplace(application),
+            value: application,
+          }))}
+          value={formValues.applicationName}
+          onChange={(value) => handleSelectChange("applicationName", value)}
+          dropdownClasses="h-10"
+        />
+      </div>
+
+      <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
+        <Dropdown
+          name="integrationCategory"
+          label="Integration Category"
+          placeholder="Select Category"
+          items={Object.values(IntegrationCategory).map((category) => ({
+            label: safeReplace(category),
+            value: category,
+          }))}
+          value={formValues.integrationCategory}
+          onChange={(value) => handleSelectChange("integrationCategory", value)}
+          dropdownClasses="h-10"
+        />
+
+        <Dropdown
+          name="connectionType"
+          label="Connection Type"
+          placeholder="Select Connection Type"
+          items={Object.values(ConnectionType).map((connectionType) => ({
+            label: safeReplace(connectionType),
+            value: connectionType,
+          }))}
+          value={formValues.connectionType}
+          onChange={(value) => handleSelectChange("connectionType", value)}
+          dropdownClasses="h-10"
+        />
+      </div>
+
+      <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
+        <Dropdown
+          name="authType"
+          label="Authentication Type"
+          placeholder="Select Authentication Type"
+          items={Object.values(AuthType).map((authType) => ({
+            label: safeReplace(authType),
+            value: authType,
+          }))}
+          value={formValues.authType}
+          onChange={(value) => handleSelectChange("authType", value)}
+          dropdownClasses="h-10"
+        />
+
+        <LabelledInput
+          type="number"
+          label="Connection Limit"
+          id="connectionLimit"
+          name="connectionLimit"
+          value={formValues.connectionLimit}
+          onChange={(e: any) => handleChange(e.target.name, e.target.value)}
+          onBlur={handleGeneralInfoBlur}
+          placeholder="Enter Connection Limit"
+          min={0}
+          // showNoneForZero={true}
+          errorMessage={errors?.connectionLimit!}
+          isInvalid={!!errors?.connectionLimit}
+        />
+      </div>
+
+      <div
+        className={`grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8 ${currentFlow === "edit" && "mb-10"}`}
+      >
+        {currentFlow === "edit" && (
+          <Dropdown
+            name="status"
+            label="Connection Status"
+            placeholder="Select Connection Status"
+            items={Object.values(Status).map((status) => ({
+              label: safeReplace(status),
+              value: status,
+            }))}
+            value={formValues.status}
+            onChange={(value) => handleSelectChange("status", value)}
+            dropdownClasses="h-10"
           />
-          {errors?.description && (
-            <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.description}
-            </p>
-          )}
-        </div>
+        )}
 
         <div className="flex flex-col gap-3 relative">
-          <Label htmlFor="applicationName" className="text-textLink">
-            Application <span className="text-lg text-accent-red">*</span>
-          </Label>
-          <Select
-            name="applicationName"
-            value={initialValues.applicationName}
-            onValueChange={(value) =>
-              handleChange!({
-                target: { name: "applicationName", value },
-              } as React.ChangeEvent<HTMLInputElement>)
-            }
-          >
-            <SelectTrigger className="bg-inputBg border-0">
-              <SelectValue placeholder="Select Application" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.values(ApplicationName).map((application) => (
-                <SelectItem key={application} value={application?.replace(/_/g, " ")}>
-                  {application?.replace(/_/g, " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors?.applicationName && (
-            <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.applicationName}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
-        <div className="flex flex-col gap-3 relative">
-          <Label htmlFor="integrationCategory" className="text-textLink">
-            Integration Category{" "}
-            <span className="text-lg text-accent-red">*</span>
-          </Label>
-          <Select
-            name="integrationCategory"
-            value={initialValues.integrationCategory}
-            onValueChange={(value) =>
-              handleChange!({
-                target: { name: "integrationCategory", value },
-              } as React.ChangeEvent<HTMLInputElement>)
-            }
-          >
-            <SelectTrigger className="bg-inputBg border-0">
-              <SelectValue placeholder="Select Category" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.values(IntegrationCategory).map((category) => (
-                <SelectItem key={category} value={category?.replace(/_/g, " ")}>
-                  {category?.replace(/_/g, " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors?.integrationCategory && (
-            <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.integrationCategory}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-3 relative">
-          <Label
-            htmlFor="connectionType"
-            className="text-textLink flex justify-between items-end"
-          >
-            <p>
-              Connection Type <span className="text-lg text-accent-red">*</span>
-            </p>
-
-            <button
-              className="text-blue-500 text-xs mb-2"
-              // onClick={() => setShowComparisonTable(true)}
-            >
-              Where to use each connection type?
-            </button>
-          </Label>
-          <Select
-            name="connectionType"
-            value={initialValues.connectionType}
-            onValueChange={(value) =>
-              handleChange!({
-                target: { name: "connectionType", value },
-              } as React.ChangeEvent<HTMLInputElement>)
-            }
-          >
-            <SelectTrigger className="bg-inputBg border-0">
-              <SelectValue placeholder="Select Connection Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.values(ConnectionType).map((connectionType) => (
-                <SelectItem key={connectionType} value={connectionType?.replace(/_/g, " ")}>
-                  {connectionType?.replace(/_/g, " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors?.connectionType && (
-            <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.connectionType}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* {currentFlow === "edit" && (
-          <div className="flex flex-col gap-3 relative">
-            <Label htmlFor="status" className="text-textLink">
-              Connection Status{" "}
-              <span className="text-lg text-accent-red">*</span>
-            </Label>
-            <Select
-              name="status"
-              value={initialValues.status}
-              onValueChange={(value) =>
-                handleChange!({
-                  target: { name: "status", value },
-                } as React.ChangeEvent<HTMLInputElement>)
-              }
-            >
-              <SelectTrigger className="bg-inputBg border-0">
-                <SelectValue placeholder="Select Authentication Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(Status).map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )} */}
-
-      <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
-        <div className="flex flex-col gap-3 relative">
-          <Label htmlFor="authType" className="text-textLink">
-            Authentication <span className="text-lg text-accent-red">*</span>
-          </Label>
-          <Select
-            name="authType"
-            value={initialValues.authType}
-            onValueChange={(value) =>
-              handleChange!({
-                target: { name: "authType", value },
-              } as React.ChangeEvent<HTMLInputElement>)
-            }
-          >
-            <SelectTrigger className="bg-inputBg border-0">
-              <SelectValue placeholder="Select Authentication Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.values(AuthType).map((authType) => (
-                <SelectItem key={authType} value={authType?.replace(/_/g, " ")}>
-                  {authType?.replace(/_/g, " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors?.authentication && (
-            <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.authentication}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-3 relative">
-          <Label htmlFor="connectionLimit" className="text-sm text-textLink">
-            ConnectionLimit <span className="text-lg text-accent-red">*</span>
-          </Label>
-          <Input
-            id="connectionLimit"
-            name="connectionLimit"
-            type="number"
-            min={1}
-            placeholder="Enter the connection limit"
-            className="bg-inputBg border-0"
-            value={initialValues.connectionLimit!}
-            onChange={(e) => handleChange!(e)}
-            onBlur={(e) => handleBlur!(e)}
-          />
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-2 grid-cols-1 lg:gap-[60px] md:gap-8">
-        <div className="flex flex-col gap-3 relative">
-          <Label htmlFor="companies" className="text-textLink">
-            Company(s) <span className="text-lg text-accent-red">*</span>
-          </Label>
           <MultiSelect
-            options={integrationForm?.companies!}
-            selectedOptions={initialValues.companies!}
-            onSelect={(value) =>
-              handleChange!({
-                target: { name: "companies", value },
-              } as React.ChangeEvent<HTMLInputElement>)
-            }
-            onDelete={(value) =>
-              handleChange!({
-                target: { name: "companies", value },
-              } as React.ChangeEvent<HTMLInputElement>)
+            label="Company(s)"
+            placeholder="Select Company(s)"
+            options={companies?.map((company) => ({
+              id: company.id,
+              value: company.id,
+              label: company.name,
+            }))}
+            defaultValue={selectedCompanies}
+            onChange={(value: Option[]) =>
+              handleMultiSelectChange("companyIds", value)
             }
           />
-          {errors?.companies && (
-            <p className="text-red-500 text-sm absolute top-full mt-0.5 ml-1">
-              {errors.companies}
-            </p>
-          )}
         </div>
       </div>
     </>

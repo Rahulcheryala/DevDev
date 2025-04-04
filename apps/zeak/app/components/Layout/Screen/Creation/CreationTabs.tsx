@@ -80,7 +80,6 @@ const CreationTabs: React.FC<CreationTabsProps> = ({
             closeDrawer(); // Close the drawer if on the first tab
         } else {
             setActiveTab(tabs[currentIndex - 1]); // Go back to the previous tab
-            onTabChanged?.(tabs[currentIndex - 1])
         }
     }
 
@@ -94,14 +93,13 @@ const CreationTabs: React.FC<CreationTabsProps> = ({
         const newActiveTab = tabs.find(tab => tab.value === selectedTab);
         if (newActiveTab) {
             setActiveTab(newActiveTab);
-            onTabChanged?.(newActiveTab)
         }
     }, [selectedTab, tabs])
     
 
 
     return (<ModalDrawer open={isOpen} onClose={onCloseHandler}>
-        <ModalDrawerContent className='w-[50%] lg:min-w-[900px] sm:min-w-[500px] min-w-[300px]'>
+        <ModalDrawerContent className='w-[55%] '>
             <ModalDrawerHeader className="border-0 px-10 py-4">
                 <div className="flex justify-between py-1 items-center">
                     <p className={cn('text-[26px] text-text-dark', labelClassName)}>{label}</p>
@@ -109,8 +107,8 @@ const CreationTabs: React.FC<CreationTabsProps> = ({
                 </div>
             </ModalDrawerHeader>
             <ModalDrawerBody className="px-0 py-0">
-                <Tabs value={activeTab.value} className="w-full flex-1 relative" >
-                    <TabsList aria-label="List of tabs" className="bg-white px-10 gap-0 sticky top-0 z-10" >
+                <Tabs value={activeTab.value} className="w-full flex-1" >
+                    <TabsList aria-label="List of tabs" className="bg-white px-10 gap-0" >
                         {tabs.map((tab) => (
                             <TabsTrigger
                                 className={cn('mb-0 flex flex-col items-center data-[state=active]:border-0  group data-[state=active]:py-0', tab.className)}
@@ -118,7 +116,7 @@ const CreationTabs: React.FC<CreationTabsProps> = ({
                                 value={tab.value}
                                 onClick={() => onTabChange(tab)}
                             >
-                                <div className="text-sm px-8 pt-[10px] pb-[10px] leading-[20px] whitespace-nowrap">
+                                <div className="px-8 pt-[10px] pb-[10px] leading-[20px] ">
                                     {tab.title}
                                 </div>
                                 <div className={cn('w-full h-[6px] bg-[#ebecee] group-data-[state=active]:block  group-data-[state=active]:bg-[#ffdf41]', tab.activeClassName)}></div>

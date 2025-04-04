@@ -19,6 +19,7 @@ export default function NextButton({ onClick }: NextButtonProps) {
             )}
             <div className="flex  h-[56px]  overflow-hidden border border-transparent">
                 <button
+                    type="submit"
                     className={cn("bg-[#0D0844] px-6 py-3 w-[192px] text-white flex-1 rounded-l-[12px] ", open && "rounded-tl-none")}
                     onClick={onClick}
                 >

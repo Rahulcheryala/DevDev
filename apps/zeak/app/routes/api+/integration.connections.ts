@@ -34,7 +34,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
       },
     });
 
-    return json({ connections });
+    return new Response(JSON.stringify(connections), {
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("Error fetching integration connections:", error);
     return json({ error: "Failed to fetch integration connections" }, { status: 500 });

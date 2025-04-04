@@ -58,7 +58,7 @@ const ViewContainer: React.FC<any> = ({
     }
 
     return (
-        <div className="flex gap-4 h-full bg-[#F0F4FD] pl-4">
+        <div className='flex gap-4 h-full bg-[#F0F4FD] pl-4'>
             <div className="left-col w-[350px] mb-6 flex flex-col gap-[14px]">
                 {listingComponent}
             </div>
@@ -66,7 +66,7 @@ const ViewContainer: React.FC<any> = ({
                 {selectedItem?.id ? <>
                     {headerComponent}
                     <Tabs value={activeTab} className="w-full flex-1 relative" >
-                        <TabsList aria-label="List of tabs" className="bg-white px-6 gap-8 mb-4 rounded-b-[12px] pt-3" >
+                        <TabsList aria-label="List of tabs" className="bg-white px-6 gap-11 mb-4 rounded-b-[12px] pt-3" >
                             {tabs.map((tab) => (
                                 <TabsTrigger
                                     className={cn('mb-0 flex flex-col items-center data-[state=active]:border-0  group data-[state=active]:py-0', tab.className)}
@@ -77,7 +77,7 @@ const ViewContainer: React.FC<any> = ({
                                     <div className="px-8 pt-[10px] pb-[10px] leading-[20px] ">
                                         {tab.title}
                                     </div>
-                                    <div className={cn('w-full h-[6px] bg-white rounded-t-[4px] group-data-[state=active]:block  group-data-[state=active]:bg-[#ACBBD6]', tab.activeClassName)}></div>
+                                    <div className={cn('w-full h-[6px] bg-white group-data-[state=active]:block  group-data-[state=active]:bg-[#ACBBD6]', tab.activeClassName)}></div>
                                 </TabsTrigger>
                             ))}
                             <button className='absolute right-6 top-5 flex gap-1 text-text-tertiary items-center'>
@@ -95,7 +95,7 @@ const ViewContainer: React.FC<any> = ({
                             initial={{ x: '-10%', opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ duration: 0.2, ease: "easeInOut" }}>
-                            <p className="text-gray-500 text-lg">No {type} selected. Please select a {type.slice(0, -1)} to view details.</p>
+                            <p className="text-gray-500 text-lg">No {type} selected. Please select a department to view details.</p>
                         </motion.div>
                     </div>}
             </div>

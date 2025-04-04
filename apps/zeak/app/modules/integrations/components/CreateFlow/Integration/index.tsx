@@ -1,16 +1,16 @@
-import { toast } from "@zeak/react";
-import { Fragment, useMemo, useState } from "react";
-import CreationTabs from "~/components/Layout/Screen/Creation/CreationTabs";
-import { ButtonProps } from "../../../../../components/Layout/Screen/Creation/SaveButton";
+import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from '@remix-run/react';
+import { toast, CreationTabs, ButtonProps } from "@zeak/ui";
 import { useUnifiedContext } from "../../../context";
+import { refreshIntegrationsAction } from "../../../context/action";
 import { createIntegrationFn } from "../../../utils/api.utils";
 import { CreationFlowTabs } from "../../../models/constants";
-import { integrationGeneralInfoSchema } from "./GeneralInfo";
+import { IIntegrationModel } from "../../../models/integration.model";
+import { integrationGeneralInfoSchema } from "../../../hooks/form/useIntegrationForm";
 import { GeneralInfo } from "./GeneralInfo";
 import { SchedulePolicies } from "./SchedulePolicies";
 import { TestConnect } from "./TestConnect";
 import { FaRegUserCircle } from "react-icons/fa";
-import { createIntegrationExample } from "~/modules/integrations/examples/create-integration-example";
 
 type ButtonTypes = "next" | "save" | "draft" | "save_add_new_connection";
 
@@ -23,11 +23,24 @@ const IntegrationAddFlow = ({
   isOpen,
   closeDrawer,
 }: IntegrationCreateFlowProps) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<CreationFlowTabs>(
     CreationFlowTabs.STEP_1
   );
-  const { state, dispatch, openConnectionDrawer } = useUnifiedContext();
-  const { integrationForm, integrationFlow } = state;
+  const [errorFields, setErrorFields] = useState<string[]>([]);
+  const {
+    state: { integrationForm, integrationErrors },
+    dispatch,
+    openConnectionDrawer,
+  } = useUnifiedContext();
+
+  // Convert integrationErrors object to array of error messages
+  useEffect(() => {
+    const errorFields = Object.keys(integrationErrors).filter(
+      (key) => integrationErrors[key] !== null
+    );
+    setErrorFields(errorFields);
+  }, [integrationErrors]);
 
   const onCloseHandler = (bool?: boolean) => {
     setActiveTab(CreationFlowTabs.STEP_1);
@@ -40,7 +53,7 @@ const IntegrationAddFlow = ({
       return true;
     } catch (error) {
       if (error instanceof Error) {
-        toast.warning("Missing Details, Cannot submit the form");
+        toast.warning("Missing Details", "Please fill in all required fields");
       }
       return false;
     }
@@ -66,10 +79,19 @@ const IntegrationAddFlow = ({
     try {
       const isValid = await validateForm();
       if (!isValid) return;
-      console.log("integrationForm", integrationForm);
 
       const body = { ...integrationForm, ...updateBody };
-      await createIntegrationFn(body);
+      const integrationResponse = await createIntegrationFn(body);
+      
+      let integration: IIntegrationModel;
+      
+      if (Array.isArray(integrationResponse)) {
+        integration = integrationResponse[0];
+      } else {
+        integration = integrationResponse;
+      }
+
+      const integrationId = integration?.id;
 
       if (close) {
         onCloseHandler(true);
@@ -77,11 +99,31 @@ const IntegrationAddFlow = ({
         dispatch({ type: "RESET_INTEGRATION_FORM" });
         dispatch({ type: "CLEAR_INTEGRATION_ERRORS" });
       }
+      refreshIntegrationsAction({}, dispatch);
 
-      return toast.success("Integration created successfully!");
+      return toast.success("SUCCESS", "Integration created successfully!", {
+        actions: [
+          {
+            label: "View Integration",
+            onClick: () => {
+              navigate(`/x/access-settings/integrations/${integrationId}`);
+            },
+          },
+          {
+            label: "Add New Connection",
+            onClick: () => {
+              dispatch({ type: "SET_SELECTED_INTEGRATION", payload: integration });
+              openConnectionDrawer("create");
+            },
+          },
+        ],
+      });
     } catch (error) {
       console.error("Unexpected error:", error);
-      return toast.error("Failed to create integration");
+      return toast.error(
+        "Error",
+        "Failed to create integration, Please try again"
+      );
     }
   };
 
@@ -91,20 +133,30 @@ const IntegrationAddFlow = ({
         return {
           label: "Next",
           id: "next",
-          onClickHandler: () => setActiveTab(CreationFlowTabs.STEP_2),
+          onClickHandler: () => {
+            if (errorFields.length === 0) {
+              setActiveTab(CreationFlowTabs.STEP_2);
+            } else {
+              toast.warning(
+                "Invalid Details",
+                `Please check the following fields: ${errorFields.join(", ")}`
+              );
+            }
+          },
         };
       case CreationFlowTabs.STEP_2:
         return {
           label: "Next",
           id: "next",
-          onClickHandler: () => setActiveTab(CreationFlowTabs.STEP_3),
+          onClickHandler: () => {
+            if (errorFields.length === 0) setActiveTab(CreationFlowTabs.STEP_3);
+          },
         };
       case CreationFlowTabs.STEP_3:
         return {
           label: "Save & Finish",
           id: "save",
           onClickHandler: (action: string) => onSubmit(action as ButtonTypes),
-          // onClickHandler: () => createIntegrationExample()
         };
       default:
         return {
@@ -113,7 +165,7 @@ const IntegrationAddFlow = ({
           onClickHandler: () => setActiveTab(CreationFlowTabs.STEP_1),
         };
     }
-  }, [activeTab]);
+  }, [activeTab, errorFields]);
 
   const optionButtons: ButtonProps[] = useMemo(() => {
     switch (activeTab) {
@@ -132,8 +184,8 @@ const IntegrationAddFlow = ({
             label: "Save & Add New Connection",
             id: "save_add_new_connection",
             onClickHandler: (mode: string) => {
-              openConnectionDrawer("create");
               onSubmit(mode as ButtonTypes);
+              openConnectionDrawer("create");
             },
           },
           {
@@ -160,34 +212,32 @@ const IntegrationAddFlow = ({
       title: "2. Schedule & Policies",
       value: CreationFlowTabs.STEP_2,
       containerClassName: "overflow-auto",
-      // component: <SchedulePolicies />,
-      component: <div>Schedule Policies</div>,
+      component: <SchedulePolicies />,
     },
     {
       id: "3",
       title: "3. Test & Connect",
       value: CreationFlowTabs.STEP_3,
       containerClassName: "overflow-auto",
-      // component: <TestConnect />,
-      component: <div>Test & Connect</div>,
+      component: <TestConnect />,
     },
   ];
 
   // Variable Assignments
   const label = (
-    <Fragment>
+    <>
       New Integration
       <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-500 px-4 py-2.5 rounded-xl ml-4">
         <FaRegUserCircle className="text-lg" />
         <span className="text-base font-medium">User Defined</span>
       </div>
-    </Fragment>
+    </>
   );
 
   return (
     <CreationTabs
-      label={label}
       isOpen={isOpen}
+      label={label}
       tabs={StepTabs}
       mainButton={mainButton}
       optionButtons={optionButtons}

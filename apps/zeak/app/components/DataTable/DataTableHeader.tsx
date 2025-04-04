@@ -25,7 +25,7 @@ export default function TableHeader<TData>({
         animate={{height: showColumnSearch ? "64px" : "48px"}}
         transition={{duration: 0.3, ease: "easeInOut"}}
         
-        className={cn("rounded-t-[12px]  bg-white  ")} key={headerGroup.id}>
+        className={cn("rounded-[12px]  bg-white  ")} key={headerGroup.id}>
           <SortableContext
             items={columnOrder}
             strategy={horizontalListSortingStrategy}

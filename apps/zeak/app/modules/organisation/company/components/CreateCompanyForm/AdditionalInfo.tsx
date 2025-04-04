@@ -1,15 +1,14 @@
-import { XCloseIcon } from "@zeak/icons";
-import { Button, cn, DatePicker, Input, Label } from "@zeak/react";
-import { ChevronDown, ChevronUp, HelpCircle, Paperclip } from "lucide-react";
+import { Button, cn, DatePicker, InputComponent, Label } from "@zeak/react";
+import { ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
 
 import { useState } from "react";
-import { StepHeader } from "./StepHeader";
-import { parseDate, today } from "@internationalized/date";
-import { getLocalTimeZone } from "@internationalized/date";
+import { parseDate } from "@internationalized/date";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { companyInfoValidator } from "../../utils/company.validators";
 import { ValidatedForm } from "@zeak/remix-validated-form";
+import AdditionalInfoAttachements from "./AdditionalInfoAttachements";
+import Toaster from "~/components/Globals/Toaster";
 
 export default function AdditionalInfoForm({
   additionalInfo,
@@ -19,7 +18,7 @@ export default function AdditionalInfoForm({
   setAdditionalInfo: any;
 }) {
   const [isEnabled, setIsEnabled] = useState(true);
-  const [isAttachmentsEnabled, setIsAttachmentsEnabled] = useState(true);
+  const [showNote, setShowNote] = useState(true);
 
   const {
     formState: { errors },
@@ -33,56 +32,40 @@ export default function AdditionalInfoForm({
   };
 
   return (
-    <div className="bg-white rounded-md ">
-      <StepHeader title="Additional Info" />
-      <div className=" 2xl:px-[60px] px-10  ">
-        <ValidatedForm
-          validator={companyInfoValidator}
-          defaultValues={{
-            fiscalYearStart: additionalInfo?.fiscalYearStart,
-            fiscalYearEnd: additionalInfo?.fiscalYearEnd,
-          }}
-          onSubmit={handleSubmit}
-          method="post"
-        >
-          <div className="bg-yellow-100 border border-yellow-200 rounded-lg p-4 flex items-start gap-4 shadow-sm">
-            {/* Icon */}
-            <div className="flex items-center">
-              <HelpCircle className="h-6 w-6 text-yellow-500" />
-            </div>
-
-            {/* Content */}
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-yellow-500">NOTE</h3>
-              <p className="text-sm text-gray-700">
-                Company addresses can serve various purposes, including the
-                primary legal address of the company (often referred to as the
-                registered or headquarters address), addresses for legal
-                registrations, and addresses for official communications. These
-                addresses are typically used in legal documents, tax filings,
-                and official correspondence.
-              </p>
-            </div>
-
-            {/* Close button */}
-            <button
-              type="button"
-              className="text-yellow-700 hover:text-yellow-900 focus:outline-none flex items-center justify-center self-center"
-            >
-              <XCloseIcon className="h-5 w-5 yellow-700" />
-            </button>
-          </div>
-
-          <div className="2xl:mb-[60px] mb-10 mt-8 space-y-8">
-            <div className="grid lg:grid-cols-2 grid-cols-1 gap-6">
+    <div>
+      {showNote && (
+        <Toaster
+          variant="warning"
+          icon={<HelpCircle className="h-6 w-6 text-[#F18F01]" />}
+          className="p-[24px] rounded-[12px] bg-[linear-gradient(0deg, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0.70) 100%), var(--macOS-system-colors-Default-Yellow-Default-Light, #FC0)]"
+          title="NOTE"
+          content="Company addresses can serve various purposes, including the
+          primary legal address of the company (often referred to as the
+          registered or headquarters address), addresses for legal
+          registrations, and addresses for official communications. These
+          addresses are typically used in legal documents, tax filings,
+          and official correspondence."
+          onClose={() => setShowNote(false)}
+        />
+      )}
+      <ValidatedForm
+        validator={companyInfoValidator}
+        defaultValues={{
+          fiscalYearStart: additionalInfo?.fiscalYearStart,
+          fiscalYearEnd: additionalInfo?.fiscalYearEnd,
+        }}
+        onSubmit={handleSubmit}
+        method="post"
+      >
+        <div className="mt-8 space-y-8">
+          <div>
+            <div className="grid grid-cols-2 gap-12 py-4 px-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="language">Primary Language</Label>
-
-                <Input
-                  id="language"
+                <InputComponent
                   name="language"
+                  label="Primary Language"
                   placeholder="Enter Primary Language"
-                  className="bg-gray-100 border-none"
+                  className="bg-[#F7F7F8] border-none text-[#0D0C22] text-md font-['Suisse Int\'l'] font-[450]"
                   value={additionalInfo?.language}
                   onChange={(e) =>
                     setAdditionalInfo({
@@ -93,12 +76,11 @@ export default function AdditionalInfoForm({
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="code">Timezone</Label>
-                <Input
-                  id="timezone"
+                <InputComponent
                   name="timezone"
+                  label="Timezone"
                   placeholder="Enter Timezone"
-                  className="bg-gray-100 border-none"
+                  className="bg-[#F7F7F8] border-none text-[#0D0C22] text-md font-['Suisse Int\'l'] font-[450]"
                   value={additionalInfo?.timezone}
                   onChange={(e) =>
                     setAdditionalInfo({
@@ -110,15 +92,14 @@ export default function AdditionalInfoForm({
               </div>
             </div>
 
-            <div className="grid lg:grid-cols-2 grid-cols-1 gap-6">
+            <div className="grid grid-cols-2 gap-12 py-4 px-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="duns">DUNS Number</Label>
-
-                <Input
-                  id="duns"
+                <InputComponent
                   name="duns"
+                  id="duns"
+                  label="DUNS Number"
                   placeholder="Enter DUNS Number"
-                  className="bg-gray-100 border-none"
+                  className="bg-[#F7F7F8] border-none text-[#0D0C22] text-md font-['Suisse Int\'l'] font-[450]"
                   value={additionalInfo?.dnbNumber}
                   onChange={(e) =>
                     setAdditionalInfo({
@@ -129,12 +110,12 @@ export default function AdditionalInfoForm({
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="bbb">BBB Rating</Label>
-                <Input
+                <InputComponent
                   id="bbb"
                   name="bbb"
+                  label="BBB Rating"
                   placeholder="Enter BBB Rating"
-                  className="bg-gray-100 border-none"
+                  className="bg-[#F7F7F8] border-none text-[#0D0C22] text-md font-['Suisse Int\'l'] font-[450]"
                   value={additionalInfo?.bbbNumber}
                   onChange={(e) =>
                     setAdditionalInfo({
@@ -146,15 +127,14 @@ export default function AdditionalInfoForm({
               </div>
             </div>
 
-            <div className="grid lg:grid-cols-2 grid-cols-1 gap-6">
+            <div className="grid grid-cols-2 gap-12 py-4 px-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="credit">Credit Rating</Label>
-
-                <Input
+                <InputComponent
                   id="credit"
                   name="credit"
+                  label="Credit Rating"
                   placeholder="Enter Credit Rating"
-                  className="bg-gray-100 border-none"
+                  className="bg-[#F7F7F8] border-none text-[#0D0C22] text-md font-['Suisse Int\'l'] font-[450]"
                   value={additionalInfo?.creditRating}
                   onChange={(e) =>
                     setAdditionalInfo({
@@ -165,230 +145,110 @@ export default function AdditionalInfoForm({
                 />
               </div>
             </div>
-
-            <section className={cn("w-full bg-[#F7F7F8] rounded-zeak ", {})}>
-              {/* Header */}
-              <div
-                className={cn(
-                  "flex items-center justify-between bg-[#E5EAF2] px-6 py-[8px] rounded-t-zeak",
-                  {
-                    "rounded-b-zeak": !isEnabled,
-                  }
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="companies">Fiscal Period</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="md"
-                    onClick={() => setIsEnabled(!isEnabled)}
-                  >
-                    {isEnabled ? (
-                      <ChevronDown className="w-6 h-6" />
-                    ) : (
-                      <ChevronUp className="w-6 h-6" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {isEnabled && (
-                <div className="grid lg:grid-cols-2 grid-cols-1 gap-6 py-4 px-4">
-                  <div className="flex flex-col gap-3">
-                    <Label className="text-[14px] font-semibold tracking-[0px]">
-                      From
-                    </Label>
-
-                    <DatePicker
-                      value={additionalInfo?.fiscalYearStart}
-                      onChange={(date) => {
-                        setAdditionalInfo({
-                          ...additionalInfo,
-                          fiscalYearStart: date,
-                        });
-                        const value =
-                          date &&
-                          parseDate(date.toString()) >
-                            additionalInfo?.fiscalYearEnd
-                            ? "End date must be after start date"
-                            : null;
-                        console.log("value :: ", value);
-                        setError("fiscalYearEnd", {
-                          message: value ? value : undefined,
-                        });
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    <Label className="text-[14px] font-semibold tracking-[0px]">
-                      To
-                    </Label>
-
-                    <DatePicker
-                      value={additionalInfo?.fiscalYearEnd}
-                      onChange={(date) => {
-                        setAdditionalInfo({
-                          ...additionalInfo,
-                          fiscalYearEnd: date,
-                        });
-                        const value =
-                          date &&
-                          parseDate(date.toString()) <
-                            additionalInfo?.fiscalYearStart
-                            ? "End date must be after start date"
-                            : null;
-                        console.log("value :: ", value);
-                        setError("fiscalYearEnd", {
-                          message: value ? value : undefined,
-                        });
-                      }}
-                      minValue={additionalInfo?.fiscalYearStart?.add({
-                        days: 1,
-                      })}
-                    />
-                    {errors.fiscalYearEnd && (
-                      <p className="text-red-500 text-sm font-sans">
-                        {errors.fiscalYearEnd.message as string}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </section>
-
-            <section className="w-full bg-[#F7F7F8] rounded-zeak">
-              {/* Header */}
-              <div className="flex items-center justify-between bg-[#E5EAF2] px-6 py-[8px] rounded-t-zeak">
-                <div className="flex items-center gap-2">
-                  <Label>Attachments</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="md"
-                    onClick={() =>
-                      setIsAttachmentsEnabled(!isAttachmentsEnabled)
-                    }
-                  >
-                    {isAttachmentsEnabled ? (
-                      <ChevronDown className="w-6 h-6" />
-                    ) : (
-                      <ChevronUp className="w-6 h-6" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {isAttachmentsEnabled && (
-                <div className="p-4">
-                  {/* Upload Area */}
-                  <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 bg-white">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <div className="w-12 h-12 bg-[#A0A0A0] rounded-full flex items-center justify-center mb-4">
-                        <Paperclip className="w-6 h-6 text-white" />
-                      </div>
-                      <h3 className="text-lg font-medium">Upload</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Drag/ Drop files here.
-                      </p>
-                      <p className="text-sm text-gray-500">(Max 5 files)</p>
-                    </div>
-                  </div>
-
-                  {/* File List */}
-                  <div className="space-y-3 mt-4">
-                    {/* Example of an uploaded file - you can map through actual files */}
-                    <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-3">
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          xmlnsXlink="http://www.w3.org/1999/xlink"
-                        >
-                          <rect
-                            width="24"
-                            height="24"
-                            fill="url(#pattern0_2675_185441)"
-                          />
-                          <defs>
-                            <pattern
-                              id="pattern0_2675_185441"
-                              patternContentUnits="objectBoundingBox"
-                              width="1"
-                              height="1"
-                            >
-                              <use
-                                xlinkHref="#image0_2675_185441"
-                                transform="scale(0.00195312)"
-                              />
-                            </pattern>
-                            <image
-                              id="image0_2675_185441"
-                              width="512"
-                              height="512"
-                              xlinkHref="data:image/png;base64,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EAEAAECACAAAAAJEAAAAECACAACAABEAAAAEiAAAACBABAAAAAEiAAAACBABAABAgAgAAAACRAAAABAgAgAAgAARAAAABIgAAAAgQAQAAAABIgAAAAgQAQAAQIAIAAAAAkQAAAAQIAIAAIAAEQAAAASIAAAAIEAEAAAAASIAAAAIEAEAAECACAAAAAJEAAAAECACAACAABEAAAAEiAAAACBABAAAAAEiAAAACBABAABAgAgAAAACRAAAABAgAgAAgAARAAAABIgAAAAgQAQAAAABIgAAAAgQAQAAQIAIAAAAAkQAAAAQIAIAAIAAEQAAAASIAAAAIEAEAAAAASIAAAAIEAEAAECACAAAAAJEAAAAECACAACAABEAAAAEiAAAACBABAAAAAEiAAAACBABAABAgAgAAAACRAAAABAgAgAAgAARAAAABIgAAAAgQAQAAAABIgAAAAgQAQAAQIAIAAAAAkQAAAAQIAIAAIAAEQAAAASIAAAAIEAEAAAAASIAAAAIEAEAAECACAAAAAJEAAAAECACAACAABEAAAAEiAAAACBABAAAAAEiAAAACBABAABAgAgAAAACRAAAABAgAgAAgAARAAAABIgAAAAgQAQAAAABIgAAAAgQAQAAQIAIAAAAAkQAAAAQIAIAAIAAEQAAAASIAAAAIEAEAAAAASIAAAAIEAEAAECACAAAAAJEAAAAECACAACAABEAAAAEiAAAACBABAAAAAGq8T0AlaF28iT1OehA3zM2yrJZWTYjy+ZkmYzipibFK1aquHyFimvWSHHse6KkMvl9tFhxa6tUKCpub5cKBcVtbYrXrFVx+QrFq1fL8nm/G3tZapuPqO9hh/qeURY67rtfhfkLfM9AGSAA0CW148ep37FH+56xRSyTUX7eW8o3zlZ+VqOyz7+g4vIVXrbUjh1T/r+PZiquWaPi4iXKz5mr/Ow5ys+eo8Jb8ys2DFLDhpX/73uJ5F57nQCAJAIAAXD19UrvtqvSu+36v7+WnztPmT8+rc5771Ph3fc8ritDzik1dKhSQ4cqvece//vLls8r98qryj77nDLP/kmFt+Z7HAmgpwgABKl2/DjVjh+n/j/4nrIv/Fntt/xemaf+KJn5nla2XG2t6vb+hOr2/oQGnHSiistXKPPkU+q45w/KN872PQ9AN/EmQITNOdXtu48GXz5NQ+++XXX7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"
-                            />
-                          </defs>
-                        </svg>
-                        <div>
-                          <p className="text-sm font-medium">
-                            TPS Report 225.xlsx
-                          </p>
-                          <p className="text-xs text-gray-500">1.2KB</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button className="p-1 hover:bg-gray-100 rounded-full">
-                          <svg
-                            className="w-5 h-5 text-gray-500"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                        </button>
-                        <button className="p-1 hover:bg-gray-100 rounded-full">
-                          <svg
-                            className="w-5 h-5 text-gray-500"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </section>
           </div>
-        </ValidatedForm>
-      </div>
+
+          <section className={cn("w-full bg-[#F7F7F8] rounded-zeak ", {})}>
+            <div
+              className={cn(
+                "flex items-center justify-between bg-[#E5EAF2] px-6 py-4 rounded-t-zeak",
+                {
+                  "rounded-b-zeak": !isEnabled,
+                }
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Label htmlFor="companies" className="text-[#0D0C22] text-lg font-['Suisse Int\'l'] font-medium">Fiscal Period</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => setIsEnabled(!isEnabled)}
+                >
+                  {isEnabled ? (
+                    <ChevronDown className="w-6 h-6" />
+                  ) : (
+                    <ChevronUp className="w-6 h-6" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {isEnabled && (
+              <div className="grid grid-cols-2 gap-12 py-4 px-4">
+                <div className="flex flex-col gap-3">
+                  <Label className="text-[#475467] text-sm font-semibold leading-5 tracking-[0.2px]">
+                    From
+                  </Label>
+
+                  <DatePicker
+                    value={additionalInfo?.fiscalYearStart}
+                    onChange={(date) => {
+                      setAdditionalInfo({
+                        ...additionalInfo,
+                        fiscalYearStart: date,
+                      });
+                      const value =
+                        date &&
+                          parseDate(date.toString()) >
+                          additionalInfo?.fiscalYearEnd
+                          ? "End date must be after start date"
+                          : null;
+                      console.log("value :: ", value);
+                      setError("fiscalYearEnd", {
+                        message: value ? value : undefined,
+                      });
+                    }}
+                    inputClasses="bg-[#ffffff]"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <Label className="text-[#475467] text-sm font-semibold leading-5 tracking-[0.2px]">
+                    To
+                  </Label>
+
+                  <DatePicker
+                    value={additionalInfo?.fiscalYearEnd}
+                    onChange={(date) => {
+                      setAdditionalInfo({
+                        ...additionalInfo,
+                        fiscalYearEnd: date,
+                      });
+                      const value =
+                        date &&
+                          parseDate(date.toString()) <
+                          additionalInfo?.fiscalYearStart
+                          ? "End date must be after start date"
+                          : null;
+                      console.log("value :: ", value);
+                      setError("fiscalYearEnd", {
+                        message: value ? value : undefined,
+                      });
+                    }}
+                    minValue={additionalInfo?.fiscalYearStart?.add({
+                      days: 1,
+                    })}
+                    inputClasses="bg-[#ffffff]"
+                  />
+                  {errors.fiscalYearEnd && (
+                    <p className="text-red-500 text-sm font-sans">
+                      {errors.fiscalYearEnd.message as string}
+                    </p>
+                  )}
+                </div>
+                <h3 className="text-lg font-medium">Upload</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Drag/ Drop files here.
+                </p>
+                <p className="text-sm text-gray-500">(Max 5 files)</p>
+              </div>
+            )}
+          </section>
+
+          <AdditionalInfoAttachements />
+        </div>
+      </ValidatedForm>
     </div>
   );
 }

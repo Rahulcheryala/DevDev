@@ -21,6 +21,7 @@ export interface IIntegrationModel {
   connectionType: ConnectionType;
   authType: AuthType;
   connectionLimit: number;
+  copies: number;
   status: Status;
   companyIds: string[];
   tags?: any;

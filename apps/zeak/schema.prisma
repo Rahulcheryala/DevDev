@@ -197,43 +197,74 @@ model teamUsers {
 }
 
 model MasterList {
-  id            String    @id @default(uuid()) @map("id")
-  name          String    @map("name")
-  code          String?   @map("code")
-  description   String?   @map("description")
-  isActive      Boolean   @map("isActive")
-  createdAt     DateTime  @default(now()) @map("createdAt")
-  createdBy     String    @map("createdBy")
+  id            String   @id @default(uuid()) @map("id")
+  name          String   @map("name")
+  code          String?  @map("code")
+  description   String?  @map("description")
+  isActive      Boolean  @map("isActive")
+  createdAt     DateTime @default(now()) @map("createdAt")
+  createdBy     String   @map("createdBy")
   inactivatedAt DateTime? @map("inactivatedAt")
-  inactivatedBy String?   @map("inactivatedBy")
-  purpose       String?   @map("purpose")
-  metadata      Json?     @map("metadata")
-  syncToken     String?   @map("syncToken")
+  inactivatedBy String?  @map("inactivatedBy")
+  purpose       String?  @map("purpose")
+  metadata      Json?    @map("metadata")
+  type          String?  @map("type") @default("user defined")
+  syncToken     String?  @map("syncToken")
   updatedAt     DateTime? @map("updatedAt")
-  lastUpdatedBy String?   @map("lastUpdatedBy")
+  lastUpdatedBy String?  @map("lastUpdatedBy")
   deletedAt     DateTime? @map("deletedAt")
-  deletedBy     String?   @map("deletedBy")
+  deletedBy     String?  @map("deletedBy")
+  startDate     DateTime? @map("startDate")
+  endDate       DateTime? @map("endDate")
+  companies     String[]  @map("companies")
+
+
+  masterListMappings masterListMapping[]
 
   @@map("masterList")
 }
 
+
 model MasterListValue {
-  id            String    @id @default(uuid())
-  masterListId  String
+  id            String   @id @default(uuid())
+  masterListId  String   @db.Uuid
   value         String
   displayName   String?
   description   String?
+  meaning       String?
   sequence      Int?
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  createdBy     String    @db.Uuid
+  isActive      Boolean  @default(true)
+  editable      Boolean  @default(true)
+  image         String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  createdBy     String   @db.Uuid
   updatedAt     DateTime?
-  lastUpdatedBy String?   @db.Uuid
-  syncToken     String?   @db.Uuid
+  lastUpdatedBy String?  @db.Uuid
+  syncToken     String?  @db.Uuid
   deletedAt     DateTime?
-  deletedBy     String?   @db.Uuid
+  deletedBy     String?  @db.Uuid
+  
+
 
   @@map("masterListValue")
+}
+
+model masterListMapping {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  createdBy String   @db.Uuid
+  company   String   @db.Uuid
+  deletedAt DateTime?
+  deletedBy String?  @db.Uuid
+  status        Boolean  @default(true)
+  module        String?
+  field         String?
+  masterListId  String   @db.Uuid
+  masterList    MasterList @relation(fields: [masterListId], references: [id])
+
+
+  @@map("masterListMapping")
 }
 
 model user {
@@ -445,7 +476,7 @@ enum ConnectionStatus {
   @@map("connectionStatus")
 }
 
-enum EnvironmentType {
+enum ConnectionEnvType {
   PROD    @map("PROD")
   SANDBOX @map("SANDBOX")
   DEV     @map("DEV")
@@ -575,6 +606,7 @@ model IntegrationsMaster {
   connectionType      ConnectionType
   authType            AuthType
   connectionLimit     Int
+  copies              Int                 @default(0)
   status              Status
   companyIds          String[]            @db.Uuid // Changed from Json to UUID array
   tags                Json?  //TODO(vamsi): change to string array
@@ -614,6 +646,7 @@ model IntegrationConnections {
   connectionDetails     Json  // TODO(vamsi): Add a compositie data type for connection details
   executionFrequency    ExecutionFrequency
   connectionStatus      ConnectionStatus
+  copies                Int                @default(0)
   isTested              Boolean            @default(false)
   lastTestedAt          DateTime?          @db.Timestamptz
   lastTestedBy          String?            @db.Uuid
@@ -730,3 +763,4 @@ model IntegrationLogs {
 
   @@map("integrationLogs")
 }
+

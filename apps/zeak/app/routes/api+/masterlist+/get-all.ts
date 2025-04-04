@@ -4,7 +4,16 @@ export const loader: LoaderFunction = async ({
   request,
 }: LoaderFunctionArgs) => {
   const prisma = await getPrismaInstance(request);
-  const masterList = await prisma.masterList.findMany({});
+  const url = new URL(request.url);
+  const sort = url.searchParams.get("sort");
+  const masterList = await prisma.masterList.findMany({
+    where: {
+      deletedAt: null,
+    },
+    orderBy: {
+      name: sort === "none" ? undefined : sort === "asc" ? "asc" : "desc",
+    },
+  });
 
   return json({
     message: "Master list fetched successfully",

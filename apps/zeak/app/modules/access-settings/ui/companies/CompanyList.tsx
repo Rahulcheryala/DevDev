@@ -78,10 +78,9 @@ const CompanyList = memo(({ data, count }: CompanyTypeTableProps) => {
       formData.append("id", `${row.id}`);
       formData.append(
         "status",
-        `${
-          row.status === companyStatusMap.ACTIVE
-            ? companyStatusMap.INACTIVE
-            : companyStatusMap.ACTIVE
+        `${row.status === companyStatusMap.ACTIVE
+          ? companyStatusMap.INACTIVE
+          : companyStatusMap.ACTIVE
         }`,
       );
 

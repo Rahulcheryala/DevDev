@@ -7,8 +7,8 @@ import { fetchCustomSchemaPrismaInstance } from "~/utils/prisma";
 export const loader: LoaderFunction = async ({ request }) => {
   try {
     const { client, companyId } = await requirePermissions(request, {
-      view: "integrations",
-      role: "employee",
+      view: "connections",
+      role: "user",
     });
 
     const tenant = await getTenantId(client, companyId!);

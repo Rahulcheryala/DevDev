@@ -9,11 +9,10 @@ interface BreadcrumbItem {
 }
 
 interface PageHeaderProps {
-  breadcrumbs?: BreadcrumbItem[];
+  breadcrumbs: BreadcrumbItem[];
   title: string;
   onEdit?: () => void;
   onMore?: () => void;
-  onAction?: () => void;
   onClose?: () => void;
   showDropdown?: boolean;
 }
@@ -23,7 +22,6 @@ export default function PageHeader({
   title,
   onEdit,
   onMore,
-  onAction,
   onClose,
   showDropdown = true
 }: PageHeaderProps) {
@@ -31,7 +29,7 @@ export default function PageHeader({
     <div className="bg-[#C6D2E7] px-6 pt-2 pb-6 rounded-t-[12px]">
       <div className="flex items-center justify-between mb-[38px]">
         <ul className="flex">
-          {breadcrumbs?.map((item, index) => (
+          {breadcrumbs.map((item, index) => (
             <li  className="flex items-center " key={index}>
               {item.to ? (
                 <Link
@@ -69,15 +67,6 @@ export default function PageHeader({
             >
               <DotsHorizontalIcon />
               More <ChevronDown />
-            </button>
-          )}
-
-          {onAction && (
-            <button 
-              onClick={onAction}
-              className="flex items-center justify-between gap-2 p-3"
-            >
-              Actions <ChevronDown />
             </button>
           )}
 

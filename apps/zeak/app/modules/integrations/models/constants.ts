@@ -1,32 +1,24 @@
-export const integrationTabs = [
+export const integrationListingTabs = [
   {
-    id: 1,
-    title: "Dashboard",
+    label: "Dashboard",
     value: "integrationDashboard",
-    content: "Dashboard",
   },
   {
-    id: 2,
-    title: "Integrations",
+    label: "Integrations",
     value: "integrationsList",
-    content: "Integrations",
   },
   {
-    id: 3,
-    title: "Connections",
+    label: "Connections",
     value: "connectionsList",
-    content: "Connections",
   },
   {
-    id: 4,
-    title: "Favorites",
+    label: "Favorites",
     value: "favoritesList",
-    content: "Favorites",
   },
 ];
 
 // for listing flow
-export enum IntegrationTab {
+export enum IntegrationListingTabs {
   DASHBOARD = "integrationDashboard",
   INTEGRATIONS = "integrationsList",
   CONNECTIONS = "connectionsList",
@@ -47,6 +39,20 @@ export enum IntegrationViewFlowTabs {
   AUDIT = "Audit",
 }
 
+export const viewFlowTabs = [
+  {
+    label: "General",
+    value: "general",
+  },
+  {
+    label: "Setup",
+    value: "setup",
+  },
+  {
+    label: "Audit",
+    value: "audit",
+  },
+];
 export type IntegrationComponents = "listing" | "individual" | null;
 export type IntegrationType = "System" | "User Defined";
 

@@ -1,146 +1,112 @@
-import { useState } from "react";
-import {
-  Label,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@zeak/react";
 import { useUnifiedContext } from "../../../context";
-import { z } from "zod";
 import { RiArrowDownSLine } from "react-icons/ri";
-
-export const schedulePoliciesSchema = z.object({
-  maxRetries: z.number().min(1, "Maximum number of retries is required"),
-  retryDelay: z.number().min(1, "Retry delay is required"),
-  timeout: z.string().min(1, "Timeout is required"),
-});
+import { useConnectionForm } from "~/modules/integrations/hooks/form/useConnectionForm";
+import { FilterTabs, LabelledInput, Label, Dropdown } from "@zeak/ui";
+import { ExecutionFrequency } from "@prisma/client";
 
 export const Schedule = () => {
-  const { state, dispatch } = useUnifiedContext();
-  const { integrationForm } = state;
-  const [executionType, setExecutionType] = useState<string>(
-    integrationForm.executionType || "on-demand"
-  );
+  const {
+    state: { connectionForm, connectionErrors },
+  } = useUnifiedContext();
+  const { handleChange, handleSelectChange, handleScheduleBlur } = useConnectionForm();
 
-  const handleChange = (name: string, value: string) => {
-    dispatch({
-      type: "UPDATE_FORM",
-      payload: { [name]: value },
-    });
+  const safeReplace = (value: any) => {
+    if (!value) return "";
+    return typeof value === "string" ? value.replace(/_/g, "-") : value;
   };
 
-  const handleBlur = async (name: string, value: string) => {
-    try {
-      (schedulePoliciesSchema as any).pick({ [name]: true }).parse({ [name]: value });
-      dispatch({ type: "UPDATE_ERROR", payload: { [name]: null } });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        dispatch({
-          type: "UPDATE_ERROR",
-          payload: { [name]: error.errors[0].message },
-        });
-      }
-    }
+  const formValues = {
+    executionFrequency:
+      safeReplace(connectionForm.executionFrequency) || "On-Demand",
+    maxRetries: connectionForm.connectionDetails.maxRetries || 0,
+    retryDelay: connectionForm.connectionDetails.retryDelay || 0,
+    timeout: connectionForm.connectionDetails.timeout || "",
   };
+
+  // console.log(formValues);
 
   return (
-    <div className="w-full px-10 py-6">
+    <div className="w-full px-10 pt-6 pb-32">
       <div className="form-container space-y-10">
         {/* Execution Frequency */}
         <div className="space-y-2">
-          <Label className="text-sm text-textLink font-medium flex items-center gap-1">
+          <Label className="justify-start">
             Execution Frequency
-            <span className="text-lg text-accent-red">*</span>
+            <span className="text-lg text-accent-orange">*</span>
           </Label>
-          <div className="flex gap-4 items-center">
-            <button
-              className={`px-8 py-3.5 rounded-md outline-none focus-visible:ring-2 ring-[#ffdf41]/50 ${executionType === "on-demand" ? "bg-[#ffdf41] text-black" : "bg-gray-100 text-textLink"}`}
-              onClick={() => setExecutionType("on-demand")}
-            >
-              On-Demand
-            </button>
-            <button
-              className={`px-8 py-3.5 rounded-md outline-none focus-visible:ring-2 ring-[#ffdf41]/50 ${executionType === "scheduled" ? "bg-[#ffdf41] text-black" : "bg-gray-100 text-textLink"}`}
-              onClick={() => setExecutionType("scheduled")}
-            >
-              Scheduled
-            </button>
-          </div>
+          <FilterTabs
+            options={Object.values(ExecutionFrequency).map((frequency) =>
+              safeReplace(frequency)
+            )}
+            defaultSelected={formValues.executionFrequency}
+            onChange={(value) => handleSelectChange("executionFrequency", value)}
+            className="px-0"
+            activeClassName="bg-[#FFDF41] border-none rounded-zeak px-10 py-4"
+            inactiveClassName="bg-[#F7F7F8] border-none rounded-zeak px-10 py-4"
+          />
         </div>
 
         {/* Retry Policy Section */}
         <div className="rounded-lg bg-[#F7F7F8]">
-          <div className="bg-[#E5EAF2] flex justify-between items-center rounded-t-lg px-5 py-4">
-            <Label className="text-base font-medium">
-              Retry Policy
-            </Label>
+          <div className="bg-[#C6D2E7] flex justify-between items-center rounded-t-lg px-5 py-4">
+            <Label className="text-base font-medium">Retry Policy</Label>
             <RiArrowDownSLine className="text-textLink" size={24} />
           </div>
 
           <div className="p-6 flex flex-col gap-6">
             <div className="grid grid-cols-2 gap-12">
               {/* Maximum Retries */}
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="maxRetries" className="text-sm text-textLink">
-                  Maximum number of retries allowed
-                </Label>
-                <Input
-                  id="maxRetries"
-                  name="maxRetries"
-                  type="number"
-                  min={1}
-                  placeholder="Enter max no.of retries"
-                  className="border-0"
-                  value={integrationForm.maxRetries}
-                  onChange={(e) => handleChange("maxRetries", e.target.value)}
-                  onBlur={(e) => handleBlur("maxRetries", e.target.value)}
-                />
-              </div>
+              <LabelledInput
+                type="number"
+                label="Maximum Retries"
+                id="maxRetries"
+                name="maxRetries"
+                value={formValues.maxRetries}
+                onChange={(e: any) =>
+                  handleChange(e.target.name, e.target.value)
+                }
+                onBlur={handleScheduleBlur}
+                errorMessage={connectionErrors?.maxRetries!}
+                placeholder="Enter Maximum Retries"
+                min={0}
+                showNoneForZero={true}
+                className="bg-white border-none"
+              />
 
               {/* Retry Delay */}
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="retryDelay" className="text-sm text-textLink">
-                  Retry Delay (in Seconds)
-                </Label>
-                <Input
-                  id="retryDelay"
-                  name="retryDelay"
-                  type="number"
-                  min={1}
-                  placeholder="Enter retry delay"
-                  className="border-0"
-                  value={integrationForm.retryDelay}
-                  onChange={(e) => handleChange("retryDelay", e.target.value)}
-                  onBlur={(e) => handleBlur("retryDelay", e.target.value)}
-                />
-              </div>
+              <LabelledInput
+                type="number"
+                label="Retry Delay (in seconds)"
+                id="retryDelay"
+                name="retryDelay"
+                value={formValues.retryDelay}
+                onChange={(e: any) =>
+                  handleChange(e.target.name, e.target.value)
+                }
+                onBlur={handleScheduleBlur}
+                errorMessage={connectionErrors?.retryDelay!}
+                placeholder="Enter Retry Delay"
+                min={0}
+                showNoneForZero={true}
+                className="bg-white border-none"
+              />
             </div>
 
             {/* Timeout */}
             <div className="grid grid-cols-2 gap-12">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="timeout" className="text-sm text-textLink">
-                  Timeout
-                </Label>
-                <Select
-                  name="timeout"
-                  value={integrationForm.timeout}
-                  onValueChange={(value) => handleChange("timeout", value)}
-                >
-                  <SelectTrigger className="border-0 bg-white">
-                    <SelectValue placeholder="None" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="30">30 seconds</SelectItem>
-                    <SelectItem value="60">1 minute</SelectItem>
-                    <SelectItem value="300">5 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Dropdown
+                name="timeout"
+                label="Timeout"
+                placeholder="Select Timeout"
+                inputClasses="bg-white"
+                items={["10s", "30s", "45s", "90s", "120s"].map((timeout) => ({
+                  label: timeout,
+                  value: timeout,
+                }))}
+                value={formValues.timeout}
+                onChange={(value) => handleChange("timeout", value)}
+                dropdownClasses="h-10"
+              />
             </div>
           </div>
         </div>

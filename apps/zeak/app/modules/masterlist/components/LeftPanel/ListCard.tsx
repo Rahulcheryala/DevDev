@@ -1,36 +1,40 @@
 import React from 'react'
 import { Zlogo } from '@zeak/icons'
-import { UserIcon } from 'lucide-react'
+import { UserIcon, UserCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { Tally1 } from 'lucide-react'
 import { Link } from '@remix-run/react'
-import { useSearchParams } from '@remix-run/react'
 import { cn } from '@zeak/react'
+import { useParams } from '@remix-run/react'
+import {useUser} from "~/modules/masterlist"
 interface ListCardProps {
     name: string
-    systemDefined: boolean,
+   createdBy: string,
     isActive: boolean,
-    updatedBy: string,
+    lastUpdatedBy: string,
     updatedAt: Date,
     id: string
+    type?: string
 }
-export default function ListCard({ name, systemDefined, isActive, updatedBy, updatedAt, id }: ListCardProps) {
-    const [searchParams] = useSearchParams()
-    const activeId = searchParams.get("id")
+export default function ListCard({ name,  isActive, lastUpdatedBy,createdBy, updatedAt, id,type }: ListCardProps) {
+    const { id: activeId } = useParams()
+    const userId= lastUpdatedBy || createdBy
+    const {data,isPending, isError} = useUser(userId)
+
     return (
         <div className={cn("px-4 py-3  cursor-pointer", activeId === id ? "bg-[#007AF5] text-white rounded-zeak" : "bg-white")}>
 
-            <Link to={`/x/masterlists?id=${id}`} >
+            <Link to={`/x/masterlists/${id}`} >
                 <div className="flex justify-between items-center">
                     <span className="capitalize">{name}</span>
                     <div className="">
                         {
-                            systemDefined ? <div className="flex items-center gap-2">
+                            type === "system" ? <div className="flex items-center gap-2">
                                 <span>System</span>
                                 <Zlogo />
                             </div> : <div className="flex items-center gap-2">
                                 <span>User Defined</span>
-                                <UserIcon />
+                                <UserCircle />
                             </div>
                         }
                     </div>
@@ -50,9 +54,9 @@ export default function ListCard({ name, systemDefined, isActive, updatedBy, upd
                     </div>
                     <div className="flex items-center gap-2">
 
-                        <div className={cn("text-sm", activeId === id ? "opacity-60" : "")} >
-                            {updatedBy}
-                        </div>
+                       {data &&  <div className={cn("text-sm", activeId === id ? "opacity-60" : "")} >
+                            {data.firstName}
+                        </div>}
                         <div >
                             <Tally1 />
                         </div>

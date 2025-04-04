@@ -319,3 +319,7 @@ input:-webkit-autofill:focus {
   color: hsla(var(--accent-blue-dark)) !important;
   text-decoration: underline !important;
 }
+
+.container{
+  @apply max-w-5xl mx-auto;
+}

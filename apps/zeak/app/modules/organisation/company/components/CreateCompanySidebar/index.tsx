@@ -1,10 +1,27 @@
-import Steps from "./Steps";
-import TopSection from "./TopSection";
+import Progress from "~/components/Globals/Progress";
+import { stepsList } from "../constants";
+import { useCompanyStore } from "../../utils/useCompanyStore";
+
 export default function CreateCompanySidebar() {
+  const { activeStep, setActiveStep } = useCompanyStore();
+
+  // Map stepsList to match Progress component's step structure
+  const progressSteps = stepsList.map((step, index) => ({
+    id: index + 1,
+    title: step.title,
+    description: step.subTitle, // Using subTitle as description
+    isRequired: step.isRequired,
+    isCompleted: step.isCompleted,
+    clickable: step.clickable
+  }));
+
   return (
-    <div className="flex flex-col xl:min-w-[384px] xl:w-[384px] 2xl:min-w-[506px] 2xl:w-[506px]  rounded-zeak">
-      <TopSection />
-      <Steps />
-    </div>
+    <Progress
+      breadcrumbs={["Organisation", "New Company"]}
+      description="Create New Company"
+      currentStep={activeStep}
+      steps={progressSteps}
+      onStepClick={setActiveStep}
+    />
   );
 }

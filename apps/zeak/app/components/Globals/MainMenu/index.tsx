@@ -9,7 +9,34 @@ import {
     DropdownMenuTrigger,
 } from '@zeak/react';
 
-const MainMenu = () => {
+interface MainMenuProps {
+    onDelete?: () => void;
+    onEdit?: () => void;
+    onNew?: () => void;
+    onExport?: () => void;
+    isDeleteDisabled?: boolean;
+    customActions?: Array<{
+        label: string;
+        onClick: () => void;
+    }>;
+    viewOptions?: Array<string>;
+    defaultView?: string;
+    searchValue?: string;
+    onSearchChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const MainMenu: React.FC<MainMenuProps> = ({
+    onDelete,
+    onEdit,
+    onNew,
+    onExport,
+    isDeleteDisabled = true,
+    customActions = [],
+    viewOptions = ['Default View'],
+    defaultView = 'DEFAULT VIEW',
+    searchValue,
+    onSearchChange,
+}) => {
     return (
         <div className="flex w-full flex-col items-start rounded-t-[12px] bg-white">
             {/* First section - exactly 60px height */}
@@ -20,18 +47,20 @@ const MainMenu = () => {
                             <Button variant="outline" className="flex items-center gap-2">
                                 <LayoutTemplate className="h-4 w-4" />
                                 <span className="font-['Suisse_Int'l] text-[14px] font-medium leading-[20px] tracking-[0.2px] text-[#475467]">
-                                    DEFAULT VIEW
+                                    {defaultView}
                                 </span>
                                 <ChevronDown className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuItem>Default View</DropdownMenuItem>
+                            {viewOptions.map((view) => (
+                                <DropdownMenuItem key={view}>{view}</DropdownMenuItem>
+                            ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Centered List section with dividers */}
-                    <div className="flex items-center gap-4 absolute left-1/2 transform -translate-x-1/2">
+                    {/* Centered List section with dividers - now using grid for better stability */}
+                    <div className="grid grid-flow-col auto-cols-max gap-4 mx-auto">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="flex items-center gap-2">
@@ -46,14 +75,19 @@ const MainMenu = () => {
 
                         <Button
                             variant="ghost"
-                            className="text-gray-400 cursor-not-allowed hover:bg-transparent hover:text-gray-400"
-                            disabled
+                            className=" disabled:text-gray-400 disabled:cursor-not-allowed"
+                            disabled={isDeleteDisabled}
+                            onClick={onDelete}
                         >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                         </Button>
 
-                        <Button variant="ghost" className="flex items-center gap-3 px-[28px] py-[14px]">
+                        <Button
+                            variant="ghost"
+                            className="flex items-center gap-3 px-[28px] py-[14px]"
+                            onClick={onEdit}
+                        >
                             <PenLine className="h-4 w-4" />
                             Edit
                             <ChevronDown className="h-4 w-4" />
@@ -67,12 +101,20 @@ const MainMenu = () => {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                                <DropdownMenuItem>Action 1</DropdownMenuItem>
+                                {customActions.map((action) => (
+                                    <DropdownMenuItem key={action.label} onClick={action.onClick}>
+                                        {action.label}
+                                    </DropdownMenuItem>
+                                ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
 
-                    <Button variant="default" className="font-['Suisse_Int'l'] text-[14px] font-semibold leading-[20px] tracking-[0.2px] text-[#007AF5] flex items-center gap-2">
+                    <Button
+                        variant="default"
+                        className="font-['Suisse_Int'l'] text-[14px] font-semibold leading-[20px] tracking-[0.2px] text-[#007AF5] flex items-center gap-2"
+                        onClick={onNew}
+                    >
                         NEW
                         <Plus className="h-4 w-4" />
                     </Button>
@@ -107,6 +149,8 @@ const MainMenu = () => {
                         <Input
                             type="text"
                             placeholder="Search"
+                            value={searchValue}
+                            onChange={onSearchChange}
                             className="bg-transparent border-none w-full focus:ring-0 focus:outline-none p-0 h-full
                                 font-['Suisse_Int'l'] text-[14px] font-normal leading-[28px] tracking-[0.2px] text-[#475467]
                                 placeholder:text-[#475467] placeholder:font-['Suisse_Int'l'] placeholder:text-[14px] 

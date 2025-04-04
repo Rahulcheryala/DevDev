@@ -20,6 +20,7 @@ CREATE TABLE "golden"."integrationConnections" (
     "connectionDetails" JSONB NOT NULL, -- TODO(vamsi): Make it a composite type
     "executionFrequency" "golden"."executionFrequency" NOT NULL,  -- TODO(vamsi): Add master list value instead of enum
     "connectionStatus" "golden"."connectionStatus" NOT NULL,
+    "copies" INT DEFAULT 0,
     "isTested" BOOLEAN NOT NULL DEFAULT FALSE,
     "lastTestedAt" TIMESTAMP WITH TIME ZONE,
     "lastTestedBy" UUID,
@@ -32,7 +33,7 @@ CREATE TABLE "golden"."integrationConnections" (
     "deletedBy" UUID,
     "syncToken" UUID NOT NULL,
     CONSTRAINT "integrationConnections_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "integrationConnections_connectionName_key" UNIQUE ("connectionName"),
+    -- CONSTRAINT "integrationConnections_connectionName_key" UNIQUE ("connectionName"),
     CONSTRAINT "integrationConnections_connectionCode_key" UNIQUE ("connectionCode"),
     CONSTRAINT "integrationConnections_integrationId_fkey" FOREIGN KEY ("integrationId") REFERENCES "golden"."integrationsMaster"("id") ON DELETE CASCADE,
     -- CONSTRAINT "integrationConnections_executionFrequency_fkey" FOREIGN KEY ("executionFrequency") REFERENCES "golden"."masterListValue"("id"),

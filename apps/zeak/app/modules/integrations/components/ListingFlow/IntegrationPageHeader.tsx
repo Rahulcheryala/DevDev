@@ -1,4 +1,4 @@
-import { PageHeader } from "~/components/Shared";
+import { PageHeader } from '@zeak/ui';
 import { useNavigate } from "@remix-run/react";
 
 export default function IntegrationPageHeader() {
@@ -19,9 +19,11 @@ export default function IntegrationPageHeader() {
     <PageHeader
       breadcrumbs={breadcrumbs}
       title="Integrations"
-      onAction={() => {}}
+      onGoBack={() => { navigate("/x")}}
+      showActions={true}
+      onActions={() => {}}
+      showClose={true}
       onClose={() => { navigate("/x")}}
-      showDropdown={true}
     />
   );
 }

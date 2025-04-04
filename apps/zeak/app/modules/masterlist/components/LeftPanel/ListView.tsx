@@ -1,42 +1,21 @@
 import ListCard from "./ListCard";
-import { useAllMasterlist } from "../../hooks";
-import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "@remix-run/react";
+import { useAllMasterlist, useMasterlistStore, useSearchMasterlist } from "~/modules/masterlist";
+import { ScrollArea } from "@zeak/react";
+import LoadingCard from "./LoadingCard";
+import AllMasterlist from "./AllMasterlist";
+import SearchResults from "./SearchResults";
 
-export default function ListView() {
-    const { data: masterLists, isPending, isError } = useAllMasterlist();
-    const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
+interface ListViewProps {
+    systemDefinedMasterLists: any;
+}
 
-    // useEffect(() => {
-    //     if (masterLists && masterLists.data.length > 0 && !searchParams.get("id")) {
-    //         navigate(`/x/masterlists?id=${masterLists.data[0].id}`, { replace: true });
-    //     }
-    // }, [masterLists, searchParams, navigate]);
+export default function ListView({ systemDefinedMasterLists }: ListViewProps) {
+    const { searchTerm } = useMasterlistStore()
 
-    if (isPending) {
-        return <div>Loading...</div>;
-    }
-    if (isError) {
-        return <div>Error fetching master lists</div>;
-    }
-    if (!masterLists || masterLists.data.length === 0) {
-        return <div>No master lists available</div>;
-    }
 
     return (
-        <div className="space-y-[2px]">
-            {masterLists.data.map((masterList: any) => (
-                <ListCard
-                    name={masterList.name}
-                    id={masterList.id}
-                    key={masterList.id}
-                    systemDefined={true}
-                    isActive={true}
-                    updatedBy="test"
-                    updatedAt={new Date()}
-                />
-            ))}
+        <div>
+            {searchTerm ? <SearchResults systemDefinedMasterLists={systemDefinedMasterLists} /> : <AllMasterlist systemDefinedMasterLists={systemDefinedMasterLists} />}
         </div>
     );
 }

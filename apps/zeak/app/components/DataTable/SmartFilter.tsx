@@ -153,11 +153,6 @@ export default function SmartFilter<TData>({table}: {table: Table<TData>}) {
           </div>
 
           {filters.map((filter, index) => {
-            // Skip filters with empty columnId or ensure a default value
-            if (!filter.columnId) {
-              return null; // Skip rendering this filter
-            }
-
             const column = table.getColumn(filter.columnId);
             return (
               <div key={filter.id} className="mb-6">

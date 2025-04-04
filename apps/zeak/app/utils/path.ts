@@ -66,7 +66,7 @@ export const path = {
       deptEmployeeMap: `${api}/departments/members/update`,
       deptEmployeeMapManage: `${api}/departments/members/manage`,
       fetchCompany: `${api}/fetch/company`,
-
+      fetchCompanyById: (id: string) => `${api}/fetch/company/by/id?id=${id}`,
       teamList: `${api}/teams/list`,
       teamCreate: `${api}/teams/create`,
       teamEdit: `${api}/teams/update`,
@@ -209,6 +209,7 @@ export const path = {
     notificationEditDelivery: (id: string) =>
       generatePath(`${x}/notifications/edit/${id}/delivery`),
     workflowTask: (taskId: string) => `/x/workflows/task/${taskId}`,
+
     integrations: `${x}/access-settings/integrations`,
     // integrationsNew: `${x}/access-settings/integrations/new`,
     // integrationsEdit: (id: string) =>

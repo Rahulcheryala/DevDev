@@ -1,0 +1,170 @@
+# .cursorrules
+
+## Project Overview
+
+You are an expert in TypeScript, Remix, Shadcn UI, Supabase, Prisma, and monorepo structures. This project follows best practices for building scalable and maintainable web applications with a strong emphasis on component reusability through shared packages.
+
+## Component Architecture
+
+- Prioritize using components from shared packages:
+  - `packages/react`: Core reusable UI components built with Radix UI and React Aria
+  - `packages/datatable`: Data table and related components using TanStack Table and DnD Kit
+  - `packages/icons`: Shared icon components
+  - `packages/utils`: Shared utility functions
+  - `packages/logger`: Logging utilities
+  - `packages/labels-forms`: Form-related components
+- Before creating new components/utilities in apps:
+  1. Check if component/utility exists in shared packages
+  2. Evaluate if new component/utility could be reusable across apps
+  3. If reusable, create in appropriate shared package:
+     - UI components → `packages/react`
+     - Icons → `packages/icons`
+     - Data tables → `packages/datatable`
+     - Utility functions → `packages/utils`
+  4. Only create in `apps/zeak` if component is app-specific
+- Components in shared packages should be:
+  - Highly configurable through props
+  - Well-documented with TypeScript types
+  - Framework-agnostic where possible
+  - Properly exported through package index
+
+## Icon Management
+
+- All icons should be managed in `packages/icons`
+- Before creating new icon components:
+  1. Check if icon exists in packages/icons
+  2. If not found, create new icon component in packages/icons
+  3. Export icon through package index
+- Icon components should:
+  - Accept standard SVG props (size, color, etc.)
+  - Use consistent naming convention (e.g., ChevronIcon, UserIcon)
+  - Include proper TypeScript types
+  - Be optimized for size and performance
+
+## Utility Functions Management
+
+- All utility functions should be managed in `packages/utils`
+- Before creating new utility functions:
+  1. Check if utility exists in packages/utils
+  2. If not found, create new utility in packages/utils
+  3. Export utility through package index
+- Utility functions should be:
+  - Pure functions where possible
+  - Well-documented with TypeScript types
+  - Framework-agnostic
+  - Properly tested
+  - Grouped by domain/purpose (e.g., date, string, number utilities)
+
+## Code Style and Structure
+
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., `isLoading`, `hasError`).
+- Structure files with exported components, subcomponents, helpers, static content, and types.
+
+## Syntax and Formatting
+
+- Use arrow functions for components and handlers.
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+- Use declarative JSX.
+- Wrap client components in Suspense with fallback and use dynamic loading for non-critical components.
+- Optimize images using the Remix Image component, include size data, and implement lazy loading.
+
+## UI and Styling
+
+- Use Shadcn UI and Tailwind for components and styling.
+- Use tailwind-merge for combining class names dynamically.
+- Avoid fixed classes like `bg-gray-500`; instead, use Shadcn classes such as `bg-background`, `text-secondary-foreground`, etc.
+- Utilize framer-motion for animations when necessary.
+
+## Database Querying and Data Model Creation
+
+- Supabase is the main database and backend service for the application.
+- Use Supabase SDK for data fetching, authentication, and storage operations.
+- Implement multi-tenant architecture using Prisma to communicate with dynamically created database schemas.
+- For each new tenant, create an isolated database schema on-the-fly.
+- Use tenant-specific database schemas with proper access controls.
+- Ensure proper tenant context is passed through database queries.
+- For data model creation, use Prisma's schema definition language (SDL) with version 6.x.
+- Implement middleware for tenant routing and schema selection.
+- Ensure type safety by generating TypeScript types from the Prisma schema.
+- Use the database package to manage connections and queries across different tenant schemas.
+
+## Performance Optimization
+
+- Optimize Web Vitals (LCP, CLS, FID).
+- Implement proper database connection pooling per tenant.
+- Use efficient tenant isolation strategies at the database level.
+- Limit the use of client-side rendering; favor server-side rendering (SSR) with Remix.
+- Implement proper caching strategies per tenant.
+- Utilize Redis for caching and session management.
+
+## State Management
+
+- Use Remix loaders and actions for data fetching and mutations.
+- Manage global state using context providers or state management libraries like nanostores.
+- Leverage Tanstack Query (React Query) for client-side data fetching and caching.
+
+## Monorepo Structure
+
+- Organize the monorepo with clear package boundaries:
+  - `packages/react`: Houses all shared UI components with Radix UI primitives
+  - `packages/datatable`: Specialized data table components with TanStack Table
+  - `packages/icons`: Shared icon components
+  - `packages/utils`: Shared utility functions
+  - `packages/logger`: Logging utilities
+  - `packages/redis`: Redis client and utilities
+  - `packages/database`: Database client and utilities with Prisma
+  - `packages/tailwind`: Tailwind configuration and utilities
+  - `packages/tsconfig`: TypeScript configuration
+  - `packages/eslint-config-zeak`: ESLint configuration
+  - `packages/labels-forms`: Form-related components
+  - `apps/zeak`: Application-specific code only
+- Using Turborepo for managing the monorepo build processes
+- Ensure each package has a clear responsibility and dependencies are well-defined
+- Maintain strict boundaries between shared and app-specific code
+
+## Component Development Guidelines
+
+- New component checklist:
+  1. Is it potentially reusable across apps?
+  2. Does it contain generic UI patterns?
+  3. Could other apps benefit from it?
+  4. Is it framework-agnostic?
+  - If YES to any: Create in `packages/react`
+  - If NO to all: Create in app directory
+- Document components with:
+  - Clear prop interfaces
+  - Usage examples
+  - Variant patterns
+  - Accessibility considerations
+
+## Technical Stack
+
+- Remix v2.9+ for the web framework
+- Supabase as the primary database and backend service
+- Prisma v6.x for ORM with dynamic multi-tenant schema creation and communication
+- Shadcn UI and Tailwind for UI components and styling
+- Radix UI for accessible UI primitives
+- React Aria Components for complex accessible components
+- TanStack Query for data fetching and caching
+- TanStack Table for data tables
+- TailwindMerge for dynamic class name merging
+- TypeScript for type safety and scalability
+- Monorepo structure managed with Turborepo
+- Redis for caching and session management
+- Trigger.dev for background jobs and workflows
+
+## Key Conventions
+
+- Implement tenant-aware routing and data access
+- Use tailwind-merge for dynamic className combinations
+- Follow multi-tenant isolation patterns in database queries
+- Optimize Web Vitals (LCP, CLS, FID)
+- Limit the use of client-side rendering; favor server-side rendering (SSR) with Remix
+- Ensure each package in the monorepo has a clear responsibility and well-defined dependencies
+- Prioritize component reuse from shared packages over creating new ones
+- Follow component development checklist before creating new components
+- Use icons exclusively from packages/icons
+- Use utility functions exclusively from packages/utils

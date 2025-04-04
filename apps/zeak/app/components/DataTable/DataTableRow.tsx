@@ -41,7 +41,7 @@ const TableRow = <TData extends { id: string | number }>({
     animate={{height: isCompact ? "48px" : "64px", opacity:1 }}
     transition={{duration: isDragging ? 0.2 : 0.5, ease: "easeInOut"}}
     exit={{y:-10, opacity:0 }}
-     ref={setNodeRef} style={style} className={cn("hover:bg-gray-100 mb-[3px]", {
+     ref={setNodeRef} style={style} className={cn("hover:bg-gray-100 mb-[3px] rounded-zeak", {
       "bg-[#D3DFE8]": enableAlternateRowColor && row.index % 2 === 0,
       "bg-[#F2F2F7]": enableAlternateRowColor && row.index % 2 === 1,
     })}>
@@ -161,7 +161,7 @@ const TableRow = <TData extends { id: string | number }>({
            
           ) : cell.getIsPlaceholder() ? null: ( // For cells with repeated values, render null
             // Otherwise, just render the regular cell
-            <div className="transition-all duration-300 ease-linear w-full">
+            <div className="transition-all duration-300 ease-linear">
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </div>
           )}

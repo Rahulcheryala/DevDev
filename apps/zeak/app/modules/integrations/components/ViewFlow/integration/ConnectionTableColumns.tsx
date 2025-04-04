@@ -1,81 +1,45 @@
-import moment from "moment-timezone";
 import { ColumnDef } from "@tanstack/react-table";
-import { cn, Popover, PopoverContent, PopoverTrigger } from "@zeak/react";
-import { DataTableCheckbox } from "../../../../../components/DataTable";
-import RowDragHandleCell from "../../../../../components/DataTable/RowDragHanle";
-import { NameColumn } from "../../../../../components/Layout/Screen";
-import ConnectionActionOptions from "../../misc/ConnectionActionOptions";
-import { LucideTriangleAlert } from "lucide-react";
+import { cn, Popup, ActionButtonProps, StatusPill } from "@zeak/ui";
+import { RadioCheckbox } from "@zeak/ui";
+import {
+  NameTableCell,
+  DateTableCell,
+  RowDragHandleCell,
+} from "@zeak/datatable";
 import { CiViewColumn } from "react-icons/ci";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { TbLink } from "react-icons/tb";
-import { LuUnlink } from "react-icons/lu";
-import { useUnifiedContext } from "../../../context";
-import { ConnectionStatus } from "@prisma/client";
-import { useNavigate } from "@remix-run/react";
-
-const statusMap = {
-  [ConnectionStatus.Online]: {
-    icon: <TbLink size={20} className="text-green-500 cursor-pointer" />,
-    label: <span className="text-green-500">ONLINE</span>,
-  },
-  [ConnectionStatus.Offline]: {
-    icon: <LuUnlink size={20} className="text-gray-500 cursor-pointer" />,
-    label: <span className="text-gray-500">OFFLINE</span>,
-  },
-  [ConnectionStatus.Error]: {
-    icon: (
-      <LucideTriangleAlert size={20} className="text-red-500 cursor-pointer" />
-    ),
-    label: <span className="text-red-500">ERROR</span>,
-  },
-};
-
-const ConnectionStatusMapper = ({ status }: { status: string }) => {
-  const statusInfo = statusMap[status as keyof typeof statusMap];
-  return (
-    <div className="flex items-center gap-3 text-sm">
-      {statusInfo ? (
-        <>
-          {statusInfo.icon}
-          {statusInfo.label}
-        </>
-      ) : (
-        <span className="text-gray-500">UNKNOWN STATUS</span>
-      )}
-    </div>
-  );
-};
 
 export const ConnectionTableColumns: ColumnDef<any>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <div className="flex items-center justify-center px-3 h-full">
-        <DataTableCheckbox
-          className="rounded-full "
-          checked={table.getIsAllPageRowsSelected()}
+      <div className="flex items-center justify-center pl-5 h-full">
+        <RadioCheckbox
+          className={cn("rounded-full border-none bg-gray-200 w-4 h-4", {
+            "bg-[#FFDF41] border-none": table.getIsAllPageRowsSelected(),
+          })}
+          isChecked={table.getIsAllPageRowsSelected()}
           onCheckedChange={() => table.toggleAllPageRowsSelected()}
+          showIndicator={false}
         />
       </div>
     ),
     cell: ({ row }) => (
       <div
-        className={cn("flex h-[64px] w-[60px] rounded-l-[12px]", {
+        className={cn("flex h-[64px] w-[60px]", {
           "bg-[#FFDF41]": row.getIsSelected(),
         })}
       >
         <RowDragHandleCell rowId={row.id} />
-        <div
-          className={cn(
-            " flex items-center justify-center rounded-l-[12px] relative"
-          )}
-        >
-          <DataTableCheckbox
-            className={cn("rounded-full", { "bg-white": row.getIsSelected() })}
-            checked={row.getIsSelected()}
+        <div className={cn("flex items-center justify-center relative")}>
+          <RadioCheckbox
+            className={cn("rounded-full border-none bg-gray-200 w-4 h-4", {
+              "bg-white border-none": row.getIsSelected(),
+            })}
+            isChecked={row.getIsSelected()}
             onCheckedChange={row.getToggleSelectedHandler()}
             aria-label="Select row"
+            showIndicator={false}
           />
         </div>
       </div>
@@ -97,10 +61,10 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row, column }) => (
-      <NameColumn
-        src={row.original.integration.logo}
-        link={`/x/access-settings/connections/${row.original.id}`}
+      <NameTableCell
+        src={row.original.integration?.logo}
         name={row.original.connectionName}
+        link={`/x/access-settings/connections/${row.original.id}`}
         columnSize={column.getSize()}
       />
     ),
@@ -122,7 +86,11 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex justify-start items-center px-6">
-        <ConnectionStatusMapper status={row.original.connectionStatus} />
+        <StatusPill
+          status={row.original.connectionStatus}
+          className="text-sm font-[450] gap-2"
+          uppercase
+        />
       </div>
     ),
     meta: {
@@ -146,7 +114,7 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
         style={{ maxWidth: column.getSize() }}
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
-        {row.original.connectionDescription}
+        {row.original.connectionDescription || "-"}
       </div>
     ),
     meta: {
@@ -195,26 +163,12 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
     cell: ({ row, column }) => (
       <div
         style={{ maxWidth: column.getSize() }}
-        className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
+        className="truncate text-sm text-left"
       >
-        <div className="flex flex-col text-left">
-          <span>
-            {moment(row.original.updatedAt || row.original.createdAt).format(
-              "DD MMM, YYYY"
-            )}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            <span className="text-[11px] text-muted-foreground">
-              {moment(row.original.updatedAt || row.original.createdAt).format(
-                "hh:mm A"
-              )}{" "}
-              |{" "}
-              {moment(row.original.updatedAt || row.original.createdAt)
-                .tz("America/Chicago")
-                .format("z")}
-            </span>
-          </span>
-        </div>
+        <DateTableCell
+          date={row.original.updatedAt || row.original.createdAt}
+          timeZone="America/Chicago"
+        />
       </div>
     ),
     meta: {
@@ -236,24 +190,12 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
     cell: ({ row, column }) => (
       <div
         style={{ maxWidth: column.getSize() }}
-        className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
+        className="truncate text-sm text-left"
       >
-        <div className="flex flex-col text-left">
-          <span>
-            {moment(row.original.lastTestedAt || row.original.createdAt).format(
-              "DD MMM, YYYY"
-            )}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            {moment(row.original.lastTestedAt || row.original.createdAt).format(
-              "hh:mm A"
-            )}{" "}
-            |{" "}
-            {moment(row.original.lastTestedAt || row.original.createdAt)
-              .tz("America/Chicago")
-              .format("z")}
-          </span>
-        </div>
+        <DateTableCell
+          date={row.original.lastTestedAt || row.original.createdAt}
+          timeZone="America/Chicago"
+        />
       </div>
     ),
     meta: {
@@ -292,27 +234,20 @@ export const ConnectionTableColumns: ColumnDef<any>[] = [
         <CiViewColumn />
       </div>
     ),
-    cell: ({ row }) => (
-      <div className="">
-        <Popover>
-          <PopoverTrigger
-            className={`${row.original.isArchived ? "cursor-not-allowed" : "cursor-pointer"}`}
-            asChild
-            disabled={row.original.isArchived}
-          >
-            <button className="flex items-center justify-between gap-3 py-3 px-6 text-secondary text-sm">
-              <BsThreeDotsVertical />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-64 p-0">
-            <ConnectionActionOptions
-              connectionId={row.original.id}
-              component="listing"
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-    ),
+    cell: ({ row }) => {
+      // Trigger button for the popup
+      const triggerButton = (
+        <button className="flex items-center justify-between gap-3 py-3 px-6 text-secondary text-sm">
+          <BsThreeDotsVertical />
+        </button>
+      );
+
+      return (
+        <div className="">
+          <Popup trigger={triggerButton} buttons={[]} align="end" />
+        </div>
+      );
+    },
     size: 64,
     meta: {
       name: "Actions",

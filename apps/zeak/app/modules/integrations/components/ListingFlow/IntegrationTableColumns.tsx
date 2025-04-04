@@ -1,19 +1,23 @@
-import moment from "moment-timezone";
+import { memo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { cn, Popover, PopoverContent, PopoverTrigger } from "@zeak/react";
-import { DataTableCheckbox } from "../../../../components/DataTable";
-import RowDragHandleCell from "../../../../components/DataTable/RowDragHanle";
-import { NameColumn } from "../../../../components/Layout/Screen";
+import { cn, Popup, ActionButtonProps, RadioCheckbox, toast } from "@zeak/ui";
+import {
+  NameTableCell,
+  DateTableCell,
+  RowDragHandleCell,
+} from "@zeak/datatable";
 import { useUnifiedContext } from "../../context";
-import IntegrationActionOptions from "../misc/IntegrationActionOptions";
+import { refreshIntegrationsAction } from "../../context/action";
+import { useIntegrationActions } from "../misc/IntegrationActionOptions";
+import ConnectionsPill from "../misc/ConnectionsPill";
+import { updateIntegrationFn } from "../../utils/api.utils";
+import { safeReplace } from "../../utils/utils";
+import { IntegrationForm } from "../../models/integration-form.model";
+// icons
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { CiViewColumn } from "react-icons/ci";
 import { FiPlus } from "react-icons/fi";
-import ConnectionsPill from "../misc/connectionsPill";
-import { updateIntegrationFn } from "../../utils/api.utils";
-import { toast } from "@zeak/react";
-import { refreshIntegrationsAction } from "../../context/action";
 
 const AddConnectionButton = ({ id }: { id: string }) => {
   const {
@@ -32,36 +36,48 @@ const AddConnectionButton = ({ id }: { id: string }) => {
 
   return (
     <button
-      className="w-full text-blue-500 font-semibold flex justify-center items-center gap-2"
+      className="w-full text-blue-500 font-semibold text-sm flex justify-center items-center gap-1.5"
       onClick={onClickHandler}
     >
-      <FiPlus className="text-lg" />
+      <FiPlus className="w-5 h-5" />
       Connection
     </button>
   );
 };
 
-const FavoriteToggle = ({ integration }: { integration: any }) => {
+export const FavoriteToggle = ({ integration }: { integration: any }) => {
   const { dispatch } = useUnifiedContext();
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
 
     try {
       const newFavoriteStatus = !integration.isFavorite;
-
-      await updateIntegrationFn(integration.id, {
+      const response = await updateIntegrationFn(integration.id, {
         isFavorite: newFavoriteStatus,
-      } as any);
+      } as Partial<IntegrationForm>);
 
-      toast.success(
-        `${integration.integrationName} ${newFavoriteStatus ? "added to" : "removed from"} favorites`
-      );
+      if (response) {
+        const actualStatus = response.isFavorite;
+        toast.success(
+          "SUCCESS",
+          `${integration.integrationName} ${actualStatus ? "added to" : "removed from"} favorites`,
+          {
+            variant: "small",
+          }
+        );
 
-      await refreshIntegrationsAction({}, dispatch);
+        await refreshIntegrationsAction({}, dispatch);
+      }
     } catch (error) {
       console.error("Failed to update favorite status:", error);
-      toast.error("Failed to update favorite status");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      toast.error(
+        "Error!",
+        `Failed to update favorite status: ${errorMessage}`
+      );
     }
   };
 
@@ -73,41 +89,87 @@ const FavoriteToggle = ({ integration }: { integration: any }) => {
           onClick={handleToggleFavorite}
         />
       ) : (
-        <FaRegHeart className="cursor-pointer text-secondary" onClick={handleToggleFavorite} />
+        <FaRegHeart
+          className="cursor-pointer text-secondary"
+          onClick={handleToggleFavorite}
+        />
       )}
     </div>
   );
 };
 
-const CompanyNames = ({ companyIds }: { companyIds: any[] }) => {
+const CompanyNames = ({
+  companyIds,
+  columnSize,
+}: {
+  companyIds: string[];
+  columnSize: number;
+}) => {
   const {
-    state: { company },
+    state: { companies },
   } = useUnifiedContext();
+
+  const companyNames = companies
+    .filter((company) => companyIds.includes(company.id))
+    .map((company) => company.name);
+
   return (
-    <>
-      <div className="w-11/12 text-ellipsis text-nowrap overflow-hidden text-left">
-        {/* {companyIds.map((company: any) => company.companyName).join(", ") ||
-          "N/A"} */}
-        {company?.name}
+    <div style={{ width: columnSize }} className="px-5 relative">
+      <div className="w-[90%] truncate text-left text-sm">
+        {companyNames.join(", ") || "N/A"}
       </div>
-      {companyIds && companyIds.length - 3 > 0 && (
+      {companyIds.length > 0 && (
         <div className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-500 font-semibold text-xs">
-          +{companyIds.length - 3}
+          {companyIds.length}
         </div>
       )}
-    </>
+    </div>
   );
 };
+
+// Create a memoized cell component to avoid re-renders and multiple hook calls
+const OptionsCell = memo(
+  ({
+    id,
+    integrationType,
+    status,
+  }: {
+    id: string;
+    integrationType: "System" | "User Defined";
+    status: any;
+  }) => {
+    // Now the hook is called only once per unique row and will only re-render when props change
+    const actionButtons = useIntegrationActions(id, integrationType, status);
+
+    // Trigger button for the popup
+    const triggerButton = (
+      <button className="flex items-center justify-between gap-3 py-3 px-6 text-secondary text-sm">
+        <BsThreeDotsVertical />
+      </button>
+    );
+
+    return (
+      <Popup
+        trigger={triggerButton}
+        buttons={actionButtons as ActionButtonProps[]}
+        align="end"
+      />
+    );
+  }
+);
 
 export const IntegrationTableColumns: ColumnDef<any>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <div className="flex items-center justify-center px-3 h-full">
-        <DataTableCheckbox
-          className="rounded-full "
-          checked={table.getIsAllPageRowsSelected()}
+      <div className="flex items-center justify-center pl-5 h-full">
+        <RadioCheckbox
+          className={cn("rounded-full border-none bg-gray-200 w-4 h-4", {
+            "bg-[#FFDF41] border-none": table.getIsAllPageRowsSelected(),
+          })}
+          isChecked={table.getIsAllPageRowsSelected()}
           onCheckedChange={() => table.toggleAllPageRowsSelected()}
+          showIndicator={false}
         />
       </div>
     ),
@@ -119,11 +181,14 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
       >
         <RowDragHandleCell rowId={row.id} />
         <div className={cn(" flex items-center justify-center relative")}>
-          <DataTableCheckbox
-            className={cn("rounded-full", { "bg-white": row.getIsSelected() })}
-            checked={row.getIsSelected()}
+          <RadioCheckbox
+            className={cn("rounded-full border-none bg-gray-200 w-4 h-4", {
+              "bg-white border-none": row.getIsSelected(),
+            })}
+            isChecked={row.getIsSelected()}
             onCheckedChange={row.getToggleSelectedHandler()}
             aria-label="Select row"
+            showIndicator={false}
           />
         </div>
       </div>
@@ -145,7 +210,7 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row, column }) => (
-      <NameColumn
+      <NameTableCell
         src={row.original.logo}
         name={row.original.integrationName}
         link={`${row.original.id}`}
@@ -168,7 +233,11 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
         Favorites
       </div>
     ),
-    cell: ({ row }) => <FavoriteToggle integration={row.original} />,
+    cell: ({ row, column }) => (
+      <div style={{ width: column.getSize() }}>
+        <FavoriteToggle integration={row.original} />
+      </div>
+    ),
     meta: {
       filterVariant: "text",
       name: "Favorites",
@@ -188,9 +257,9 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
     cell: ({ row, column }) => (
       <div
         style={{ maxWidth: column.getSize() }}
-        className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
+        className="truncate text-sm px-5 text-left"
       >
-        {row.original.integrationCategory.replace(/_/g, " ") || "-"}
+        {safeReplace(row.original.integrationCategory)}
       </div>
     ),
     meta: {
@@ -212,24 +281,12 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
     cell: ({ row, column }) => (
       <div
         style={{ maxWidth: column.getSize() }}
-        className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
+        className="truncate text-sm text-left"
       >
-        <div className="flex flex-col text-left">
-          <span>
-            {moment(row.original.updatedAt || row.original.createdAt).format(
-              "DD MMM, YYYY"
-            )}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            {moment(row.original.updatedAt || row.original.createdAt).format(
-              "hh:mm A"
-            )}{" "}
-            |{" "}
-            {moment(row.original.updatedAt || row.original.createdAt)
-              .tz("America/Chicago")
-              .format("z")}
-          </span>
-        </div>
+        <DateTableCell
+          date={row.original.updatedAt || row.original.createdAt}
+          timeZone="America/Chicago"
+        />
       </div>
     ),
     meta: {
@@ -273,9 +330,10 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row, column }) => (
-      <div style={{ maxWidth: column.getSize() }} className="px-5 relative">
-        <CompanyNames companyIds={row.original.companyIds} />
-      </div>
+      <CompanyNames
+        companyIds={row.original.companyIds}
+        columnSize={column.getSize()}
+      />
     ),
     meta: {
       filterVariant: "text",
@@ -317,26 +375,11 @@ export const IntegrationTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="">
-        <Popover>
-          <PopoverTrigger
-            className={`${row.original.isArchived ? "cursor-not-allowed" : "cursor-pointer"}`}
-            asChild
-            disabled={row.original.isArchived}
-          >
-            <button className="flex items-center justify-between gap-3 py-3 px-6 text-secondary text-sm">
-              <BsThreeDotsVertical />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-56 p-0 rounded-zeak">
-            <IntegrationActionOptions
-              integrationId={row.original.id}
-              component="listing"
-              integrationType={row.original.integrationType}
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
+      <OptionsCell
+        id={row.original.id.toString()}
+        integrationType={row.original.integrationType}
+        status={row.original.status}
+      />
     ),
     size: 64,
     meta: {

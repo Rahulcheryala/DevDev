@@ -41,7 +41,7 @@ export default function ActionMenu({
     return (
         <aside
             className={cn(
-                "flex flex-col flex-1 items-center w-[272px] gap-1 pb-3 rounded-r-xl bg-[#F0F4FD] shadow-[10px_-5px_15px_0_rgba(206,213,222,0.60)] transition-all duration-300 ease-in-out h-screen overflow-hidden",
+                "flex flex-col flex-1 items-center w-[272px] gap-1 pb-3 rounded-r-xl bg-[#F0F4FD] shadow-[10px_-5px_15px_0_rgba(206,213,222,0.60)] transition-all duration-300 ease-in-out h-full overflow-hidden",
                 isCollapsed ? "w-[72px]" : "w-[240px] items-start",
                 className
             )}

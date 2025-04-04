@@ -1,42 +1,45 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { cn, Popover, PopoverContent, PopoverTrigger } from "@zeak/react";
+import { cn, Popup, ActionButtonProps, RadioCheckbox } from "@zeak/ui";
 import { CiViewColumn } from "react-icons/ci";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { DataTableCheckbox } from "../../../../../components/DataTable";
-import RowDragHandleCell from "../../../../../components/DataTable/RowDragHanle";
-import { NameColumn } from "../../../../../components/Layout/Screen";
-import moment from "moment";
+import {
+  NameTableCell,
+  DateTableCell,
+  RowDragHandleCell,
+} from "@zeak/datatable";
 import CompanyActionOptions from "../../misc/CompanyActionOptions";
 
 export const CompanyTableColumns: ColumnDef<any>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <div className="flex items-center justify-center px-3 h-full">
-        <DataTableCheckbox
-          className="rounded-full "
-          checked={table.getIsAllPageRowsSelected()}
+      <div className="flex items-center justify-center pl-5 h-full">
+        <RadioCheckbox
+          className={cn("rounded-full border-none bg-gray-200 w-4 h-4", {
+            "bg-[#FFDF41] border-none": table.getIsAllPageRowsSelected(),
+          })}
+          isChecked={table.getIsAllPageRowsSelected()}
           onCheckedChange={() => table.toggleAllPageRowsSelected()}
+          showIndicator={false}
         />
       </div>
     ),
     cell: ({ row }) => (
       <div
-        className={cn("flex h-[64px] w-[60px] rounded-l-[12px]", {
+        className={cn("flex h-[64px] w-[60px]", {
           "bg-[#FFDF41]": row.getIsSelected(),
         })}
       >
         <RowDragHandleCell rowId={row.id} />
-        <div
-          className={cn(
-            " flex items-center justify-center rounded-l-[12px] relative"
-          )}
-        >
-          <DataTableCheckbox
-            className={cn("rounded-full", { "bg-white": row.getIsSelected() })}
-            checked={row.getIsSelected()}
+        <div className={cn("flex items-center justify-center relative")}>
+          <RadioCheckbox
+            className={cn("rounded-full border-none bg-gray-200 w-4 h-4", {
+              "bg-white border-none": row.getIsSelected(),
+            })}
+            isChecked={row.getIsSelected()}
             onCheckedChange={row.getToggleSelectedHandler()}
             aria-label="Select row"
+            showIndicator={false}
           />
         </div>
       </div>
@@ -58,9 +61,9 @@ export const CompanyTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row, column }) => (
-      <NameColumn
-        link={`${row.original.id}`}
-        name={row.original.companyName}
+      <NameTableCell
+        // link={`${row.original.id}`}
+        name={row.original.name}
         columnSize={column.getSize()}
       />
     ),
@@ -81,9 +84,7 @@ export const CompanyTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="flex justify-start items-center px-4">
-        {row.original.enabled ? "Yes" : "No"}
-      </div>
+      <div className="flex justify-start items-center px-4">Yes</div>
     ),
     meta: {
       filterVariant: "text",
@@ -104,9 +105,12 @@ export const CompanyTableColumns: ColumnDef<any>[] = [
     cell: ({ row, column }) => (
       <div
         style={{ maxWidth: column.getSize() }}
-        className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
+        className="truncate text-sm text-left"
       >
-        {moment(row.original.lastUpdated).format("DD MMM, YYYY")}
+        <DateTableCell
+          date={row.original.lastUpdated}
+          timeZone="America/Chicago"
+        />
       </div>
     ),
     meta: {
@@ -131,7 +135,7 @@ export const CompanyTableColumns: ColumnDef<any>[] = [
         className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
       >
         <div className="flex flex-col text-left">
-          <span>{row.original.errors}</span>
+          <span>{row.original.errors || 0}</span>
         </div>
       </div>
     ),
@@ -150,24 +154,25 @@ export const CompanyTableColumns: ColumnDef<any>[] = [
         <CiViewColumn />
       </div>
     ),
-    cell: ({ row }) => (
-      <div className="">
-        <Popover>
-          <PopoverTrigger
-            className={`${row.original.isArchived ? "cursor-not-allowed" : "cursor-pointer"}`}
-            asChild
+    cell: ({ row }) => {
+      // Trigger button for the popup
+      const triggerButton = (
+        <button className="flex items-center justify-between gap-3 py-3 px-6 text-secondary text-sm">
+          <BsThreeDotsVertical />
+        </button>
+      );
+
+      return (
+        <div className="">
+          <Popup
+            trigger={triggerButton}
+            buttons={[] as ActionButtonProps[]}
+            align="end"
             disabled={row.original.isArchived}
-          >
-            <button className="flex items-center justify-between gap-3 py-3 px-6 text-secondary text-sm">
-              <BsThreeDotsVertical />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-64 p-0">
-            <CompanyActionOptions />
-          </PopoverContent>
-        </Popover>
-      </div>
-    ),
+          />
+        </div>
+      );
+    },
     size: 64,
     meta: {
       name: "Actions",

@@ -12,13 +12,13 @@ export const StepHeader: FC<StepHeaderProps> = ({ title }) => {
   const { activeStep } = useCompanyStore();
   const navigate = useNavigate();
   return (
-    <div className="2xl:px-[60px] px-10 py-6 bg-white rounded-t-zeak  flex justify-between items-center">
-      <div className="text-[12px] font-medium tracking-[0px] uppercase text-[#007AF5]">
+    <div className="flex justify-between items-center">
+      <div className="font-['Suisse_Int\'l'] text-[12px] font-medium leading-normal tracking-[0.2px] uppercase text-[#007AF5]">
         STEP {activeStep + 1} OF 4
       </div>
-      <h2 className="text-[26px]  leading-[36px] text-[#0D0C22]">{title}</h2>
+      <h2 className="font-['Suisse_Int\'l'] font-normal tracking-[0.2px] text-[26px] leading-[36px] text-[#0D0C22]">{title}</h2>
       <X
-        className="w-6 h-6 cursor-pointer text-secondary"
+        className="w-6 h-6 cursor-pointer text-[##475467] font-normal"
         onClick={() => navigate(path.to.companySettings)}
       />
     </div>

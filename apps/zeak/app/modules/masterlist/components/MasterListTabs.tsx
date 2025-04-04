@@ -1,12 +1,11 @@
 import { tabsLinks } from "../constants";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@zeak/react";
-import DetailsView from "./DetailsView";
-import MasterListTable from "./MasterListTable";
+
 import AllMasterListTable from "./AllMasterListTable";
 
-export default function MasterListTabs() {
+export default function MasterListTabs({ userId }: { userId: string }) {
   return (
-    <Tabs defaultValue={tabsLinks[0].value} className="w-full h-full ">
+    <Tabs defaultValue={tabsLinks[1].value} className="w-full h-full ">
       <TabsList aria-label="List of tabs" className="px-6 bg-white rounded-b-[12px] ">
         {tabsLinks.map((tab, index) => (
           <TabsTrigger className="flex flex-col  relative px-2 items-center data-[state=active]:border-0  group " key={tab.id} value={tab.value}>
@@ -18,15 +17,10 @@ export default function MasterListTabs() {
         ))}
       </TabsList>
       <TabsContent className=" " value={tabsLinks[0].value}>
-        <div className="space-y-4">
-          <DetailsView />
-          <div className="w-full h-auto">
-            <MasterListTable />
-          </div>
-        </div>
+
       </TabsContent>
       <TabsContent className=" " value={tabsLinks[1].value}>
-        <AllMasterListTable />
+        <AllMasterListTable userId={userId} />
       </TabsContent>
     </Tabs>
   );

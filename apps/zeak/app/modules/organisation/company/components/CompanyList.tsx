@@ -54,6 +54,9 @@ import {
 import TableRow from "~/components/DataTable/DataTableRow";
 import TableHeader from "~/components/DataTable/DataTableHeader";
 import CreateCompany from "./CreateNewCompany";
+import MainMenu from "~/components/Globals/MainMenu";
+import { DataTable } from "~/components/Globals/DataTable/DataTable";
+import { columns } from "~/components/Globals/DataTable/Columns";
 
 type CompanyTypeTableProps = {
   data: CompanyType[];
@@ -100,152 +103,152 @@ const CompanyList = memo(({ data, count }: CompanyTypeTableProps) => {
   const [isCompact, setIsCompact] = useState(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const columns = useMemo<ColumnDef<(typeof data)[number]>[]>(() => {
-    return [
-      {
-        accessorKey: "logoAndName",
-        header: () => (
-          <div>
-            Company
-            <input
-              type="text"
-              placeholder="Search..."
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) =>
-                setLocalData(
-                  localData?.filter((item) =>
-                    item.name?.includes(e.target.value)
-                  )
-                )
-              }
-              className="mt-1 block w-full"
-            />
-          </div>
-        ),
-        cell: (item) => (
-          <div className="flex items-center">
-            <Avatar
-              src={item.row.original.logo as string}
-              name={item.row.original.name as string}
-            />
-            <span className="ml-2">{item.row.original.name}</span>
-          </div>
-        ),
-      },
-      {
-        accessorKey: "companyCode",
-        header: () => (
-          <div>
-            Company Code
-            <input
-              type="text"
-              placeholder="Search..."
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) =>
-                setLocalData(
-                  localData?.filter((item) =>
-                    item.companyCode?.includes(e.target.value)
-                  )
-                )
-              }
-              className="mt-1 block w-full"
-            />
-          </div>
-        ),
-        cell: (item) => item.getValue(),
-      },
-      {
-        accessorKey: "domainUrl",
-        header: () => (
-          <div>
-            URL
-            <input
-              type="text"
-              placeholder="Search..."
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) =>
-                setLocalData(
-                  localData?.filter((item) =>
-                    item.domainUrl?.includes(e.target.value)
-                  )
-                )
-              }
-              className="mt-1 block w-full"
-            />
-          </div>
-        ),
-        cell: (item) => item.getValue().replace(/https?:\/\//, ""),
-      },
-      {
-        accessorKey: "status",
-        header: () => (
-          <div>
-            Status
-            <input
-              type="text"
-              placeholder="Search..."
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) =>
-                setLocalData(
-                  localData?.filter((item) =>
-                    item.status?.includes(e.target.value)
-                  )
-                )
-              }
-              className="mt-1 block w-full"
-            />
-          </div>
-        ),
-        meta: {
-          getCellContext: (context: any) => {
-            return {
-              className:
-                context.getValue() === companyStatusMap.ACTIVE
-                  ? ` text-center text-[rgba(4,_167,_119)]`
-                  : ` text-center text-[rgba(0,_0,_0)]`,
-            };
-          },
-        },
-      },
-      {
-        accessorKey: "numuser",
-        header: () => (
-          <div>
-            Number of Users
-            <input
-              type="text"
-              placeholder="Search..."
-              onClick={(e) => e.stopPropagation()}
-              // onChange={(e) => setLocalData(localData?.filter(item => item?.numuser?.includes(e.target.value)))}
-              className="mt-1 block w-full"
-            />
-          </div>
-        ),
-        cell: (item) => item.getValue(),
-      },
-      {
-        accessorKey: "createdAt",
-        header: () => (
-          <div>
-            Creation date
-            <input
-              type="text"
-              placeholder="Search..."
-              onClick={(e) => e.stopPropagation()}
-              // onChange={(e) => setColumnFilters([{ id: 'createdAt', value: e.target.value }])}
-              className="mt-1 block w-full"
-            />
-          </div>
-        ),
-        cell: (item) => (
-          <div className="flex flex-col">
-            <div>{formatDate(item.getValue())}</div>
-            <div>{formatTime(item.getValue())}</div>
-          </div>
-        ),
-      },
-    ];
-  }, [setColumnFilters]);
+  // const columns = useMemo<ColumnDef<(typeof data)[number]>[]>(() => {
+  //   return [
+  //     {
+  //       accessorKey: "logoAndName",
+  //       header: () => (
+  //         <div>
+  //           Company
+  //           <input
+  //             type="text"
+  //             placeholder="Search..."
+  //             onClick={(e) => e.stopPropagation()}
+  //             onChange={(e) =>
+  //               setLocalData(
+  //                 localData?.filter((item) =>
+  //                   item.name?.includes(e.target.value)
+  //                 )
+  //               )
+  //             }
+  //             className="mt-1 block w-full"
+  //           />
+  //         </div>
+  //       ),
+  //       cell: (item) => (
+  //         <div className="flex items-center">
+  //           <Avatar
+  //             src={item.row.original.logo as string}
+  //             name={item.row.original.name as string}
+  //           />
+  //           <span className="ml-2">{item.row.original.name}</span>
+  //         </div>
+  //       ),
+  //     },
+  //     {
+  //       accessorKey: "companyCode",
+  //       header: () => (
+  //         <div>
+  //           Company Code
+  //           <input
+  //             type="text"
+  //             placeholder="Search..."
+  //             onClick={(e) => e.stopPropagation()}
+  //             onChange={(e) =>
+  //               setLocalData(
+  //                 localData?.filter((item) =>
+  //                   item.companyCode?.includes(e.target.value)
+  //                 )
+  //               )
+  //             }
+  //             className="mt-1 block w-full"
+  //           />
+  //         </div>
+  //       ),
+  //       cell: (item) => item.getValue(),
+  //     },
+  //     {
+  //       accessorKey: "domainUrl",
+  //       header: () => (
+  //         <div>
+  //           URL
+  //           <input
+  //             type="text"
+  //             placeholder="Search..."
+  //             onClick={(e) => e.stopPropagation()}
+  //             onChange={(e) =>
+  //               setLocalData(
+  //                 localData?.filter((item) =>
+  //                   item.domainUrl?.includes(e.target.value)
+  //                 )
+  //               )
+  //             }
+  //             className="mt-1 block w-full"
+  //           />
+  //         </div>
+  //       ),
+  //       cell: (item) => item.getValue().replace(/https?:\/\//, ""),
+  //     },
+  //     {
+  //       accessorKey: "status",
+  //       header: () => (
+  //         <div>
+  //           Status
+  //           <input
+  //             type="text"
+  //             placeholder="Search..."
+  //             onClick={(e) => e.stopPropagation()}
+  //             onChange={(e) =>
+  //               setLocalData(
+  //                 localData?.filter((item) =>
+  //                   item.status?.includes(e.target.value)
+  //                 )
+  //               )
+  //             }
+  //             className="mt-1 block w-full"
+  //           />
+  //         </div>
+  //       ),
+  //       meta: {
+  //         getCellContext: (context: any) => {
+  //           return {
+  //             className:
+  //               context.getValue() === companyStatusMap.ACTIVE
+  //                 ? ` text-center text-[rgba(4,_167,_119)]`
+  //                 : ` text-center text-[rgba(0,_0,_0)]`,
+  //           };
+  //         },
+  //       },
+  //     },
+  //     {
+  //       accessorKey: "numuser",
+  //       header: () => (
+  //         <div>
+  //           Number of Users
+  //           <input
+  //             type="text"
+  //             placeholder="Search..."
+  //             onClick={(e) => e.stopPropagation()}
+  //             // onChange={(e) => setLocalData(localData?.filter(item => item?.numuser?.includes(e.target.value)))}
+  //             className="mt-1 block w-full"
+  //           />
+  //         </div>
+  //       ),
+  //       cell: (item) => item.getValue(),
+  //     },
+  //     {
+  //       accessorKey: "createdAt",
+  //       header: () => (
+  //         <div>
+  //           Creation date
+  //           <input
+  //             type="text"
+  //             placeholder="Search..."
+  //             onClick={(e) => e.stopPropagation()}
+  //             // onChange={(e) => setColumnFilters([{ id: 'createdAt', value: e.target.value }])}
+  //             className="mt-1 block w-full"
+  //           />
+  //         </div>
+  //       ),
+  //       cell: (item) => (
+  //         <div className="flex flex-col">
+  //           <div>{formatDate(item.getValue())}</div>
+  //           <div>{formatTime(item.getValue())}</div>
+  //         </div>
+  //       ),
+  //     },
+  //   ];
+  // }, [setColumnFilters]);
 
   const changeStatus = useCallback(
     async (row: any) => {
@@ -253,10 +256,9 @@ const CompanyList = memo(({ data, count }: CompanyTypeTableProps) => {
       formData.append("id", `${row.id}`);
       formData.append(
         "status",
-        `${
-          row.status === companyStatusMap.ACTIVE
-            ? companyStatusMap.INACTIVE
-            : companyStatusMap.ACTIVE
+        `${row.status === companyStatusMap.ACTIVE
+          ? companyStatusMap.INACTIVE
+          : companyStatusMap.ACTIVE
         }`
       );
 
@@ -379,6 +381,18 @@ const CompanyList = memo(({ data, count }: CompanyTypeTableProps) => {
     // setLocalData(localData?.filter(item => item.name?.includes(filterValue)))
   };
 
+  const tableDataTransformer = (data: CompanyType[]) => data.reduce((acc, item) => {
+    return acc.push({
+      id: item.id,
+      name: item.name,
+      code: item.companyCode,
+      url: item.domainUrl,
+      status: item.status,
+      users: item.noOfUsers || '',
+      createdAt: item.createdAt,
+    })
+  }, []);
+
   const table = useReactTable({
     data: data,
     columns: columns,
@@ -453,30 +467,90 @@ const CompanyList = memo(({ data, count }: CompanyTypeTableProps) => {
     useSensor(KeyboardSensor, {})
   );
 
+  interface CustomHeaderProps {
+    onDelete: () => void;
+    onEdit: () => void;
+    onNew: () => void;
+    searchText: string;
+    onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    enableDelete?: boolean;
+  }
+
+  const CustomHeader = ({
+    onDelete,
+    onEdit,
+    onNew,
+    searchText,
+    onSearchChange,
+    enableDelete = false
+  }: CustomHeaderProps) => (
+    <MainMenu
+      onDelete={onDelete}
+      onEdit={onEdit}
+      onNew={onNew}
+      searchText={searchText}
+      onSearchChange={onSearchChange}
+      isDeleteDisabled={!enableDelete}
+      customActions={[
+        { label: 'Custom Action 1', onClick: () => console.log('custom action 1') },
+        { label: 'Custom Action 2', onClick: () => console.log('custom action 2') },
+      ]}
+      viewOptions={['Grid View', 'List View', 'Card View']}
+      defaultView="GRID VIEW"
+    />
+  );
+
   return (
     <>
-      <DataTableToolbar
+      {/* <DataTableToolbar
         setIsCompact={setIsCompact}
         isCompact={isCompact}
         data={data}
         table={table}
         additionalClassName="mb-2"
-      />
+      /> */}
+
+      {/* <MainMenu
+        onDelete={() => console.log('delete')}
+        onEdit={() => console.log('edit')}
+        onNew={() => console.log('new')}
+        isDeleteDisabled={false}
+        customActions={[
+          { label: 'Custom Action 1', onClick: () => console.log('custom action 1') },
+          { label: 'Custom Action 2', onClick: () => console.log('custom action 2') },
+        ]}
+        viewOptions={['Grid View', 'List View', 'Card View']}
+        defaultView="GRID VIEW"
+      /> */}
 
       {count === 0 ? (
         <CreateCompany />
       ) : (
-        <Table<(typeof data)[number]>
-          headerIcons={headerIcons}
-          data={localData}
+        // <Table<(typeof data)[number]>
+        //   headerIcons={headerIcons}
+        //   data={localData}
+        //   columns={columns}
+        //   count={count}
+        //   withSearch={false}
+        //   withColumnOrdering={false}
+        //   withSimpleSorting={true}
+        //   renderContextMenu={renderContextMenu}
+        //   onSelectedRowsChange={onSelectedRowsChange}
+        //   withSelectableRows
+        // />
+        <DataTable
           columns={columns}
-          count={count}
-          withSearch={false}
-          withColumnOrdering={false}
-          withSimpleSorting={true}
-          renderContextMenu={renderContextMenu}
-          onSelectedRowsChange={onSelectedRowsChange}
-          withSelectableRows
+          data={data}
+          customHeader={({ searchText, onSearchChange, enableDelete }) => (
+            <CustomHeader
+              onDelete={() => console.log('delete')}
+              onEdit={() => console.log('edit')}
+              onNew={() => navigate("/x/access-settings/companies/new")}
+              searchText={searchText}
+              onSearchChange={onSearchChange}
+              enableDelete={enableDelete}
+            />
+          )}
         />
       )}
 

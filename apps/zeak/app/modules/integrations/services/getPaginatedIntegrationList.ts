@@ -15,6 +15,8 @@ export interface IntegrationsQuery {
     tags?: string[];
     page?: number;
     limit?: number;
+    deletedAt?: Date | null;
+    copies?: number;
   }
   
   export async function getPaginatedIntegrationsList(
@@ -49,8 +51,7 @@ export interface IntegrationsQuery {
   
     if (integrationName) {
       whereClause.integrationName = {
-        contains: integrationName,
-        mode: 'insensitive',
+        equals: integrationName,
       };
     }
   

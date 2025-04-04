@@ -18,6 +18,7 @@ CREATE TABLE "public"."masterList" (
     CONSTRAINT "masterList_pkey" PRIMARY KEY ("id")
 );
 
+
 GRANT SELECT ON TABLE "public"."masterList" TO "anon";
 
 GRANT SELECT ON TABLE "public"."masterList" TO "authenticated";

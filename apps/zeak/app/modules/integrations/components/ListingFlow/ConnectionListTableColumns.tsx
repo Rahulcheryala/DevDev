@@ -1,84 +1,34 @@
-import moment from "moment-timezone";
 import { ColumnDef } from "@tanstack/react-table";
-import { cn, Popover, PopoverContent, PopoverTrigger } from "@zeak/react";
-import { DataTableCheckbox } from "../../../../components/DataTable";
-import RowDragHandleCell from "../../../../components/DataTable/RowDragHanle";
-import { NameColumn } from "../../../../components/Layout/Screen";
-import ConnectionActionOptions from "../misc/ConnectionActionOptions";
-import { LucideTriangleAlert } from "lucide-react";
+import {
+  ActionButtonProps,
+  cn,
+  Popup,
+  RadioCheckbox,
+  StatusPill,
+} from "@zeak/ui";
+import {
+  NameTableCell,
+  DateTableCell,
+  RowDragHandleCell,
+} from "@zeak/datatable";
+import { useConnectionActions } from "../misc/ConnectionActionOptions";
+import { safeReplace } from "../../utils/utils";
+// icons
 import { CiViewColumn } from "react-icons/ci";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { TbLink } from "react-icons/tb";
-import { LuUnlink } from "react-icons/lu";
-import { useIntegrationData } from "../../hooks/useIntegrationData";
-import { ConnectionStatus } from "@prisma/client";
-
-const statusMap = {
-  [ConnectionStatus.Online]: {
-    icon: <TbLink size={20} className="text-green-500 cursor-pointer" />,
-    label: <span className="text-green-500">ONLINE</span>,
-  },
-  [ConnectionStatus.Offline]: {
-    icon: <LuUnlink size={20} className="text-gray-500 cursor-pointer" />,
-    label: <span className="text-gray-500">OFFLINE</span>,
-  },
-  [ConnectionStatus.Error]: {
-    icon: <LucideTriangleAlert size={20} className="text-red-500 cursor-pointer" />,
-    label: <span className="text-red-500">ERROR</span>,
-  },
-};
-
-const ConnectionStatusMapper = ({ status }: { status: string }) => {
-  const statusInfo = statusMap[status as keyof typeof statusMap]
-  return (
-    <div className="flex items-center gap-3 text-sm">
-      {statusInfo ? (
-        <>
-          {statusInfo.icon}
-          {statusInfo.label}
-        </>
-      ) : (
-        <span className="text-gray-500">UNKNOWN STATUS</span>
-      )}
-    </div>
-  );
-};
-
-const ConnectionNameLink = ({
-  connectionName,
-  connectionId,
-  columnSize,
-}: {
-  connectionName: string;
-  connectionId: string;
-  columnSize: number;
-}) => {
-  return (
-    <div
-    // onClick={() =>
-    // {
-    //   dispatch({
-    //     type: "SET_SELECTED_CONNECTION",
-    //     payload: connectionId,
-    //   });
-    //   console.log(connectionId)
-    // }
-    // }
-    >
-      {/* <NameColumn  name={connectionName} columnSize={columnSize} /> */}
-    </div>
-  );
-};
 
 export const ConnectionListTableColumns: ColumnDef<any>[] = [
   {
     id: "select",
     header: ({ table }) => (
       <div className="flex items-center justify-center px-3 h-full">
-        <DataTableCheckbox
-          className="rounded-full "
-          checked={table.getIsAllPageRowsSelected()}
+        <RadioCheckbox
+          className={cn("rounded-full border-none bg-gray-200 w-4 h-4", {
+            "bg-[#FFDF41] border-none": table.getIsAllPageRowsSelected(),
+          })}
+          isChecked={table.getIsAllPageRowsSelected()}
           onCheckedChange={() => table.toggleAllPageRowsSelected()}
+          showIndicator={false}
         />
       </div>
     ),
@@ -89,16 +39,15 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
         })}
       >
         <RowDragHandleCell rowId={row.id} />
-        <div
-          className={cn(
-            " flex items-center justify-center rounded-l-[12px] relative"
-          )}
-        >
-          <DataTableCheckbox
-            className={cn("rounded-full", { "bg-white": row.getIsSelected() })}
-            checked={row.getIsSelected()}
+        <div className={cn(" flex items-center justify-center relative")}>
+          <RadioCheckbox
+            className={cn("rounded-full border-none bg-gray-200 w-4 h-4", {
+              "bg-white border-none": row.getIsSelected(),
+            })}
+            isChecked={row.getIsSelected()}
             onCheckedChange={row.getToggleSelectedHandler()}
             aria-label="Select row"
+            showIndicator={false}
           />
         </div>
       </div>
@@ -120,16 +69,10 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row, column }) => (
-      // <ConnectionNameLink
-      //   connectionName={row.original.connectionName}
-      //   connectionId={row.original.id}
-      //   columnSize={column.getSize()}
-      // />
-      <NameColumn
-        // link={`connections/${row.original.id}`}
-        src={row.original.integration.logo}
+      <NameTableCell
         name={row.original.connectionName}
         columnSize={column.getSize()}
+        showImage={false}
       />
     ),
     meta: {
@@ -150,7 +93,11 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex justify-start items-center px-6">
-        <ConnectionStatusMapper status={row.original.connectionStatus} />
+        <StatusPill
+          status={row.original.connectionStatus}
+          className="text-sm font-[450] gap-2"
+          uppercase
+        />
       </div>
     ),
     meta: {
@@ -170,16 +117,15 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row, column }) => {
-      const { getIntegrationById } = useIntegrationData();
-      const integration = getIntegrationById(row.original.integrationId);
+      // console.log(row.original.integration.id);
       return (
-        <NameColumn
-          src={integration?.logo!}
-          name={integration?.integrationName!}
-          link={`${integration?.id}`}
+        <NameTableCell
+          src={row.original.integration.logo}
+          name={row.original.integration.integrationName}
+          link={`${row.original.integration.id}`}
           columnSize={column.getSize()}
         />
-      )
+      );
     },
     meta: {
       filterVariant: "text",
@@ -198,16 +144,13 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
       </div>
     ),
     cell: ({ row, column }) => {
-      const { getIntegrationById } = useIntegrationData();
-      const integration = getIntegrationById(row.original.integrationId);
       return (
-        <NameColumn
-          src={integration?.logo!}
-          name={integration?.applicationName.replace(/_/g," ")!}
-          // link={`${integration?.id}`}
+        <NameTableCell
+          src={row.original.integration.logo}
+          name={safeReplace(row.original.integration.applicationName)}
           columnSize={column.getSize()}
         />
-      )
+      );
     },
     meta: {
       filterVariant: "text",
@@ -228,9 +171,9 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
     cell: ({ row, column }) => (
       <div
         style={{ maxWidth: column.getSize() }}
-        className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
+        className="truncate text-sm px-5 text-left"
       >
-        {row.original.connectionDescription}
+        {row.original.connectionDescription || "-"}
       </div>
     ),
     meta: {
@@ -279,17 +222,12 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
     cell: ({ row, column }) => (
       <div
         style={{ maxWidth: column.getSize() }}
-        className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
+        className="truncate text-sm text-left"
       >
-        <div className="flex flex-col text-left">
-          <span>{moment(row.original.updatedAt || row.original.createdAt).format("DD MMM, YYYY")}</span>
-          <span className="text-[11px] text-muted-foreground">
-          <span className="text-[11px] text-muted-foreground">
-            {moment(row.original.updatedAt || row.original.createdAt).format("hh:mm A")} |{" "}
-            {moment(row.original.updatedAt || row.original.createdAt).tz("America/Chicago").format("z")}
-          </span>
-          </span>
-        </div>
+        <DateTableCell
+          date={row.original.updatedAt || row.original.createdAt}
+          timeZone="America/Chicago"
+        />
       </div>
     ),
     meta: {
@@ -311,15 +249,12 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
     cell: ({ row, column }) => (
       <div
         style={{ maxWidth: column.getSize() }}
-        className="text-ellipsis text-nowrap overflow-hidden px-5 text-left"
+        className="truncate text-sm text-left"
       >
-        <div className="flex flex-col text-left">
-          <span>{moment(row.original.lastTestedAt || row.original.createdAt).format("DD MMM, YYYY")}</span>
-          <span className="text-[11px] text-muted-foreground">
-          {moment(row.original.lastTestedAt || row.original.createdAt).format("hh:mm A")} |{" "}
-          {moment(row.original.lastTestedAt || row.original.createdAt).tz("America/Chicago").format("z")}
-          </span>
-        </div>
+        <DateTableCell
+          date={row.original.lastTestedAt}
+          timeZone="America/Chicago"
+        />
       </div>
     ),
     meta: {
@@ -358,28 +293,25 @@ export const ConnectionListTableColumns: ColumnDef<any>[] = [
         <CiViewColumn />
       </div>
     ),
-    cell: ({ row }) => (
-      <div className="">
-        <Popover>
-          <PopoverTrigger
-            className={`${row.original.isArchived ? "cursor-not-allowed" : "cursor-pointer"}`}
-            asChild
-            disabled={row.original.isArchived}
-          >
-            <button className="flex items-center justify-between gap-3 py-3 px-6 text-secondary text-sm">
-              <BsThreeDotsVertical />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-64 p-0">
-            {/* TODO(vamsi): Add the action options */}
-            <ConnectionActionOptions
-              connectionId={row.original.id}
-              component="listing"
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const actionButtons = useConnectionActions(row.original.id, row.original.connectionStatus);
+      // Trigger button for the popup
+      const triggerButton = (
+        <button className="flex items-center justify-between gap-3 py-3 px-6 text-secondary text-sm">
+          <BsThreeDotsVertical />
+        </button>
+      );
+
+      return (
+        <div className="">
+          <Popup
+            trigger={triggerButton}
+            buttons={actionButtons as ActionButtonProps[]}
+            align="end"
+          />
+        </div>
+      );
+    },
     size: 64,
     meta: {
       name: "Actions",

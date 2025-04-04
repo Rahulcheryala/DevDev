@@ -7,6 +7,9 @@ export const createMasterlistSchema = z.object({
   code: z.string().min(1),
   isActive: z.boolean(),
   purpose: z.string().optional(),
+  startDate: z.date(),
+  endDate: z.date().optional(),
+
 });
 
 export type CreateMasterlistSchema = z.infer<typeof createMasterlistSchema>;

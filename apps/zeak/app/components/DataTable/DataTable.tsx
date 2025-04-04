@@ -56,11 +56,10 @@ import {
 import { motion } from "framer-motion";
 import AddNewRow from "./AddNewRow";
 import AddNewColumn from "./AddNewColumn"
-import IntegrationCard from "~/modules/integrations/components/misc/IntegrationCard";
 
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
-    filterVariant?: "text" | "number" | "range" | "select" | "boolean" | "date";
+    filterVariant?: "text" | "number" | "range" | "select" | "boolean" | "date" | "enum";
   }
   interface ColumnMeta<TData extends RowData, TValue> {
     name?: string;
@@ -83,29 +82,19 @@ declare module "@tanstack/react-table" {
 interface DataTableProps<TData extends { id: string | number }> {
   data: TData[];
   columns: ColumnDef<TData>[];
-  type?: string;
-  // for integrations
-  gridComponent?: React.ReactNode;
-  handleAddNewIntegration?: () => void;
-  handleAddNewConnection?: () => void;
+
+
 }
 
 function DataTable<TData extends { id: string | number }>({
   data: initialData,
   columns,
-  children,
-  type,
-  // for integrations
-  gridComponent,
-  handleAddNewIntegration,
-  handleAddNewConnection
+  children
 }: PropsWithChildren<DataTableProps<TData>>) {
   const columnsmemo = React.useMemo<ColumnDef<TData>[]>(
     () => columns,
     [columns],
   );
-  const viewTypes = ["list", "grid"]
-  const [viewType, setViewType] = React.useState(viewTypes[0])
   const { newColumnName, newColType } = useDatatableStore()
   const [cols, setCols] = React.useState(columns)
   const [isCompact, setIsCompact] = React.useState(false);
@@ -142,6 +131,9 @@ function DataTable<TData extends { id: string | number }>({
       .toLowerCase()
       .includes(String(filterValue).toLowerCase());
   };
+
+
+
 
   const table = useReactTable({
     data,
@@ -279,14 +271,10 @@ function DataTable<TData extends { id: string | number }>({
 
   return (
     <div className="">
-      {type === "view" && <div className="bg-[#F8FAFE] px-6 py-4 rounded-t-[12px]">
-        <p className="text-secondary-tertiary text-[26px]">Connections</p>
-      </div>}
-      
+
       <AddNewRow columns={cols} setData={setData} data={data} />
       <AddNewColumn addNewColumn={() => handleAddNewColumn()} />
       <DataTableToolbar
-        type={type}
         columns={columns}
         setIsCompact={setIsCompact}
         isCompact={isCompact}
@@ -294,13 +282,6 @@ function DataTable<TData extends { id: string | number }>({
         table={table}
         currentPageData={table.getRowModel().rows.map(row => row.original)}
         setColumnFilters={setColumnFilters}
-
-        // for integrations
-        viewType={viewType}
-        viewTypes={viewTypes}
-        setViewType={setViewType}
-        handleAddNewIntegration={handleAddNewIntegration}
-        handleAddNewConnection={handleAddNewConnection}
       />
 
       <DndContext
@@ -311,10 +292,7 @@ function DataTable<TData extends { id: string | number }>({
       >
         <div className=" mt-2 rounded-zeak overflow-x-auto">
 
-          {viewType === viewTypes[1] ? (
-            gridComponent
-          ):(
-            <motion.table
+          <motion.table
             initial={{ opacity: 0, }}
             animate={{ opacity: 1, width: table.getTotalSize() }}
             id="notifications-data-table"
@@ -325,30 +303,30 @@ function DataTable<TData extends { id: string | number }>({
             }} className="  table-fixed  ">
             <TableHeader table={table} columnOrder={columnOrder} />
 
-            {data.length ? 
-              <motion.tbody className="overflow-x-scroll">
-                <SortableContext
+            {data.length ? <motion.tbody
+
+              className="overflow-x-scroll">
+              <SortableContext
                 items={dataIds}
                 strategy={verticalListSortingStrategy}
-                >
+              >
                 {table.getRowModel().rows.map((row) => (
-                  <React.Fragment key={row.original.id}>
-                    <TableRow isCompact={isCompact} row={row} />
+                  <React.Fragment key={row.id}>
+                    <TableRow isCompact={isCompact} key={row.id} row={row} />
                     {row.getIsExpanded() && <ExpandedCard />}
                   </React.Fragment>
                 ))}
-                </SortableContext>
-              </motion.tbody> : children}
-            </motion.table> 
-          )}
+              </SortableContext>
+            </motion.tbody> : children}
+          </motion.table> 
 
         </div>
       </DndContext>
 
       <DataTablePagination table={table} />
-      {/* <div className="mt-4 p-4 bg-gray-50 rounded-zeak">
+      <div className="mt-4 p-4 bg-gray-50 rounded-zeak">
 
-      </div> */}
+      </div>
     </div>
   );
 }

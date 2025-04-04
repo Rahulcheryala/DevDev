@@ -14,7 +14,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- relace the id in the companyIds with the actual company ids
 
 -- Insert into integrationsMaster
-INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationsMaster" (
+INSERT INTO "572cf367-22bd-44d0-916f-ee98b6d94309"."integrationsMaster" (
     "id", 
     "integrationName", 
     "applicationName",
@@ -26,6 +26,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationsMaster" (
     "connectionType", 
     "authType",
     "connectionLimit", 
+    "copies", 
     "integrationCategory",
     "status", 
     "companyIds", 
@@ -47,9 +48,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationsMaster" (
     'API', 
     'OAuth2',
     5, 
+    0, 
     'ERP',
     'Active', 
-    ARRAY[]::UUID[], -- Replace with actual company IDs
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[], -- Replace with actual company IDs
     '["ERP", "CRM", "Microsoft"]', 
     TRUE, 
     'System', 
@@ -68,9 +70,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationsMaster" (
     'API', 
     'OAuth2',
     3, 
+    0, 
     'Productivity',
     'Active', 
-    ARRAY[]::UUID[], -- Replace with actual company IDs
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[], -- Replace with actual company IDs
     '["Productivity", "Microsoft", "Email", "Documents"]', 
     TRUE, 
     'System', 
@@ -89,9 +92,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationsMaster" (
     'REST', 
     'API Key',
     3, 
+    0, 
     'Project Management',
     'Inactive', 
-    ARRAY[]::UUID[], -- Replace with actual company IDs
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[], -- Replace with actual company IDs
     '["DevOps", "Microsoft", "CI/CD"]', 
     FALSE, 
     'System', 
@@ -110,9 +114,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationsMaster" (
     'API', 
     'PAT',
     4, 
+    0, 
     'CRM',
     'Active', 
-    ARRAY[]::UUID[], -- Replace with actual company IDs
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[], -- Replace with actual company IDs
     '["CRM", "Sales", "Marketing"]', 
     TRUE, 
     'System', 
@@ -131,9 +136,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationsMaster" (
     'REST', 
     'OAuth2',
     2, 
+    0, 
     'Communication',
     'Inactive', 
-    ARRAY[]::UUID[], -- Replace with actual company IDs
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[], -- Replace with actual company IDs
     '["Communication", "Messaging", "Collaboration"]', 
     FALSE, 
     'System', 
@@ -141,7 +147,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationsMaster" (
 );
 
 -- Insert into integrationConnections
-INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
+INSERT INTO "572cf367-22bd-44d0-916f-ee98b6d94309"."integrationConnections" (
     "id",
     "integrationId",
     "connectionName",
@@ -163,13 +169,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Dynamics 365 - Production',
     'DYN365-PROD',
     'ERP Production environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     TRUE,
     '{"environmentType": "PROD", "environmentURL": "https://api.dynamics.com/prod", "maxRetries": 3, "timeout": 30, "retryDelay": 5}'::json,
     'Scheduled',
     'Online',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Microsoft Dynamics 365 - Dev
@@ -179,13 +185,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Dynamics 365 - Development',
     'DYN365-DEV',
     'Feature Development environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     FALSE,
     '{"environmentType": "DEV", "environmentURL": "https://api.dynamics.com/dev", "maxRetries": 5, "timeout": 60, "retryDelay": 10}'::json,
     'On-Demand',
     'Online',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Office 365 - Prod
@@ -195,13 +201,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Office 365 - Production',
     'O365-PROD',
     'Office Production environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     TRUE,
     '{"environmentType": "PROD", "environmentURL": "https://graph.microsoft.com/v1.0", "maxRetries": 3, "timeout": 30, "retryDelay": 5}'::json,
     'Scheduled',
     'Online',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Office 365 - Dev
@@ -211,13 +217,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Office 365 - Development',
     'O365-DEV',
     'Office 365 Development environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     FALSE,
     '{"environmentType": "DEV", "environmentURL": "https://graph.microsoft.com/beta", "maxRetries": 5, "timeout": 60, "retryDelay": 10}'::json,
     'On-Demand',
     'Online',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Azure DevOps - Prod
@@ -227,13 +233,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Azure DevOps - Production',
     'AZDO-PROD',
     'Azure Production environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     TRUE,
     '{"environmentType": "PROD", "environmentURL": "https://dev.azure.com/prod", "maxRetries": 2, "timeout": 45, "retryDelay": 3}'::json,
     'On-Demand',
     'Online',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Azure DevOps - Dev
@@ -243,13 +249,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Azure DevOps - Development',
     'AZDO-DEV',
     'Azure Development environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     FALSE,
     '{"environmentType": "DEV", "environmentURL": "https://dev.azure.com/dev", "maxRetries": 4, "timeout": 60, "retryDelay": 8}'::json,
     'Scheduled',
     'Error',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Salesforce - Prod
@@ -259,13 +265,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Salesforce - Production',
     'SF-PROD',
     'Salesforce Production environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     TRUE,
     '{"environmentType": "PROD", "environmentURL": "https://api.salesforce.com/prod", "maxRetries": 3, "timeout": 30, "retryDelay": 5}'::json,
     'Batch',
     'Offline',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Salesforce - Dev
@@ -275,13 +281,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Salesforce - Development',
     'SF-DEV',
     'Salesforce Development environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     FALSE,
     '{"environmentType": "DEV", "environmentURL": "https://api.salesforce.com/dev", "maxRetries": 5, "timeout": 45, "retryDelay": 7}'::json,
     'On-Demand',
     'Error',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Salesforce - Testing
@@ -291,13 +297,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Salesforce - Testing',
     'SF-TEST',
     'Salesforce Testing environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     FALSE,
     '{"environmentType": "TEST", "environmentURL": "https://api.salesforce.com/test", "maxRetries": 4, "timeout": 40, "retryDelay": 6}'::json,
     'Scheduled',
     'Offline',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Slack - Prod
@@ -307,13 +313,13 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Slack - Production',
     'SLACK-PROD',
     'Slack Production environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     TRUE,
     '{"environmentType": "PROD", "environmentURL": "https://slack.com/api", "maxRetries": 3, "timeout": 20, "retryDelay": 4}'::json,
     'Batch',
     'Online',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Slack - Dev
@@ -323,18 +329,18 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationConnections" (
     'Slack - Development',
     'SLACK-DEV',
     'Slack Development environment',
-    ARRAY[]::UUID[],
+    ARRAY['572cf367-22bd-44d0-916f-ee98b6d94309']::UUID[],
     FALSE,
     '{"environmentType": "DEV", "environmentURL": "https://slack.com/api/dev", "maxRetries": 5, "timeout": 30, "retryDelay": 6}'::json,
     'On-Demand',
     'Error',
     TRUE,
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 );
 
 -- Insert into integrationCreds
-INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationCreds" (
+INSERT INTO "572cf367-22bd-44d0-916f-ee98b6d94309"."integrationCreds" (
     "id",
     "integrationId",
     "credentials",
@@ -358,7 +364,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationCreds" (
     '2025-01-01 00:00:00+00',
     'Microsoft Dynamics 365',
     '["Contacts.Read", "Accounts.ReadWrite"]',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Office 365 credentials
@@ -372,7 +378,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationCreds" (
     '2025-01-01 00:00:00+00',
     'Office 365',
     '["Mail.Read", "Calendars.ReadWrite"]',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Azure DevOps credentials
@@ -386,7 +392,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationCreds" (
     '2025-01-01 00:00:00+00',
     'Azure DevOps',
     '["Code.Read", "WorkItems.ReadWrite"]',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Salesforce credentials
@@ -400,7 +406,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationCreds" (
     '2025-01-01 00:00:00+00',
     'Salesforce',
     '["api", "web", "full"]',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Slack credentials
@@ -414,12 +420,12 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationCreds" (
     '2025-01-01 00:00:00+00',
     'Slack',
     '["chat:write", "channels:read"]',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 );
 
 -- Insert into integrationParameters
-INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationParameters" (
+INSERT INTO "572cf367-22bd-44d0-916f-ee98b6d94309"."integrationParameters" (
     "id",
     "integrationId",
     "parameterName",
@@ -441,7 +447,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationParameters" (
     FALSE,
     'Active',
     '{"companyId": "1", "companyName": "Acme Corp"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Microsoft Dynamics 365 - Client Secret
@@ -454,7 +460,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationParameters" (
     TRUE,
     'Active',
     '{"companyId": "1", "companyName": "Acme Corp"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Office 365 - Client ID
@@ -467,7 +473,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationParameters" (
     FALSE,
     'Active',
     '{"companyId": "1", "companyName": "Acme Corp"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Office 365 - Client Secret
@@ -480,7 +486,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationParameters" (
     TRUE,
     'Active',
     '{"companyId": "1", "companyName": "Acme Corp"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Azure DevOps - API Key
@@ -493,7 +499,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationParameters" (
     TRUE,
     'Active',
     '{"companyId": "1", "companyName": "Acme Corp"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Salesforce - API Key
@@ -506,7 +512,7 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationParameters" (
     TRUE,
     'Active',
     '{"companyId": "1", "companyName": "Acme Corp"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Slack - API Key
@@ -519,12 +525,12 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationParameters" (
     TRUE,
     'Active',
     '{"companyId": "1", "companyName": "Acme Corp"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 );
 
 -- Insert sample integration logs
-INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
+INSERT INTO "572cf367-22bd-44d0-916f-ee98b6d94309"."integrationLogs" (
     "id",
     "referenceId",
     "referenceType",
@@ -549,10 +555,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     200,
     '{"action": "connect", "params": {"environment": "prod"}}',
     '{"status": "success", "message": "Connected successfully"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Successfully connected to Microsoft Dynamics 365',
     'success',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Office 365 connection log
@@ -565,10 +571,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     200,
     '{"action": "connect", "params": {"environment": "prod"}}',
     '{"status": "success", "message": "Connected successfully"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Successfully connected to Office 365',
     'success',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Azure DevOps error log
@@ -581,10 +587,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     401,
     '{"action": "connect", "params": {"environment": "prod"}}',
     '{"status": "error", "message": "Authentication failed"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Failed to connect to Azure DevOps due to authentication error',
     'failure',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Salesforce connection log
@@ -597,10 +603,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     200,
     '{"action": "connect", "params": {"environment": "prod"}}',
     '{"status": "success", "message": "Connected successfully"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Successfully connected to Salesforce',
     'success',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Dynamics 365 Production connection log - sync
@@ -613,10 +619,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     200,
     '{"action": "sync", "params": {"entity": "customers"}}',
     '{"status": "success", "message": "Synced 150 records"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Successfully synced customer data from Dynamics 365 Production',
     'success',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Dynamics 365 Development connection log - error
@@ -629,10 +635,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     500,
     '{"action": "sync", "params": {"entity": "products"}}',
     '{"status": "error", "message": "Internal server error", "details": "Timeout occurred while processing request"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Failed to sync product data from Dynamics 365 Development due to server timeout',
     'failure',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Office 365 Production connection log - retry
@@ -645,10 +651,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     429,
     '{"action": "fetch", "params": {"entity": "emails", "limit": 1000}}',
     '{"status": "error", "message": "Too many requests", "retryAfter": 60}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Rate limit exceeded while fetching emails from Office 365 Production, retry scheduled',
     'failure',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Azure DevOps Production connection log - successful operation
@@ -661,10 +667,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     200,
     '{"action": "fetch", "params": {"entity": "workitems", "project": "ZEAK"}}',
     '{"status": "success", "message": "Retrieved 75 work items", "data": {"count": 75}}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Successfully retrieved work items from Azure DevOps Production',
     'success',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Salesforce Production connection log - disconnection
@@ -677,10 +683,10 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     200,
     '{"action": "disconnect", "params": {"reason": "scheduled"}}',
     '{"status": "success", "message": "Disconnected successfully"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Scheduled disconnection from Salesforce Production completed successfully',
     'success',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ),
 -- Salesforce Production connection log - reconnection
@@ -693,9 +699,9 @@ INSERT INTO "681b47fb-1644-473e-8c43-32e0731857cb"."integrationLogs" (
     200,
     '{"action": "connect", "params": {"reason": "scheduled"}}',
     '{"status": "success", "message": "Connected successfully"}',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     'Scheduled reconnection to Salesforce Production completed successfully',
     'success',
-    'bc2c77bf-bbed-4703-a9dd-2a4604d18ed0',
+    '8c86884c-050e-4cc3-a5e8-4ec02c5f945b',
     uuid_generate_v4()
 ); 

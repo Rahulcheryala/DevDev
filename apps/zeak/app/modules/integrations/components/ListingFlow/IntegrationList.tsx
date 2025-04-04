@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useIntegrationData } from "../../hooks/useIntegrationData";
+import { useUnifiedContext } from "../../context";
 import IntegrationDataTable from "./IntegrationDataTable";
 
 type IntegrationListProps = {
@@ -9,7 +9,7 @@ type IntegrationListProps = {
 export default function IntegrationList({
   type = "all",
 }: IntegrationListProps) {
-  const { integrations } = useIntegrationData();
+  const { state: {records: integrations} } = useUnifiedContext();
 
   const filteredIntegrations = useMemo(() => {
     return type === "favorites"
@@ -18,7 +18,7 @@ export default function IntegrationList({
   }, [integrations, type]);
 
   return (
-    <div className="bg-[#F0F4FD] flex flex-col h-full">
+    <div className="flex flex-col h-full">
       <IntegrationDataTable records={filteredIntegrations} />
     </div>
   );

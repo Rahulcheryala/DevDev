@@ -7,11 +7,11 @@ import { ConnectionsQuery } from "../services/getPaginatedConnectionList";
 import { ConnectionForm } from "../models/connection-form.model";
 import { toast } from "@zeak/react";
 
-export const fetchCompany = async (): Promise<{ name: string, id: string }> => {
-    let url = `${path.to.api.fetchCompany}?`;
+export const fetchCompanyById = async (id: string): Promise<{ name: string, id: string }> => {
+    let url = `${path.to.api.fetchCompanyById(id)}`;
     const response = await fetch(url);
     const records = await response.json();
-    return { name: records.data.name, id: records.data.id };
+    return { name: records.data.name, id: records.data.tenantId };
 }
 
 export const fetchIntegrationsList = async (filters?: Partial<IntegrationsQuery>): Promise<{
@@ -136,6 +136,7 @@ export const updateIntegrationFn = async (id: string, data: Partial<IntegrationF
         }
         
         const record = await response.json();
+        // console.log("record", record);
         return record;
     } catch (error: any) {
         toast.error(error.message || 'Failed to update integration details');

@@ -12,7 +12,9 @@ export interface ConnectionsQuery {
     updatedAt?: Date;
     lastTestedAt?: Date;
     // createdAt?: Date;
-    isOnline?: boolean;
+    isEnabled?: boolean;
+    deletedAt?: Date | null;
+
   }
   
   export async function getPaginatedConnectionsList(
@@ -32,7 +34,7 @@ export interface ConnectionsQuery {
       updatedAt,
       lastTestedAt,
       // createdAt,
-      isOnline,
+      isEnabled,
     } = filters;
   
     const pageNumber = page || 1;
@@ -92,8 +94,8 @@ export interface ConnectionsQuery {
       whereClause.lastTestedAt = lastTestedAt;
     }
   
-    if (isOnline) {
-      whereClause.isOnline = isOnline;
+    if (isEnabled) {
+      whereClause.isEnabled = isEnabled;
     }
   
     // Soft delete filter
@@ -118,6 +120,7 @@ export interface ConnectionsQuery {
           // },
           integration: {
             select: {
+              id: true,
               integrationName: true,
               applicationName: true,
               integrationCategory: true,

@@ -29,8 +29,6 @@ import { error, success } from "~/utils/result";
 import { useLoaderData } from "@remix-run/react";
 import CompanyNewModule from "~/modules/organisation/company/CompanyNew";
 
-import { CompaniesPage } from "./home";
-
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client, userId, companyId } = await requirePermissions(request, {
     view: "users",
@@ -159,7 +157,5 @@ export default function NewCompany() {
       googleMapsApiKey={googleMapsApiKey as string}
       company={company}
     />
-
-    // <CompaniesPage />
   );
 }

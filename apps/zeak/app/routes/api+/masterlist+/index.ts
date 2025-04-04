@@ -5,10 +5,10 @@ import { getPrismaInstance } from "~/utils/prisma.server";
 
 export async function action({ request }: { request: Request }) {
   const prisma = await getPrismaInstance(request);
-  const { name, isActive, createdBy, purpose, code } = await request.json();
+  const { name, isActive, createdBy, purpose, code, companies, startDate, endDate } = await request.json();
   if (request.method === "POST") {
     const masterlist = await prisma.masterList.create({
-      data: { name, isActive, createdBy, purpose, code },
+      data: { name, isActive, createdBy, purpose, code, companies, startDate, endDate },
     });
     if (!masterlist) {
       return json(
@@ -22,7 +22,13 @@ export async function action({ request }: { request: Request }) {
     );
   }
   if (request.method === "GET") {
-    const masterlist = await prisma.masterList.findMany();
+    const masterlist = await prisma.masterList.findMany(
+      {
+        where: {
+          deletedAt: null,
+        },
+      }
+    );
     return json({ masterlist });
   }
 }

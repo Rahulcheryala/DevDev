@@ -1,20 +1,27 @@
-import { DataTable } from "../../../../../components/DataTable";
+import { DataTable } from "@zeak/datatable";
 import { useUnifiedContext } from "../../../context";
 import { CompanyTableColumns } from "./CompanyTableColumns";
+import { EmptyTableState } from "@zeak/ui";
 
 export default function CompaniesDataTable() {
   const {
-    state: { selectedIntegration },
+    state: { selectedIntegration, companies },
+    dispatch
   } = useUnifiedContext();
 
-  const companies = selectedIntegration?.companies;
-  // console.log(records);
-  // console.log(companies);
+  const integrationCompanies = companies?.filter((company) =>
+    selectedIntegration?.companyIds.includes(company.id)
+  );
+  // console.log(integrationCompanies);
+
+  const handleAddCompany = () => {}
+
   return (
     <DataTable
-      type="company"
+      addNewText=""
       columns={CompanyTableColumns}
-      data={companies!}
-    ></DataTable>
+      data={integrationCompanies!}
+      emptyTableState={<EmptyTableState title="Click to add Company" onClick={handleAddCompany} />}
+    />
   );
 }

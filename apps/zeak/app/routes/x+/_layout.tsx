@@ -1,4 +1,5 @@
-import { Toaster, TooltipProvider, useMount } from "@zeak/react";
+import { TooltipProvider, useMount } from "@zeak/react";
+import { Toaster } from "@zeak/ui";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
@@ -223,9 +224,9 @@ export default function AuthenticatedRoute() {
                     onMenuPinned={handleMenuPinned}
                     onSettingClicked={handleSettingOpen}
                   />
-                  <div className="w-full h-full pl-[12px] flex flex-col justify-between">
+                  <div className="w-full h-full px-[12px] flex flex-col justify-between">
                     <div
-                      className="h-full bg-[#F0F4FD] rounded-tl-[10px] overflow-y-auto overflow-x-hidden"
+                      className="h-full rounded-tl-[10px] overflow-y-auto overflow-x-hidden"
                       id="main-layout"
                     >
                       <Outlet />

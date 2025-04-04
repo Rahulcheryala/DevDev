@@ -1,56 +1,120 @@
+import { Table, Image, Button } from "@zeak/ui";
+import { DateTableCell } from "@zeak/datatable";
 import { useUnifiedContext } from "../../../context";
-import { useState } from "react";
-import Image from "../../../../../components/Image";
+// icons
+import { IoIosCheckmarkCircle, IoIosCloseCircle } from "react-icons/io";
 import { PiSpinnerGap } from "react-icons/pi";
 import { RiLoopRightLine } from "react-icons/ri";
 import { FaPlug } from "react-icons/fa";
-import { ZeakLogo } from "@zeak/icons";
-import { IoIosCheckmarkCircle, IoIosCloseCircle } from "react-icons/io";
 
 type TestStatus = {
   event: string;
   message: string;
   date: string;
-  time: string;
   status: "progress" | "passed" | "failed";
 };
 
 export const TestConnect = () => {
   const { state } = useUnifiedContext();
-  const [testStatuses, setTestStatuses] = useState<TestStatus[]>([
+  const testStatuses: TestStatus[] = [
     {
       event: "Integration Test",
       message: "Testing in Progress",
-      date: "24 Aug, 2024",
-      time: "02:55 PM | CST",
+      date: "2025-03-25 00:53:32.469966+00",
       status: "progress",
     },
     {
       event: "Integration Test",
       message: "Test Complete",
-      date: "24 Aug, 2024",
-      time: "02:55 PM | CST",
+      date: "2025-03-25 20:07:03.126+00",
       status: "passed",
     },
     {
       event: "Integration Test",
       message: "Test Complete",
-      date: "24 Aug, 2024",
-      time: "02:55 PM | CST",
+      date: "2025-03-26 11:00:35.767+00",
       status: "failed",
     },
-  ]);
+  ];
+
+  const ZeakLogo = () => {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="92"
+        height="24"
+        viewBox="0 0 92 24"
+        fill="none"
+      >
+        <path
+          d="M0 21.668 12.677 4.042H.617V-.003h18.588v2.329L6.46 19.952h12.402v4.045H0zm24.805 1.44q-.924-.892-.922-2.329V-.003h18.246V4.11H28.597v5.553h12.506v4.112H28.597v6.105h13.532v4.112h-14.93q-1.467.002-2.394-.889zm36.449-4.7h-8.952l-2.12 5.59h-4.921l9.36-24h2.12c1.478 0 2.485.685 3.004 2.058l8.507 21.947H63.33l-2.082-5.59zm-7.688-3.978h6.423l-3.174-8.64h-.036zm32.694 9.567-7.89-10.082-2.29 2.47v7.612h-4.714v-24h4.714v10.358L85.576-.003h5.807l-9.837 10.53L92 24.002h-5.74z"
+          fill="#31384D"
+        />
+        <path
+          d="M0 21.668 15.584-.002h3.615v2.328L3.529 23.997H0z"
+          fill="#8599D1"
+        />
+      </svg>
+    );
+  };
 
   const status: TestStatus["status"] = "progress";
 
   const getStatusIcon = (status: TestStatus["status"]) => {
     if (status === "progress")
-      return <PiSpinnerGap className="w-5 h-5 animate-spin text-white bg-gray-400 rounded-full p-0.5" />;
+      return (
+        <PiSpinnerGap className="w-5 h-5 animate-spin text-white rounded-full p-0.5" />
+      );
     if (status === "passed")
-      return <IoIosCheckmarkCircle className="w-6 h-6 text-green-500 bg-white rounded-full" />;
+      return (
+        <IoIosCheckmarkCircle className="w-6 h-6 text-green-500 bg-white rounded-full" />
+      );
     if (status === "failed")
-      return <IoIosCloseCircle className="w-6 h-6 text-red-500 bg-white rounded-full" />;
+      return (
+        <IoIosCloseCircle className="w-6 h-6 text-red-500 bg-white rounded-full" />
+      );
     return null;
+  };
+
+  // Define table headers
+  const tableHeaders = [
+    { key: "event", label: "Event", width: "33%" },
+    { key: "message", label: "Message", width: "33%" },
+    { key: "dateTime", label: "Time", width: "33%" },
+  ];
+
+  // Map test statuses to table rows
+  const tableRows = testStatuses.map((status) => ({
+    event: status.event,
+    message: status.message,
+    dateTime: status.date,
+    status: status.status,
+  }));
+
+  // Custom cell renderer
+  const renderCell = (key: string, value: any, row: Record<string, any>) => {
+    if (key === "message") {
+      return (
+        <div className="flex items-center gap-2">
+          <span className="bg-gray-400 rounded-full">
+            {getStatusIcon(row.status)}
+          </span>
+          {value}
+        </div>
+      );
+    }
+
+    if (key === "dateTime") {
+      return (
+        <DateTableCell
+          date={value}
+          timeZone="America/Chicago"
+          className="p-0"
+        />
+      );
+    }
+
+    return value;
   };
 
   return (
@@ -67,7 +131,7 @@ export const TestConnect = () => {
                   alt={state.integrationForm.integrationName}
                   className="w-full h-full rounded-full"
                 />
-                <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center">
+                <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-gray-400">
                   {getStatusIcon(status)}
                 </div>
               </div>
@@ -92,7 +156,7 @@ export const TestConnect = () => {
                         : "border-solid border-gray-300"
                 }`}
               >
-                <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full">
+                <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-400">
                   {getStatusIcon(status)}
                 </div>
               </div>
@@ -102,14 +166,12 @@ export const TestConnect = () => {
             <div className="flex flex-col items-center gap-2">
               <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center relative">
                 <FaPlug className="w-8 h-8" />
-                <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center">
+                <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-gray-400">
                   {getStatusIcon(status)}
                 </div>
               </div>
               <div className="text-center">
-                <p className="font-medium">
-                  {state.integrationForm.authentication}
-                </p>
+                <p className="font-medium">{state.integrationForm?.authType}</p>
                 <p className="text-xs text-textLink">BRIDGE</p>
               </div>
             </div>
@@ -127,7 +189,7 @@ export const TestConnect = () => {
                         : "border-solid border-gray-300"
                 }`}
               >
-                <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full">
+                <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-400">
                   {getStatusIcon(status)}
                 </div>
               </div>
@@ -137,7 +199,7 @@ export const TestConnect = () => {
             <div className="flex flex-col items-center gap-2">
               <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center relative p-3">
                 <ZeakLogo />
-                <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center">
+                <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-gray-400">
                   {getStatusIcon(status)}
                 </div>
               </div>
@@ -151,58 +213,30 @@ export const TestConnect = () => {
       </div>
 
       <div className="mx-auto">
-        <button className="bg-gray-300 text-black px-6 py-3 rounded-lg inline-block">
-          {status === "progress" ? (
-            <div className="flex items-center gap-2">
-              <PiSpinnerGap className="w-4 h-4 animate-spin" />
-              Testing in Progress
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <RiLoopRightLine className="w-4 h-4" />
-              Test Connection
-            </div>
-          )}
-        </button>
+        <Button
+          isLoading={status === "progress"}
+          className="bg-[#D3DFE8] rounded-md py-3 px-6 h-14 text-base font-medium text-[#475467]"
+          onClick={() => {}}
+          spinner={getStatusIcon(status)}
+          spinnerClassName="scale-125 mr-1"
+          leftIcon={<RiLoopRightLine className="w-5 h-5" />}
+        >
+          {status === "progress" ? "Testing in Progress" : "Test Connection"}
+        </Button>
       </div>
 
       {/* Testing Status */}
       <div className="px-10 mb-10">
-        <div className="bg-[#F7F7F8] rounded-lg">
-          {/* Test Status Table */}
-          <div className="">
-            <table className="w-full table-fixed">
-              <thead className="text-left">
-                <tr className="border-b-4 border-white bg-[#F0F4FD] rounded-t-lg">
-                  <th className="py-4 px-6 font-medium w-1/3">Event</th>
-                  <th className="py-4 px-6 font-medium w-1/3">Message</th>
-                  <th className="py-4 px-6 font-medium w-1/3">Time</th>
-                </tr>
-              </thead>
-              <tbody className="text-left">
-                {testStatuses.map((status, index) => (
-                  <tr key={index} className="bg-[#F8FAFE] border-b border-white divide-x divide-white">
-                    <td className="py-4 px-6 w-1/3">{status.event}</td>
-                    <td className="py-4 px-6 w-1/3">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(status.status)}
-                        {status.message}
-                      </div>
-                    </td>
-                    <td className="py-2 px-6 w-1/3">
-                      <div className="flex flex-col justify-center items-start gap-1">
-                        <span>{status.date}</span>
-                        <span className="text-textLink text-xs">
-                          {status.time}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Table
+          headers={tableHeaders}
+          rows={tableRows}
+          renderCell={renderCell}
+          showDividers={true}
+          isRounded={true}
+          containerClassName="bg-[#F7F7F8] rounded-lg"
+          headerClassName="bg-[#F0F4FD] rounded-t-lg"
+          rowClassName="bg-[#F8FAFE]"
+        />
       </div>
     </div>
   );

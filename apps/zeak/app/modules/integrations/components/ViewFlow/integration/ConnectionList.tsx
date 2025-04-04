@@ -24,7 +24,7 @@ export default function ConnectionList({
   // console.log(connections);
 
   return (
-    <div className="bg-[#F0F4FD] flex flex-col h-full">
+    <div className="flex flex-col h-full">
       <ConnectionDataTable
         type={component}
         columns={columns}
