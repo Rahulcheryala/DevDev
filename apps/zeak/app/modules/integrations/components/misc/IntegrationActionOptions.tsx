@@ -23,7 +23,7 @@ export function useIntegrationActions(
     if (integration) {
       dispatch({ type: "SET_SELECTED_INTEGRATION", payload: integration });
     }
-    
+
     // Then set the flow
     dispatch({ type: "SET_INTEGRATION_FLOW", payload: flow });
   };
@@ -51,6 +51,18 @@ export function useIntegrationActions(
       label: "Delete Integration",
       onClick: () => onClickHandler("delete"),
       disabled: integrationType === "System",
+    },
+    {
+      icon: <LuUnlink className="text-accent-dark" />,
+      label: "Deactivate Integration",
+      onClick: () => onClickHandler("deactivation"),
+      disabled: integrationStatus === "Inactive",
+    },
+    {
+      icon: <TbLink className="text-accent-dark" />,
+      label: "Activate Integration",
+      onClick: () => onClickHandler("activation"),
+      disabled: integrationStatus === "Active",
     },
     {
       icon: <CiExport className="text-accent-dark" />,

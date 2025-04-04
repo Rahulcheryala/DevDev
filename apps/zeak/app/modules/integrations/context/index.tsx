@@ -44,6 +44,7 @@ export type IntegrationFlow =
   | "connection"
   | "activation"
   | "deactivation"
+  | "deactivation"
   | "duplicate"
   | "delete"
   | "export"
@@ -122,20 +123,20 @@ export type UnifiedAction =
   | { type: "SET_INTEGRATIONS_LIST"; payload: IIntegrationModel[] }
   | { type: "SET_SELECTED_INTEGRATION"; payload: IIntegrationModel | null }
   | {
-      type: "SET_SELECTED_INTEGRATION_CONNECTIONS";
-      payload: IConnectionModel[];
-    }
+    type: "SET_SELECTED_INTEGRATION_CONNECTIONS";
+    payload: IConnectionModel[];
+  }
   | {
-      type: "UPDATE_INTEGRATION_FORM";
-      payload: Partial<IntegrationForm>;
-      setFormDirty?: boolean;
-    }
+    type: "UPDATE_INTEGRATION_FORM";
+    payload: Partial<IntegrationForm>;
+    setFormDirty?: boolean;
+  }
   | { type: "RESET_INTEGRATION_FORM" }
   | { type: "SET_INTEGRATION_FLOW"; payload: IntegrationFlow }
   | {
-      type: "UPDATE_INTEGRATION_ERROR";
-      payload: { [key: string]: string | null };
-    }
+    type: "UPDATE_INTEGRATION_ERROR";
+    payload: { [key: string]: string | null };
+  }
   | { type: "CLEAR_INTEGRATION_ERRORS" }
 
   // Connection actions
@@ -144,16 +145,16 @@ export type UnifiedAction =
   | { type: "SET_CONNECTIONS_LIST"; payload: IConnectionModel[] }
   | { type: "SET_SELECTED_CONNECTION"; payload: IConnectionModel | null }
   | {
-      type: "UPDATE_CONNECTION_FORM";
-      payload: Partial<ConnectionForm>;
-      setFormDirty?: boolean;
-    }
+    type: "UPDATE_CONNECTION_FORM";
+    payload: Partial<ConnectionForm>;
+    setFormDirty?: boolean;
+  }
   | { type: "RESET_CONNECTION_FORM" }
   | { type: "SET_CONNECTION_FLOW"; payload: ConnectionFlow }
   | {
-      type: "UPDATE_CONNECTION_ERROR";
-      payload: { [key: string]: string | null };
-    }
+    type: "UPDATE_CONNECTION_ERROR";
+    payload: { [key: string]: string | null };
+  }
   | { type: "CLEAR_CONNECTION_ERRORS" }
 
   // Company actions
@@ -242,49 +243,63 @@ function unifiedReducer(
 // Create unified context
 const UnifiedContext = createContext<
   | {
-      state: UnifiedState;
-      dispatch: React.Dispatch<UnifiedAction>;
-      openIntegrationDrawer: (type: IntegrationFlow) => void;
-      closeIntegrationDrawer: (ignoreCheck?: boolean) => void;
-      openConnectionDrawer: (type: ConnectionFlow) => void;
-      closeConnectionDrawer: (ignoreCheck?: boolean) => void;
-      isIntegrationDrawerOpen: boolean;
-      isConnectionDrawerOpen: boolean;
-      isDeleteIntegrationOpen: boolean;
-      integrationConfirmationOpen: {
+    state: UnifiedState;
+    dispatch: React.Dispatch<UnifiedAction>;
+    openIntegrationDrawer: (type: IntegrationFlow) => void;
+    closeIntegrationDrawer: (ignoreCheck?: boolean) => void;
+    openConnectionDrawer: (type: ConnectionFlow) => void;
+    closeConnectionDrawer: (ignoreCheck?: boolean) => void;
+    isIntegrationDrawerOpen: boolean;
+    isConnectionDrawerOpen: boolean;
+    isDeleteIntegrationOpen: boolean;
+    integrationConfirmationOpen: {
+      message: ConfirmationMessage;
+      title: string;
+      flag: boolean;
+      type: ModalType;
+    };
+    connectionConfirmationOpen: {
+      message: ConfirmationMessage;
+      title: string;
+      flag: boolean;
+      type: ModalType;
+    };
+    setIntegrationConfirmationOpen: React.Dispatch<
+      React.SetStateAction<{
         message: ConfirmationMessage;
         title: string;
         flag: boolean;
         type: ModalType;
-      };
-      connectionConfirmationOpen: {
+      }>
+    >;
+    setConnectionConfirmationOpen: React.Dispatch<
+      React.SetStateAction<{
         message: ConfirmationMessage;
         title: string;
         flag: boolean;
         type: ModalType;
-      };
-      setIntegrationConfirmationOpen: React.Dispatch<
-        React.SetStateAction<{
-          message: ConfirmationMessage;
-          title: string;
-          flag: boolean;
-          type: ModalType;
-        }>
-      >;
-      setConnectionConfirmationOpen: React.Dispatch<
-        React.SetStateAction<{
-          message: ConfirmationMessage;
-          title: string;
-          flag: boolean;
-          type: ModalType;
-        }>
-      >;
-      setIsDeleteIntegrationOpen: React.Dispatch<React.SetStateAction<boolean>>;
-      onIntegrationConfirmHandler: () => Promise<void>;
-      onIntegrationCancelHandler: () => void;
-      onConnectionConfirmHandler: () => Promise<void>;
-      onConnectionCancelHandler: () => void;
-    }
+      }>
+    >;
+    setDeleteIntegrationOpen: React.Dispatch<
+      React.SetStateAction<{
+        message: string;
+        title: string;
+        flag: boolean;
+        onConfirm?: Promise<void>;
+        onClose?: void;
+      }>
+    >;
+    onIntegrationConfirmHandler: () => Promise<void>;
+    onIntegrationCancelHandler: () => void;
+    onConnectionConfirmHandler: () => Promise<void>;
+    onConnectionCancelHandler: () => void;
+    onDeleteIntegrtionHandler: () => Promise<void>;
+    onDeleteCancelHandler: () => void;
+    onDeActivateIntegrtionHandler: () => Promise<void>;
+    onDeActivateCancelHandler: () => void;
+    onDuplicateIntegrtionHandler: () => Promise<void>;
+    onDuplicateCancelHandler: () => void;
+  }
   | undefined
 >(undefined);
 
@@ -307,7 +322,15 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
 
   // Integration state
   const [isIntegrationDrawerOpen, setIsIntegrationDrawerOpen] = useState(false);
-  const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useState(false);
+  const [DeleteIntegrationOpen, setDeleteIntegrationOpen] = useState({
+    ...initialConfirmationValues,
+  });
+  const [integrationTaskState, setIntegrationTaskState] = useState({
+    ...initialConfirmationValues,
+  });
+  const [integrationTaskStateDuplicate, setIntegrationTaskStateDuplicate] = useState({
+    ...initialConfirmationValues,
+  });
   const [integrationConfirmationOpen, setIntegrationConfirmationOpen] =
     useState({
       ...initialConfirmationValues,
@@ -508,7 +531,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
       case "delete":
         // Check if the integration has dependencies that prevent deletion
         const hasDependencies = selectedIntegration && checkIntegrationDependencies(selectedIntegration);
-        
+
         if (hasDependencies) {
           // If has dependencies, show the unable to delete modal instead
           setUnableToDeleteModalState({
@@ -572,7 +595,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
       case "delete":
         // Check if the connection has dependencies that prevent deletion
         const connectionDependencies = selectedConnection && checkConnectionDependencies(selectedConnection);
-        
+
         if (connectionDependencies) {
           // If has dependencies, show the unable to delete modal instead
           setUnableToDeleteModalState({
@@ -627,7 +650,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
       if (!selectedIntegration) return;
       const currentCopies = selectedIntegration.copies || 0;
       const newCopyNumber = currentCopies + 1;
-      
+
       // Generate new name and code with copy number
       const copyIntegrationName = `Copy ${newCopyNumber} of ${selectedIntegration?.integrationName}`;
       const newIntegrationCode = `CP-${newCopyNumber}-${selectedIntegration?.integrationCode!}`;
@@ -654,7 +677,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
 
       // console.log("updatedIntegration", updatedIntegration);
 
-      if(newIntegration && updatedIntegration){
+      if (newIntegration && updatedIntegration) {
         toast.success(
           "INTEGRATION DUPLICATED SUCCESSFULLY",
           `Integration ${selectedIntegration?.integrationName} duplicated successfully`,
@@ -845,10 +868,10 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
   // Connection handlers
   const handleDuplicateConnection = async () => {
     try {
-      if (!selectedConnection) return;      
+      if (!selectedConnection) return;
       const currentCopies = selectedConnection.copies || 0;
       const newCopyNumber = currentCopies + 1;
-      
+
       // Generate new name and code with copy number
       const copyConnectionName = `Copy ${newCopyNumber} of ${selectedConnection.connectionName}`;
       const newConnectionCode = `CP-${newCopyNumber}-${selectedConnection.connectionCode!}`;
@@ -860,15 +883,15 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id, ...data })
         });
-        
+
         if (!response.ok) {
           const error = await response.json();
           throw new Error(error.error || 'Failed to update connection');
         }
-        
+
         return await response.json();
       };
-      
+
       // Create duplicate connection
       const newConnection = await createConnectionFn({
         integrationId: selectedConnection.integrationId,
@@ -931,12 +954,12 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id, ...data })
         });
-        
+
         if (!response.ok) {
           const error = await response.json();
           throw new Error(error.error || 'Failed to update connection');
         }
-        
+
         return await response.json();
       };
 
@@ -949,7 +972,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
           "CONNECTION DELETED SUCCESSFULLY",
           `Connection ${selectedConnection.connectionName} deleted successfully`
         );
-        
+
         await refreshConnectionsAction({}, dispatch);
         navigate(`/x/access-settings/integrations/${selectedConnection?.integrationId}`);
       }
@@ -1009,11 +1032,11 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
   const checkIntegrationDependencies = (integration: IIntegrationModel) => {
     const dependencies = [];
     const activeConnections = state.connectionsList.filter(
-      conn => conn.integrationId === integration.id && 
-              conn.connectionStatus === "Online" && 
-              !conn.deletedAt
+      conn => conn.integrationId === integration.id &&
+        conn.connectionStatus === "Online" &&
+        !conn.deletedAt
     );
-    
+
     if (activeConnections.length > 0) {
       dependencies.push({
         count: activeConnections.length,
@@ -1023,7 +1046,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
         }
       });
     }
-    
+
     if (integration.companyIds && integration.companyIds.length > 0) {
       dependencies.push({
         count: integration.companyIds.length,
@@ -1033,13 +1056,13 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
         }
       });
     }
-    
+
     return dependencies.length > 0 ? dependencies : null;
   };
 
   const checkConnectionDependencies = (connection: IConnectionModel) => {
     const dependencies = [];
-    
+
     if (connection.connectionStatus === "Online") {
       dependencies.push({
         count: 1,
@@ -1049,7 +1072,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
         }
       });
     }
-    
+
     if (connection.companyIds && connection.companyIds.length > 0) {
       dependencies.push({
         count: connection.companyIds.length,
@@ -1059,7 +1082,7 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
         }
       });
     }
-    
+
     return dependencies.length > 0 ? dependencies : null;
   };
 
@@ -1074,12 +1097,14 @@ export const UnifiedProvider = ({ children }: { children: ReactNode }) => {
         closeConnectionDrawer,
         isIntegrationDrawerOpen,
         isConnectionDrawerOpen,
-        isDeleteIntegrationOpen,
+        DeleteIntegrationOpen,
+        integrationTaskState,
+        integrationTaskStateDuplicate,
         integrationConfirmationOpen,
         connectionConfirmationOpen,
         setIntegrationConfirmationOpen,
         setConnectionConfirmationOpen,
-        setIsDeleteIntegrationOpen,
+        setDeleteIntegrationOpen,
         onIntegrationConfirmHandler,
         onIntegrationCancelHandler,
         onConnectionConfirmHandler,
